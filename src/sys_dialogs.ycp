@@ -37,8 +37,7 @@
 
   UI(``{  global define HelpMsgStart()``{
       return( // helptext for popup 
-	     _("<p>With this editor,  edit the variables in <b>/etc/rc.config,
-the central configuration file</b> of your SuSE Linux system.</p>
+	     _("<p>With this editor, edit the variables in /etc/sysconfig configfiles</p>
 "));
   }});
     
@@ -51,23 +50,16 @@ the central configuration file</b> of your SuSE Linux system.</p>
   UI(``{ global define HelpMsgBody() ``{
       return(  // helptext for popup 
 	     _("<p>After you save your changes, this editor changes the variables in the
-corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/*. Then it runs
+corresponding  sysconfig file. Then it runs
 SuSEconfig, which changes the underlying configuration files, stops and starts daemons,
-and runs low-level configuration tools so your configuration in rc.config takes effect.</p>
+and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
 ") +
  
 	     _("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
 
 	     _("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
  you have manually changed any of them.  If you have changed a configuration file manually,
- it will not touch it.</p>") +
- 
-	     _("<p> This was arranged so that <ul><li>your basic configuration is stored in \"one\" central file, which 
-is easy to read and edit.</li>
-<li>you can easily copy the rc.config to another computer, run SuSEconfig, 
-and this system will be almost ready for implementation, without having to
-manually edit up to twenty individual configuration files.</li></ul></p>
-"));
+ it will not touch it.</p>") );
   }});
 
 
@@ -758,7 +750,7 @@ Do you want to view the relevant log file?
 
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(60),
-			      `Heading(_("Search for a rc.config variable")),
+			      `Heading(_("Search for a sysconfig variable")),
 			      `VSpacing(0.5),
 			      `HBox(`VSpacing(10),
 				    `RichText( helptextCR ),
@@ -899,7 +891,7 @@ Choose \"Cancel\" to edit the values again.
 			`HBox( `VSpacing(12),
 			       `VBox(`HSpacing(70),
 				     //heading of popup
-				     `Heading(_("Save rc.config variables")),
+				     `Heading(_("Save sysconfig variables")),
 				     `Label(  helptextCR ),
 				     `VSpacing(0.5),
 				     `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description") ), table_list ),
@@ -975,7 +967,7 @@ Choose \"Cancel\" to edit the values again.
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(80),
 			      //heading of popup
-			      `Heading(_("Search for a rc.config variable")),
+			      `Heading(_("Search for a sysconfig variable")),
 			      `VSpacing(0.5),
 			      `HBox(`VSpacing(10),
 				    `HWeight(30,`RichText( helptextCR )),

@@ -1,0 +1,57 @@
+#
+# spec file for package @RPMNAME@
+# 
+# Copyright  (c)  2000  SuSE GmbH  Nuernberg, Germany.
+#
+# please send bugfixes or comments to @MAINTAINER@
+#
+
+# neededforbuild yast2-devtools  gpp libgpp autoconf automake ydoc glibc-devel glibc  
+
+Vendor:       SuSE GmbH, Nuernberg, Germany
+Distribution: SuSE Linux 6.4 (i386)
+Name:         @RPMNAME@
+Release:      1
+Copyright:    (c) 2000 SuSE GmbH
+Group:        System Environment/YaST
+Requires:	yast2-trans-sysconfig yast2
+
+Packager:     @MAINTAINER@
+
+Summary:      YaST2 Modules for installation
+Version:      @VERSION@
+Source0:      @RPMNAME@-@VERSION@.tar.bz2
+Provides:     yast2-config-rcconfig
+Obsoletes:    yast2-config-rcconfig
+
+%description
+-
+
+%prep
+
+%setup -n @RPMNAME@-@VERSION@
+
+%build
+
+./configure
+make
+
+%install
+
+make install
+
+%{?suse_check}
+
+%files
+
+%dir @YAST2DIR@/clients
+%dir @YAST2DIR@/include
+%dir @YAST2DIR@/menuentries
+@YAST2DIR@/menuentries/menuentry_sysconfig.y2cc
+@YAST2DIR@/clients/sysconfig_step1.ycp
+@YAST2DIR@/clients/sysconfig.ycp
+@YAST2DIR@/meta_sys.config
+@YAST2DIR@/include/sys_dialogs.ycp
+@YAST2DIR@/bin/syscreate_data
+
+%doc @DOCDIR@

@@ -17,6 +17,9 @@
 
 {
 
+  import "Mode";
+  Mode::normal = true;	// system is already installed
+
   textdomain "rc_config";
   global boolean firewall_mode   = false;
 
@@ -198,7 +201,7 @@
    */
 
   list dialog = [
-                ``(CallFunction (`rc_config_step1() ))
+                ``(CallFunction (`sysconfig_step1() ))
   ];
 
   integer id = 0;

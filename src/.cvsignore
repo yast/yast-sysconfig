@@ -2,5 +2,5 @@ fw
 root
 Makefile
 Makefile.in
-rc_create_data
+syscreate_data
 .deps

@@ -23,6 +23,7 @@
    \\ $Id$
 
 
+   
 ////////////////////////////////////////////////////////////////////////////////
 
     namespace:
@@ -90,7 +91,7 @@
     textdomain "rc_config";
      
     UI(`ChangeWidget(`id(`package),   `Value, 20));
-    include "rc_dialogs.ycp";
+    include "sys_dialogs.ycp";
   
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
@@ -154,12 +155,6 @@
            path_slash = regexpsub( path_slash, "(.*)rc/config(.*)",  "\\1rc.config\\2" );
 	}
     
-	y2milestone( "VAR  %1", variable );
-	y2milestone( "EEEE %1", path_list );
-	y2milestone( "EEEEs %1", path_string );
-	y2milestone( "EEEEp %1", path_path );
-	y2milestone( "EEEEl %1", path_slash );
- 	    
  	if ( !contains(registered_list, path_path))
  	{
  	    y2debug("REGISTER____________________________ %1", path_path);
@@ -194,13 +189,13 @@
     
     if ( firewall_mode )
     {
-       rc_create_command = "/usr/lib/YaST2/bin/rc_create_data -f";
+       rc_create_command = "/usr/lib/YaST2/bin/syscreate_data -f";
        rc_config_file    = "fw_config_keys" ;
        tree_data_file    = "fw_tree_data";
     }
     else
     {
-       rc_create_command = "/usr/lib/YaST2/bin/rc_create_data";
+       rc_create_command = "/usr/lib/YaST2/bin/syscreate_data";
        rc_config_file    = "rc_config_keys" ;
        tree_data_file    = "tree_data";
     }
@@ -256,7 +251,7 @@
      }
      else
      {
-	 UI(`SetContents(_("Edit rc_config"), main_window, help_text, true, true ));
+	 UI(`SetContents(_("Edit sysconfig variables"), main_window, help_text, true, true ));
      }
 
      // Initial Settings:
@@ -277,8 +272,7 @@ requires the linux kernel 2.4 to run.</p>")));
      }
      else
      {
-	 curr_dialog = getDirDialog( UI(_("<p>With this editor, edit the variables in /etc/rc.config,
-the central configuration file of your SuSE Linux system.</p>
+	 curr_dialog = getDirDialog( UI(_("<p>With this editor, edit the variables in /etc/sysconfig configfiles.</p>
 ")) + UI(_("<p>
 Many of these variables are set by specialized YaST2
 configuration modules like the \"Network configuration\".</p>
@@ -527,43 +521,6 @@ configuration modules like the \"Network configuration\".</p>
    		        CallFunction( `inst_suseconfig( false, false ) );
 			//ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
 			//UI(`CloseDialog());
-		    }
-
-		    if ( ret == 0 )
-		    {
-			any retAsk = `log;
-			
-			if ( firewall_mode )
-			{
-			    retAsk = UI(`AskFwShowLog());
-			}
-			else
-			{
-			    retAsk = UI(`AskShowLog());
-			}
-			
-			if ( retAsk == `log )
-			{
-			    string text =  "";
-			    if ( !firewall_mode )
-			    {
-				text = SCR(`Read(.target.string,  "/var/log/SuSEconfig.log" ));
-				SCR(`Execute(.target.bash, "rm /var/log/SuSEconfig.log "));
-
-			    }
-			    else
-			    {
-				text = SCR(`Read(.target.string,  "/var/log/firewall.log" ));
-				SCR(`Execute(.target.bash, "rm /var/log/firewall.log"));
-			    }
-			    
-			    y2debug( "<<%1", text);
-			    UI(`DisplayLogFile( text ));
-			}
-		    }
-		    else
-		    {
-			UI(`ErrorMessage());		        	 
 		    }
 
 		    return( `next );

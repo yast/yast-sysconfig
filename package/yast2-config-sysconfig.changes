@@ -1,4 +1,39 @@
 -------------------------------------------------------------------
+Thu Mar 21 18:12:38 CET 2002 - mike@suse.de
+
+- bug 13694: missing variables in sysconfig editor
+
+-------------------------------------------------------------------
+Wed Mar 20 17:15:10 CET 2002 - mike@suse.de
+
+- ro request: bug in spec fixed
+
+-------------------------------------------------------------------
+Thu Mar 14 14:39:23 CET 2002 - mike@suse.de
+
+- Bug 14992: sysconfig editor asks me if I wish to see the installation log
+
+-------------------------------------------------------------------
+Tue Feb 26 14:03:46 CET 2002 - mike@suse.de
+
+- enameing from yast2-trans-rcconfig to  yast2-trans-sysconfig
+
+-------------------------------------------------------------------
+Tue Feb 26 12:16:17 CET 2002 - mike@suse.de
+
+- renameing from yast2-config-rcconfig to  yast2-config-sysconfig
+
+-------------------------------------------------------------------
+Mon Feb 18 18:41:05 CET 2002 - mike@suse.de
+
+- new libtool version was required
+
+-------------------------------------------------------------------
+Mon Feb 18 17:50:45 CET 2002 - mike@suse.de
+
+- changes due to /etc/sysconfig and deleted firewall option
+
+-------------------------------------------------------------------
 Fri Feb  8 18:05:19 CET 2002 - lnussel@suse.de
 
 - command line argument is of type string

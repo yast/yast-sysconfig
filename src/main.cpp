@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
   const int MAX_DIR_DEPTH     =    20;
 
   // variables for the file names
-  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/meta_rc.config";
+  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/meta_sys.config";
   char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/rc_config_keys";
   char  tree_data_arr[FILENAME_LENGTH]       = "/usr/lib/YaST2/tree_data";
   char *meta_rc_config                       = meta_rc_config_arr;
@@ -394,6 +394,7 @@ int main(int argc, char* argv[])
     "/etc/sysconfig/locate",
     "/etc/sysconfig/lvm",
     "/etc/sysconfig/mail",
+    "/etc/sysconfig/postfix",
     "/etc/sysconfig/mouse",
     "/etc/sysconfig/nfs-server",
     "/etc/sysconfig/proxy",
