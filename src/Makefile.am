@@ -36,10 +36,10 @@ ydata_DATA =                    \
 	powertweak.agent	\
 	descriptions
 
-symlinks:
-	test -L sysconfig || ln -sf . sysconfig
+sysconfig:
+	ln -sf . sysconfig
 
-ycpchook = symlinks
+ycpchook = sysconfig
 
 YCPCFLAGS=-I.
 
