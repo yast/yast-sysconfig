@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 12 14:33:47 CET 2003 - lslezak@suse.de
+
+- fixed undefined function call UI::ErrorMessage
+  (changed to UI::ErrorPopup), fixed translation
+- version 2.7.12
+
+-------------------------------------------------------------------
 Mon Mar 10 09:40:37 CET 2003 - lslezak@suse.de
 
 - fixed ifcfg.template location, comment reading from template

@@ -85,7 +85,7 @@ global define symbol ReadDialog() ``{
 
 	    if (just_installed == false)
 	    {
-		UI::ErrorMessage("Installation of package failed.\nPress OK to exit.");
+		UI::ErrorPopup(_("Package installation failed\nPress OK to exit"));
 		return `abort;
 	    }
 	}
