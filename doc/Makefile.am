@@ -2,9 +2,8 @@
 # Makefile.am for y2c_rc_config/doc
 #
 
-docdir = @DOCDIR@
-htmldir = $(docdir)/y2c_rc_config
+docdir = @YAST2DOC@
 
-html_DATA = README
+doc_DATA = README
 
-EXTRA_DIST = $(html_DATA)
+EXTRA_DIST = $(doc_DATA)

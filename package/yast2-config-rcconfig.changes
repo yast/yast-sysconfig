@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May  8 14:53:45 CEST 2001 - mike@suse.de
+
+- added varaiables for 7.2, added Documentation
+
+-------------------------------------------------------------------
 Tue Apr 24 07:08:11 CEST 2001 - jbuch@suse.de
 
 - define -> global define 
