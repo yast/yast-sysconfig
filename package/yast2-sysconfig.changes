@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 17 17:09:41 CET 2003 - lslezak@suse.de
+
+- convert '<', '>' to '&lt;', '&gt;' in richtext comment
+- version 2.7.6
+
+-------------------------------------------------------------------
 Wed Feb  5 14:03:09 CET 2003 - lslezak@suse.cz
 
 - don't show comments after three hash characters
