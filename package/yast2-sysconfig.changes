@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Feb 13 10:55:54 CET 2004 - lslezak@suse.cz
+
+- read /etc/sysconfig/powersave/* files
+- use CommandLine::Run
+- NI fixes: nil checking
+- version 2.9.6
+
+-------------------------------------------------------------------
 Sat Feb 07 23:52:17 CET 2004 - arvin@suse.de
 
 - removed config files (*.y2cc)
