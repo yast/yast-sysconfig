@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 24 07:08:11 CEST 2001 - jbuch@suse.de
+
+- define -> global define 
+
+-------------------------------------------------------------------
 Thu Mar  8 10:48:42 CET 2001 - curry@suse.de
 
 - faster reading and processing of rc.config variables 
