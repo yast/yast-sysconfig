@@ -88,6 +88,20 @@
 
 
     /**
+     * Command line interface - handler for clear command
+     * @param options command options
+     * @return boolean True on success
+     */
+     define boolean clearHandler(map<string, any> options) ``{
+	// set empty value
+	options["value"] = "";
+
+	// call set handler
+	return setHandler(options);
+    }
+
+
+    /**
      * Command line interface - handler for details command
      * @param options details command options
      * @return boolean True on success

@@ -51,6 +51,11 @@ include "sysconfig/cmdline.ycp";
 		"help"      : _("Set variable value"),
 		"handler"   : setHandler
 	     ],
+	    "clear" : $[
+		// help text for command 'set'
+		"help"      : _("Set empty value (\"\")"),
+		"handler"   : clearHandler
+	     ],
 	    "details" : $[
 		// help text for command 'details'
 		"help"      : _("Show details about selected variable"),
@@ -64,16 +69,19 @@ include "sysconfig/cmdline.ycp";
 	    ],
 	    "variable" : $[
 		// help text for option 'variable'
-		"help"      : _("Selected variable")
+		"help"      : _("Selected variable"),
+		"type"      : "string"
 	    ],
 	    "value" : $[
 		// help text for option 'value'
-		"help"      : _("New value")
+		"help"      : _("New value"),
+		"type"      : "string"
 	    ]
 	],
 	"mappings" : $[
 	    "list" : ["all"],
 	    "set"  : ["variable", "value"],
+	    "clear"  : ["variable"],
 	    "details" : ["variable"]
 	]
     ];
