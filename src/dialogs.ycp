@@ -19,108 +19,99 @@ include "ui/common_messages.ycp";
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
 
-/**
- * Configure1 dialog
- * @return dialog result
- */
-global define symbol Configure1Dialog () ``{
 
-    /* Sysconfig configure1 dialog caption */
-    string caption = _("Sysconfig configuration");
+global define map display_search_dialog()
+``{
+    // helptext for popup search
+    string helptextCR = _("Enter a keyword related to the information needed.");
 
-    /* XXPkg configure1 dialog contents */
-    term contents = `Label (_("First part of configuration of sysconfig"));
+    UI::OpenDialog( `opt(`decorated ),
+		`VBox(`HSpacing(60),
+		    // search popup window header
+		      `Heading(_("Search for a configuration variable")),
+		      `VSpacing(0.5),
+		      `HBox(`VSpacing(10),
+			    `RichText( helptextCR ),
+			    `HSpacing(2),
+			    `VBox(
+				`VSpacing(1),
+				// text entry label
+				`TextEntry(`id(`search_entry), _("&Search for:")),
+				`VSpacing(1),
+				// check box label
+				`Left(`CheckBox(`id(`ignore), _("Case insensitive search"), true)),
+				// check box label
+				`Left(`CheckBox(`id(`nkey), _("Search &variable name"), true)),
+				// check box label
+				`Left(`CheckBox(`id(`ndescr), _("Search &description"), true)),
+				// check box label
+				`Left(`CheckBox(`id(`nvalue), _("Search &value"), false)),
+				`VSpacing(1)
+				),
+			    `HSpacing(2)
+			  ),
+		      `VSpacing(0.5),
+		      `HBox(
+			  // push button label
+			  `PushButton(`id(`ok), `opt(`default), OKButtonLabel()),
+			  // push button label
+			  `PushButton(`id(`cancel), CancelButtonLabel())
+			  )
+		    )
+	);
 
-    Wizard::SetContentsButtons(caption, contents, HELPS["c1"]:"",
-	    BackButtonLabel(), NextButtonLabel());
+    UI::SetFocus(`id(`search_entry));
 
-    any ret = nil;
-    while(true) {
+    symbol ui = UI::UserInput();
 
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
+    while (ui != `ok && ui != `cancel)
+    {
+	ui = UI::UserInput();
     }
 
+    map ret = $[];
+
+    if (ui == `ok)
+    {
+	ret = add(ret, "search", UI::QueryWidget(`id(`search_entry), `Value));
+	ret = add(ret, "ignore", UI::QueryWidget(`id(`ignore), `Value));
+	ret = add(ret, "varname", UI::QueryWidget(`id(`nkey), `Value));
+	ret = add(ret, "value", UI::QueryWidget(`id(`nvalue), `Value));
+	ret = add(ret, "descripton", UI::QueryWidget(`id(`ndescr), `Value));
+    }
+
+    UI::CloseDialog();
     return ret;
 }
 
-/**
- * Configure2 dialog
- * @return dialog result
- */
-global define symbol Configure2Dialog () ``{
-
-    /* Sysconfig configure2 dialog caption */
-    string caption = _("Sysconfig configuration");
-
-    /* XXPkg configure2 dialog contents */
-    term contents = `Label (_("Second part of configuration of sysconfig"));
-
-    Wizard::SetContentsButtons(caption, contents, HELPS["c2"]:"",
-	    BackButtonLabel(), NextButtonLabel());
-
-    any ret = nil;
-    while(true) {
-
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
-    }
-
-    return ret;
-}
-
-
-global define symbol display_save_dialog(list table_content) ``{
+global define symbol display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label) ``{
 
     UI::OpenDialog(`opt(`decorated), `HBox(
-	`VSpacing(12),
+	`VSpacing(14),
 	`VBox(`HSpacing(70),
 	    //heading of popup
-	    `Heading("Header"),
-	    `Label("helptextCR"),
+	    `Heading(header),
+	    `Label(label),
 	    `VSpacing(0.5),
 
 	    // table column header
-	    `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description")), table_content),
+	    `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old value"), _("Description")), table_content),
 `VSpacing(0.5),
-	    HBox(
+	    `HBox(
 		// push button label
-		`PushButton(`id(`ok), `opt(`default), UI::OKButtonLabel()),
+		`PushButton(`id(`action), `opt(`default), ok_label),
 		// push button label
-		`PushButton(`id(`cancel), UI::CancelButtonLabel())
+		`PushButton(`id(`cancel), cancel_label)
 	    )
 			   )
 		    )
 	);
 
-    UI::UserInput();
+    symbol ret = UI::UserInput();
 
     UI::CloseDialog();
 
+    return ret;
 }
 
 /* EOF */
