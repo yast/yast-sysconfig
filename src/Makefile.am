@@ -30,6 +30,7 @@ ybin_SCRIPTS =			\
 
 ydata_DATA =                    \
 	sysedit.agent		\
-	powertweak.agent
+	powertweak.agent	\
+	descriptions
 
 EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(config_DATA) $(module_DATA) $(ybin_SCRIPTS) $(ydata_DATA)

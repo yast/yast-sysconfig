@@ -267,7 +267,13 @@ my %descriptions = ();
 # collect pairs (location, variables definition) from all configuration files
 for my $fname (@list)
 {
-    open(CONFIGFILE, $fname);
+    my $stat = open(CONFIGFILE, $fname);
+
+    if (!defined $stat)
+    {
+	print STDERR "Cannot open file $fname\n";
+	next;
+    }
 
     my $location = "Other".$fname;
     my $description = "";

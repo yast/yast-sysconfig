@@ -1,0 +1,70 @@
+## Path:	Hardware
+## Description: Here you can configure some hardware settings.\
+## You can use specialized Yast2 modules to configure\
+## hardware devices.
+
+## Path:	Network
+## Description: Network services can be configured here.\
+## Some services can be also configured in special Yast2 modules.
+
+## Path: 	Applications
+## Description: Applications which have sysconfig configuration file can be configured here.
+
+## Path:	Other
+## Description:	Files which do not contain location information are put in this subtree.\
+## Subtree path is equal to directory path to the configuration file.
+
+## Path:	Network/Mail
+## Description:	Mail related configuration
+
+## Path:	Network/DHCP
+## Description:	DHCP client or server configuration
+
+## Path:	Network/FTP
+## Description:	FTP servers configuration
+
+## Path:	Network/File systems
+## Description:	Configuration of network file systems
+
+## Path:	Hardware/UPS
+## Description:	UPS configuration
+
+## Path:	Hardware/SCSI
+## Description:	SCSI utility settings
+
+## Path:	Hardware/Network
+## Description:	Network devices configuration
+
+## Path:	Network/WWW
+## Description:	Web servers configuration
+
+## Path:	Network/Remote access
+## Description:	Remote access services configuration
+
+## Path:	Network/NIS
+## Description:	NIS client or server configuration
+
+## Path:	Network/Monitors
+## Description:	Network monitors
+
+## Path:	Network/Firewall
+## Description:	Firewall configuration
+
+## Path:	Network/Distributed system
+## Description:	Distributed systems configuration
+
+## Path:	System/Yast2
+## Description:	Yast2 modules configuration
+
+## Path:	System/Security
+## Description:	Security settings
+
+## Path:	System/Power management
+## Description:	Power management configuration - APM, ACPI
+
+## Path:	System/File systems
+## Description:	Local file systems configuration
+
+## Path:	System/Environment
+## Description:	Environment and localization settings
+
