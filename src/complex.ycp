@@ -13,8 +13,6 @@ textdomain "sysconfig";
 
 import "Wizard";
 import "Sysconfig";
-import "Runlevel";
-import "Directory";
 import "Mode";
 import "Require";
 import "String";
