@@ -219,13 +219,13 @@ global define string create_richtext_description(map description) ``{
 	string precommand = description["actions", "Pre"]:nil;
 
 	// check whether action is defined
-	if (precommand != nil)
+	if (size(precommand) > 0)
 	{
 	    // header in the variable description text, bash command is appended
 	    result = result + "<P><B>" + _("Prepare Command: ") + "</B> " + precommand + "</P>";
 	}
 
-	if (conf_modules != nil)
+	if (size(conf_modules) > 0)
 	{
 	    // parse string with options, then add them to the rich text
 	    list conf = Sysconfig::ParseString(conf_modules, Sysconfig::parse_param);
@@ -233,21 +233,21 @@ global define string create_richtext_description(map description) ``{
 	    result = result + "<P><B>" + _("Configuration Script: ") + "</B> " + mergestring(conf, ", ") + "</P>";
 	}
 
-	if (reload != nil)
+	if (size(reload) > 0)
 	{
 	    list services = Sysconfig::ParseString(reload, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + "<P><B>" + _("Service to Reload: ") + "</B> " + mergestring(services, ", ") + "</P>";
 	}
 
-	if (restart != nil)
+	if (size(restart) > 0)
 	{
 	    list services = Sysconfig::ParseString(restart, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + "<P><B>" + _("Service to Restart: ") + "</B> " + mergestring(services, ", ") + "</P>";
 	}
 
-	if (command != nil)
+	if (size(command) > 0)
 	{
 	    // header in the variable description text, bash command is appended
 	    result = result + "<P><B>" + _("Activation Command: ") + "</B> " + command + "</P>";
@@ -779,32 +779,8 @@ global define symbol MainDialog() ``{
     {
 	ret = UI::UserInput();
 
-	if (ret == `tree)
-	{
-	    check_set_current_value(false);
-
-	    string selected = UI::QueryWidget(`id(`tree), `CurrentItem);
-	    selected_variable = selected;
-	    y2milestone("Selected: %1", selected);
-
-	    map description = Sysconfig::get_description(selected);
-
-	    y2milestone("Descr: %1", description);
-
-	    // update richtext content
-	    UI::ChangeWidget(`id(`rt), `Value, create_richtext_description(description));
-
-	    // update combo box
-	    update_combo(description, false);
-
-	    // update "Default" button state (enable/disable)
-	    update_button_state(description);
-
-	    // update location in header
-	    update_location(description);
-	}
 	// "Default" button
-	else if (ret == `def)
+	if (ret == `def)
 	{
 	    map description = Sysconfig::get_description(selected_variable);
 	    update_combo(description, true);
@@ -828,7 +804,7 @@ global define symbol MainDialog() ``{
 _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
-"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), _("Confirm Each Activation Command"), false);
+"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), ((Sysconfig::powertweak_mode == false) ? _("Confirm Each Activation Command") : ""), false);
 
 		if (result["ui"]:`dummy == `cancel)
 		{
@@ -865,7 +841,11 @@ Choose \"Cancel\" to edit the values again.
 			string sel = input["selected"]:nil;
 			if (sel != nil)
 			{
+			    // select variable in the tree
 			    UI::ChangeWidget(`id(`tree), `CurrentItem, sel);
+
+			    // display selected variable
+			    ret = `tree;
 			}
 		    }
 		}
@@ -953,9 +933,30 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 		Sysconfig::set_value(sformat("%1$%2", name, file), value, false, true);
 	    }
 	}
-	else
+
+	if (ret == `tree)
 	{
-	    y2warning("Unknown UserInput: %1", ret);
+	    check_set_current_value(false);
+
+	    string selected = UI::QueryWidget(`id(`tree), `CurrentItem);
+	    selected_variable = selected;
+	    y2milestone("Selected: %1", selected);
+
+	    map description = Sysconfig::get_description(selected);
+
+	    y2milestone("Descr: %1", description);
+
+	    // update richtext content
+	    UI::ChangeWidget(`id(`rt), `Value, create_richtext_description(description));
+
+	    // update combo box
+	    update_combo(description, false);
+
+	    // update "Default" button state (enable/disable)
+	    update_button_state(description);
+
+	    // update location in header
+	    update_location(description);
 	}
     }
 

@@ -1113,7 +1113,7 @@ global define boolean Write() ``{
 	    // get activation map for variable
 	    string presave = actions[vid, "Pre"]:nil;
 
-	    if (presave != nil)
+	    if (size(presave) > 0)
 	    {
 		string confirm = _("A command will be executed");
 		string label = sformat(_("Starting command: %1..."), presave);
@@ -1164,7 +1164,7 @@ global define boolean Write() ``{
 	}
 	else
 	{
-	    if (restart_service != nil)
+	    if (size(restart_service) > 0)
 	    {
 		list parsed = ParseString(restart_service, parse_param);
 		foreach(string s, parsed,
@@ -1174,7 +1174,7 @@ global define boolean Write() ``{
 		);
 	    }
 
-	    if (reload_service != nil)
+	    if (size(reload_service) > 0)
 	    {
 		list parsed = ParseString(reload_service, parse_param);
 		foreach(string s, parsed,
@@ -1184,7 +1184,7 @@ global define boolean Write() ``{
 		);
 	    }
 
-	    if (config_module != nil)
+	    if (size(config_module) > 0)
 	    {
 		list parsed = ParseString(config_module, parse_param);
 		foreach(string s, parsed,
@@ -1194,7 +1194,7 @@ global define boolean Write() ``{
 		);
 	    }
 
-	    if (bash_command != nil)
+	    if (size(bash_command) > 0)
 	    {
 		Commands[bash_command] = true;
 	    }
@@ -1247,9 +1247,14 @@ global define boolean Write() ``{
     SCR::Write(.syseditor, nil);
     Progress::NextStep();
 
+    // now start required activation commands
+    Progress::NextStage();
+
     // activate powertweak configuration
     if (powertweak_mode == true)
     {
+	Progress::Title(sformat(_("Starting command: %1..."), "/usr/sbin/powertweakd --no-daemon"));
+
 	y2milestone("Activating powertweak configuration");
 	ret = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
 
@@ -1263,15 +1268,12 @@ global define boolean Write() ``{
 	return ret;
     }
 
-    // now start required activation commands
-    Progress::NextStage();
-
     // start SuSEconfig
     if (CompleteSuSEconfig == true)
     {
 	// action command is missing, start complete SuSEconfig (backward compatibility)
 	string start_command = sformat("/sbin/%1", SuSEconfigName);
-	string confirm = sformat("Complete %1 will be started", SuSEconfigName);
+	string confirm = sformat(_("Complete %1 will be started"), SuSEconfigName);
 	string label = sformat(_("Starting %1..."), SuSEconfigName);
 	string error = sformat(_("Script %1 failed"), SuSEconfigName);
 
@@ -1291,7 +1293,7 @@ global define boolean Write() ``{
 
 	    // action command is missing, start complete SuSEconfig (backward compatibility)
 	    string start_command = sformat("/sbin/%1 --module %2", SuSEconfigName, modulename);
-	    string confirm = sformat("%1 module %2 will be started", SuSEconfigName, modulename);
+	    string confirm = sformat(_("%1 module %2 will be started"), SuSEconfigName, modulename);
 	    // progress bar label - %1 is SuSEconfig or ULconfig string, %2 is module name
 	    string label = sformat(_("Starting %1 module %2..."), SuSEconfigName, modulename);
 	    // error message (config module failed) - %1 is SuSEconfig or ULconfig string, %2 is module name
@@ -1324,7 +1326,7 @@ global define boolean Write() ``{
 	    {
 		// service is running, reload it
 		string start_command = sformat("/etc/init.d/%1 reload", servicename);
-		string confirm = sformat("Service %1 will be reloaded", servicename);
+		string confirm = sformat(_("Service %1 will be reloaded"), servicename);
 		string label = sformat(_("Reloading service %1..."), servicename);
 		string error = sformat(_("Reload of the service %1 failed"), servicename);
 
@@ -1357,7 +1359,7 @@ global define boolean Write() ``{
 	    {
 		// service is running, restart it
 		string start_command = sformat("/etc/init.d/%1 restart", servicename);
-		string confirm = sformat("Service %1 will be restarted", servicename);
+		string confirm = sformat(_("Service %1 will be restarted"), servicename);
 		string label = sformat(_("Restarting service %1..."), servicename);
 		string error = sformat(_("Restart of the service %1 failed"), servicename);
 
