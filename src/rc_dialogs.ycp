@@ -39,7 +39,6 @@
     
     define getComboList( string key, map entry_map )
    ``{
-	// y2log ( .milestone, "rc_config", 1, "COMBOOOOOOO", key, entry_map);
 	  // get real value of the entry
 	  map    key_map      = lookup( rc_config_keys, key, $[] );
 	  string entry_value  = lookup(key_map, `value, "");
@@ -409,7 +408,6 @@
    
    define getD1Dialog( list entry_list )
    ``{
-       y2log( entry_list );
 
 	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
 
