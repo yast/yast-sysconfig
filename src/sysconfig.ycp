@@ -37,24 +37,24 @@ include "commandline/commandline.ycp";
 	 _("Editor for /etc/sysconfig files"),
 	"id"        : (Sysconfig::powertweak_mode == true) ? "powertweak" : "sysconfig",
 	"guihandler": ``(SysconfigSequence()),
-	"initialize": ``(Sysconfig::Read()),
+	"initialize": Sysconfig::Read,
 	// use write handler - disable progress bar
-	"finish"    : ``(writeHandler()),
+	"finish"    : writeHandler,
 	"actions"   : $[
 	    "list" : $[
 		// help text for command 'list'
 		"help"      : _("Display configuration summary"),
-		"handler"   : ``(listHandler())
+		"handler"   : listHandler
 	    ],
 	    "set" : $[
 		// help text for command 'set'
 		"help"      : _("Set variable value"),
-		"handler"   : ``(setHandler())
+		"handler"   : setHandler
 	     ],
 	    "details" : $[
 		// help text for command 'details'
 		"help"      : _("Show details about selected variable"),
-		"handler"   : ``(detailsHandler())
+		"handler"   : detailsHandler
 	    ]
 	],
 	"options" : $[

@@ -63,11 +63,11 @@
      * @param options list command options
      * @return boolean True on success
      */
-    global define boolean setHandler(map options) ``{
+    global define boolean setHandler(map<string, any> options) ``{
 	if (haskey(options, "variable") && haskey(options, "value"))
 	{
-	    string variable = options["variable"]:nil;
-	    string value = options["value"]:nil;
+	    string variable = (string) (options["variable"]:nil);
+	    string value = (string) (options["value"]:nil);
 	    string vid = variable2id(variable);
 
 	    if (vid == nil)
@@ -92,8 +92,8 @@
      * @param options details command options
      * @return boolean True on success
      */
-    global define boolean detailsHandler(map options) ``{
-	string variable = options["variable"]:nil;
+    global define boolean detailsHandler(map<string, any> options) ``{
+	string variable = (string) (options["variable"]:nil);
 	string varid = variable2id(variable);
 
 	if (varid == nil)
@@ -103,7 +103,7 @@
 
 	// header (command line mode output)
 	CommandLine::Print("\nDescription:\n");
-	map description = Sysconfig::get_description(varid);
+	map<string, any> description = Sysconfig::get_description(varid);
 
 	// display a new value for modified variables
 	string value = ((description["new_value"]:nil != nil) ? (_("New value: ") + description["new_value"]:"") : (_("Value: ") + description["value"]:"")) + "\n";

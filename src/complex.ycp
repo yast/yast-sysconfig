@@ -260,10 +260,10 @@ global define string possible_values(map description, boolean richtext) ``{
  * @param richtext if true result is rich text, if false result is plain text
  * @return string Rich text string
  */
-global define string create_description(map description, boolean richtext) ``{
+global define string create_description(map<string, any> description, boolean richtext) ``{
     string varname = description["name"]:"";
     string file = description["file"]:"";
-    string default_value = description["Default"]:nil;
+    string default_value = (string) (description["Default"]:nil);
     string comment = description["comment"]:"";
 
     string possible_vals = possible_values(description, richtext);
@@ -307,11 +307,11 @@ global define string create_description(map description, boolean richtext) ``{
     if (haskey(description, "actions"))
     {
 	// display specified action command
-	string conf_modules = description["actions", "Cfg"]:nil;
-	string restart = description["actions", "Rest"]:nil;
-	string reload = description["actions", "Reld"]:nil;
-	string command = description["actions", "Cmd"]:nil;
-	string precommand = description["actions", "Pre"]:nil;
+	string conf_modules = (string) (description["actions", "Cfg"]:nil);
+	string restart = (string) (description["actions", "Rest"]:nil);
+	string reload = (string) (description["actions", "Reld"]:nil);
+	string command = (string) (description["actions", "Cmd"]:nil);
+	string precommand = (string) (description["actions", "Pre"]:nil);
 
 	// check whether action is defined
 	if (size(precommand) > 0)
@@ -492,14 +492,14 @@ global define string backslash_remove(string input) ``{
  * @param set_default If true add default value to the list
  * @return list List of values for combo box widget
  */
-global define list combo_list(map description, boolean set_default) ``{
-    string new_value = backslash_remove(description["new_value"]:nil);
+global define list combo_list(map<string, any> description, boolean set_default) ``{
+    string new_value = backslash_remove((string) (description["new_value"]:nil));
     string value = backslash_remove(description["value"]:"");
     list ret = [];
 
     if (set_default == true)
     {
-	string def = description["Default"]:nil;
+	string def = (string) (description["Default"]:nil);
 
 	if (def != nil)
 	{
@@ -517,7 +517,7 @@ global define list combo_list(map description, boolean set_default) ``{
 	if (!contains(ret, value)) ret = add(ret, value);
     }
 
-    string deflt = description["Default"]:nil;
+    string deflt = (string) (description["Default"]:nil);
 
     string type = description["Type"]:"";
 
@@ -575,7 +575,7 @@ global define list combo_list(map description, boolean set_default) ``{
  * @param description Variable description
  * @param set_default Set to true ifdefault value should be in the combo box
  */
-global define void update_combo(map description, boolean set_default) ``{
+global define void update_combo(map<string, any> description, boolean set_default) ``{
     string varname = description["name"]:"";
 
     // modification flag added to variable name (if it was changed)
@@ -617,8 +617,8 @@ global define void update_combo(map description, boolean set_default) ``{
  * Update "Default" button state (enable/disable) in the dialog
  * @param description Variable description
  */
-global define void update_button_state(map description) ``{
-    string def = description["Default"]:nil;
+global define void update_button_state(map<string, any> description) ``{
+    string def = (string) (description["Default"]:nil);
 
     UI::ChangeWidget(`id(`def), `Enabled, (def != nil));
 }
@@ -788,7 +788,7 @@ global define symbol MainDialog() ``{
 	// "Default" button
 	if (ret == `def)
 	{
-	    map description = Sysconfig::get_description(selected_variable);
+	    map<string, any> description = Sysconfig::get_description(selected_variable);
 	    update_combo(description, true);
 	}
 	else if (ret == `next)
@@ -832,7 +832,7 @@ Choose \"Cancel\" to edit the values again.
 		if (size(found) > 0)
 		{
 		    // // popup dialog header
-		    map input = display_variables_dialog(_("Search Result"),
+		    map<string, any> input = display_variables_dialog(_("Search Result"),
 			// help text in popup dialog
 			_("The search results are displayed here. If you see the item you want, select it then click \"Go to\". Otherwise, click \"Cancel\" to close this dialog."), create_table_content(found),
 			// push button label
@@ -844,7 +844,7 @@ Choose \"Cancel\" to edit the values again.
 		    }
 		    else
 		    {
-			string sel = input["selected"]:nil;
+			string sel = (string) (input["selected"]:nil);
 			if (sel != nil)
 			{
 			    // select variable in the tree
@@ -924,7 +924,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 	    // force current value as changed
 	    check_set_current_value(true);
 
-	    map description = Sysconfig::get_description(selected_variable);
+	    map<string, any> description = Sysconfig::get_description(selected_variable);
 
 	    // update combo box - add "changed" status
 	    update_combo(description, false);
@@ -954,7 +954,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 	    selected_variable = selected;
 	    y2milestone("Selected: %1", selected);
 
-	    map description = Sysconfig::get_description(selected);
+	    map<string, any> description = Sysconfig::get_description(selected);
 
 	    y2milestone("Descr: %1", description);
 
