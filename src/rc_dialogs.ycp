@@ -36,8 +36,8 @@
     //////////////////////////////////////////////////////////////////////////////////////
 
     UI(``{  define HelpMsgStart()``{
-	return( // helptext for popup 
-	        _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
+	  return( // helptext for popup 
+		  _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
 the central configuration file</b> of your SuSE Linux</p>"));
     }});
     
@@ -48,7 +48,7 @@ the central configuration file</b> of your SuSE Linux</p>"));
     //////////////////////////////////////////////////////////////////////////////////////
     
     UI(``{ define HelpMsgBody() ``{
-	return(  // helptext for popup 
+	  return(  // helptext for popup 
 _("<p>After you save your changes, this editor changes the variables in the
 corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/ *. Then it runs
 SuSEconfig, which changes the underlying configuration files, resp. stops/starts deamons,
@@ -70,7 +70,7 @@ _("<p> This concept was choosen, because:
     //////////////////////////////////////////////////////////////////////////////////////
 
     UI(``{ define HelpMsgNotice()``{
-	return( // helptext for popup 
+	  return( // helptext for popup 
 _("<p>Please notice, that many of this variables are set by specialized YaST2 configuration modules like the \"Network configuration</p>"));
     }});
 
@@ -583,10 +583,7 @@ _("<p>Please notice, that many of this variables are set by specialized YaST2 co
     UI(``{
     define HelpDlg()
     ``{
-	string helptextCR  = "";
-	string helptextCR += HelpMsgStart();
-	string helptextCR += HelpMsgBody();
-	string helptextCR += HelpMsgStart();
+	string helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
 
 	OpenDialog( `opt(`decorated ),
 		    `HBox( `VSpacing(16),

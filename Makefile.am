@@ -11,7 +11,7 @@ RPMNAME = $(shell cat $(srcdir)/RPMNAME)
 EXTRA_DIST = COPYRIGHT.english COPYRIGHT.french COPYRIGHT.german \
 	VERSION README RPMNAME MAINTAINER $(RPMNAME).spec.in
 
-AUTOMAKE_OPTIONS = foreign 
+AUTOMAKE_OPTIONS = foreign  dist-bzip2
 
 $(RPMNAME)-$(VERSION).tar.bz2: dist-bzip2
 
