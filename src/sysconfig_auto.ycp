@@ -24,7 +24,7 @@ y2milestone("---------------------------------");
 y2milestone("Sysconfig autoinst client started");
 any ret = nil;
 string func = "";
-map param = $[];
+list param = [];
 
 
 /* Check arguments */

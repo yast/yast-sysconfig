@@ -866,26 +866,31 @@ global define boolean Write() ``{
  * @param settings The YCP structure to be imported.
  * @return boolean True on success
  */
-global define boolean Import (map settings) ``{
-    modified_variables = settings;
+global define boolean Import (list settings) ``{
 
+    modified_variables = $[];
     list files = configfiles;
 
-    if (size(settings) > 0)
-    {
-	// register agent for user defined files
-	foreach(string varid, string val, settings,
-	    ``{
-		string file = get_file_from_id(varid);
+    // convert from 8.1 export format
+    foreach(map setting, settings,
+	``{
+	    string n = setting["sysconfig_key"]:"";
+	    string f = setting["sysconfig_path"]:"";
+	    string v = setting["sysconfig_value"]:"";
 
-		if (!contains(files, file))
-		{
-		    files = add(files, file);
-		}
+	    string key = sformat("%1$%2", n, f);
+
+	    modified_variables = add(modified_variables, key, v);
+
+	    // add configuration file if it isn't already specified
+	    if (!contains(files, file))
+	    {
+		files = add(files, file);
 	    }
-	);
-    }
+	}
+    );
 
+    // register agent for user defined files, read values
     return Sysconfig::Read(files);
 }
 
@@ -894,8 +899,30 @@ global define boolean Import (map settings) ``{
  * (For use by autoinstallation.)
  * @return map Dumped settings (later acceptable by Import ())
  */
-global define map Export () ``{
-    return modified_variables;
+global define list Export () ``{
+    // return structured map (for 8.1 compatibility)
+
+    list ret = [];
+
+    if (size(modified_variables) > 0)
+    {
+	foreach(string varid, string val, modified_variables,
+	    ``{
+		string n = get_name_from_id(varid);
+		string f = get_file_from_id(varid);
+
+		map m = $[
+		    "sysconfig_key"   : n,
+		    "sysconfig_path"  : f,
+		    "sysconfig_value" : val
+		];
+
+		ret = add(ret, m);
+	    }
+	);
+    }
+
+    return ret;
 }
 
 /**
