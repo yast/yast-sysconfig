@@ -49,6 +49,7 @@
           "MOUSE"     :$[ `value:"/dev/psaux",  `descr:"Which device is the mouse?" ]
        ];
 
+      
        assigned means, that after I have checked these fields with the structured information I have (= tree_preferences)
        the "assigned" entry is in the structured information.
 
@@ -57,8 +58,7 @@
 
        for a "parent-nodey"   `descr and `dialogtype
        for a "leaf-node"      `dialogtype
-       for a rc_config_key    `assigned   if in structured data
-                              `decr options and entrynb
+       for a rc_config_key    `decr options and entrynb
 			      
  ---------------------------------------------------------------------------------------
  from SCR
@@ -129,6 +129,7 @@
                                                           ]
                                               ]
                                    ],
+				   
                           "A2":$[`parent="A",
                                 `nodetype:`dir,
                                 `descr:"All A2's",
@@ -181,6 +182,8 @@
 */
 
 {
+    Include (`rc_process_db());
+  
     ////////////////////////////////////////////////////////////
     // Test, if the user wants the inetd.conf custom configuration
     // (this in normally set in inst_inetd_start)
@@ -192,6 +195,9 @@
     // Testmode, for example fo screenshots
     boolean test_mode    = lookup ( user_settings, "test_mode", false );
 
+    // todo change
+    boolean lib_test_mode = true;
+    
     ////////////////////////////////////////////////////////////
     // Read the current architecture (no architecture depended modes yet
     // string architecture = lookup( user_settings, "architecture", default_architecture);
@@ -475,19 +481,22 @@
 
     define getDescr( string key )
     ``{
-             map key_map          = lookup( rc_config_keys, key, "" );
+             map key_map          = lookup( rc_config_keys, key, $[] );
              any descr            = lookup(key_map, `descr, `not_read);
 	     
-	     // y2log ( .milestone, "rc_config", 1, "TTTTT2", descr);
+	     y2log ( .milestone, "rc_config", 1, "TTTTT2", descr);
 		  
 	     if ( descr  == `not_read )
 	     {
 	     	descr          = SCR( `Read(topath(sformat("%1.comment", lookup( key_map,`path,"")))));
-		// y2log ( .milestone, "rc_config", 1, "TTTTT", descr);
+		if ( descr == nil ) descr = "";
+		y2log ( .milestone, "rc_config", 1, "TTTTT", descr);
+
 	     	// save it
 	     	key_map        = add( key_map, `descr, descr);
 	     	rc_config_keys = add( rc_config_keys, key, key_map );
 	     }
+	     
 
 	     // delete all #
 	     descr = mergestring(splitstring( descr, "#"),"");
@@ -543,6 +552,15 @@
 	      // We can ignore entrys, cause the entrys are
 	      // shown on right side of the dialog
 	      //
+
+	      map|void    curr_keymap = lookup( rc_config_keys, key);
+
+	      // todo check:(quick hack?)
+	      if ( curr_keymap == nil )
+	      {
+		  change( rc_config_keys, key, $[]);
+		  curr_keymap = lookup( rc_config_keys, key);
+	      }
 	      
 	      symbol status = lookup(line, `nodetype, `none);
 
@@ -568,27 +586,34 @@
 		  // but we mark the current entry in rc_config_keys as assigned, cause this
 		  // entry ist set in a structured dialog
 
-		    rc_config_keys = change_MM( rc_config_keys, key, `assigned,    true );
-		    rc_config_keys = change_MM( rc_config_keys, key, `options,     lookup( line, `options,   []  ));
-		    rc_config_keys = change_MM( rc_config_keys, key, `entrynb,     lookup( line, `entrynb, ""  ));
+                  change( curr_keymap, `options,     lookup( line, `options,   []  ));
+		  change( curr_keymap, `entrynb,     lookup( line, `entrynb, ""    ));
+	      
+		    //rc_config_keys = change_MM( rc_config_keys, key, `assigned,    true );
+		    //rc_config_keys = change_MM( rc_config_keys, key, `options,     lookup( line, `options,   []  ));
+		    //rc_config_keys = change_MM( rc_config_keys, key, `entrynb,     lookup( line, `entrynb, ""  ));
 	      }
 
 
 		///////////////////////////////////////////   
 		// put the parent to the rc_config_keys
-		rc_config_keys = change_MM( rc_config_keys, key, `parent,      parent);
+	        change( curr_keymap, `parent,      parent);
+	        // rc_config_keys = change_MM( rc_config_keys, key, `parent,      parent);
 
 		///////////////////////////////////////////   
 		// put the dialogtype into rc_config_keys
 		
 		if ( status == `dialog )
 		{
-		    rc_config_keys = change_MM( rc_config_keys, key, `dialogtype,  lookup( line, `dialogtype, "none"));
+		    change( curr_keymap, `dialogtype,  lookup( line, `dialogtype, "none"));
+		    // rc_config_keys = change_MM( rc_config_keys, key, `dialogtype,  lookup( line, `dialogtype, "none"));
 		}
 		else if ( status == `dir )
 		{
-		    rc_config_keys = change_MM( rc_config_keys, key, `dialogtype, "dir" );
-		    rc_config_keys = change_MM( rc_config_keys, key, `descr, lookup( line, `descr, ""));
+		    change( curr_keymap, `dialogtype, "dir" );
+		    change( curr_keymap, `descr, lookup( line, `descr, ""));
+		    // rc_config_keys = change_MM( rc_config_keys, key, `dialogtype, "dir" );
+		    // rc_config_keys = change_MM( rc_config_keys, key, `descr, lookup( line, `descr, ""));
 		}
 
 	      
@@ -922,7 +947,36 @@ Choose \"Cancel\" to edit the values again");
 
 ////////////////////////////////////////////////////////////////////////////////
 
- define change_map( map map_to_change, list keys, any value)
+ define change_map( map curr_map, list keys, any value)
+``{
+    integer i = 0;
+    // y2log ( .milestone, "rc_config", 1, "TTTTTMAP", value,  keys);        
+    // build stack
+    void|map ncurr_map = $[]; 
+
+    while( i < (size(keys)-1)  )                                 
+    {
+	
+	    ncurr_map = lookup( curr_map, select(keys,i));
+
+	    if (ncurr_map == nil)
+	    {
+		change(  curr_map, select(keys,i), $[] );
+		ncurr_map = lookup( curr_map, select(keys,i));
+	    }
+
+	    curr_map = ncurr_map;
+	    i=i+1;
+    }
+
+    // now we make the change ...                                     
+    change( curr_map, select(keys, i), value);
+ };
+
+ 
+////////////////////////////////////////////////////////////////////////////////
+ 
+ define old_change_map( map map_to_change, list keys, any value)
 ``{
     integer i = 0;
     // y2log ( .milestone, "rc_config", 1, "TTTTTMAP", value,  keys);        
@@ -965,7 +1019,8 @@ Choose \"Cancel\" to edit the values again");
       
       return(a);
  };
-       
+
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     //////                                       STATIC DATA                                       //////
     /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -998,386 +1053,6 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
  ];
 
 
-map tree_preferences    = $[];
-map rc_config_eddb_path = $[];
-
- ////////////////////////////////////////////////////////////////////////////////
- // parse the hierarchie ...
- // - create a hierarchie hash -> rc_config_eddb_path
- // - create the basic hierachical nodes in  tree_preferences
-
- y2log ( .milestone, "rc_config", 1, "AAAAAA START");
- integer i = 0;
- while(  i < size( rc_config_eddb) )
- {
-     map entry = select( rc_config_eddb, i);
-     // y2log ( .milestone, "rc_config", 1, entry);
-     
-     if ( lookup( entry, `property) == "path")
-     {
-	  rc_config_eddb_path = add( rc_config_eddb_path, lookup(entry,`key), lookup( entry,`value));
-
-//	  tree_preferences = change_map( tree_preferences,
-//					 lmerge ( get_keys(lookup( entry,`value)), [`children, lookup( entry,`key)] ),
-//					 $[]	);
-     }
-     i=i+1; 
- }
-
-
- y2log ( .milestone, "rc_config", 1, "AAAAAA  TREE");
- y2log ( .milestone, "rc_config", 1, "AVVV  TREE", tree_preferences);
-
-// // muss noch aufgeteilt werden, path vor allen anderen!
-//
-// // First, create all hierarchical entries
-// maplist( rc_config_eddb, `entry,
-//	    ``{
-//		string property = lookup( entry, `property);
-//		
-//		if (property == "path")
-//		{
-//		    list keys  = get_keys(lookup( entry,`value));
-//		    map  value = $[];
-//		
-//		    tree_preferences = change_map( tree_preferences,
-//						   lmerge( keys, [`children]) ,
-//						   entry, value );
-//		}
-//	      }
-//	    );
-//
-
-  // Now merge really existing variables with the db-data
- // - if in path: write a void description to show the variable exist
- //   else make en entry in /etc
- // - create
- //  map rc_config_keys =
- //	 $[ "MAIL_LEVEL":$[  `value:"warn",        `descr:"There are two levels of mailing..." ],
- //	    "MOUSE"     :$[ `value:"/dev/psaux",  `descr:"Which device is the mouse?" ]
- //	 ];
-
- //todo other as .system
- list rc_variables = SCR(`Dir(.rc.system));
- y2log ( .milestone, "rc_config", 1, "AAAAAAA SCR Read");
- map rc_config_keys = $[];
-
- // todo remove begin
-  rc_variables = filter( `entry, rc_variables, ``( substring( entry, 0, 1) == "C" ));
- // todo remove end
-
- i=0;
- while(  i < size(rc_variables) )
- {
-     string key = select( rc_variables, i);
-     
-     //todo other as .system!
-     rc_config_keys = add( rc_config_keys, key, $[`value:`not_read,
-						    `descr:`not_read,
-						   `path:topath(sformat(".rc.system.%1", key))
-                                                   ]
-			   );
-
-     
-     list keys = get_keys( lookup(rc_config_eddb_path, key));
-     // y2log( .milestone, "r", 1, "WWWWWWWW", key, keys);
-
-     if ( keys == ["etc"] )
-     {
-	// rc-onfig variable which are not in eddb: create entry in /etc
-
-	map children = $[];
-	children = add(children, key, $[`nodetype:`entry,`entrynb:1,`type: "options" ]);
-			
-	tree_preferences = change_map( tree_preferences,
-					 [ "etc", `children, tolower(key) ],
-					 $[`nodetype:`dialog,
-					   `dialogtype:"d1",
-					   `children:children
-					  ]
-					 );
-
-	
-     }
-     else
-     {
-	 // fill in rc-config varaibles, which have a path in the eddb
-	 tree_preferences = change_map( tree_preferences,
-					lmerge( keys, [ `children, key ]),
-					$[]
-					 );
-
-     }
-     i=i+1; 
- }
-
-
-
- // todo: defaultentry aus rc.config in `value einlesen
- y2log ( .milestone, "rc_config", 1, "AAAAAAA FILL end1");
- SCR(`Write (.dumpto.tmp.tree2, tree_preferences ));
- y2log ( .milestone, "rc_config", 1, "AAAAAAA Fill end2 ");
-
- map valid_rc_keys = $[];
- 
- ////////////////////////////////////////////////////////////////////////////////			      
- // returns: symbol: `entry if is an entry
- // collects the valid keys
- ////////////////////////////////////////////////////////////////////////////////			      
- define set_nodetype_and_dialog_type( map curr_tree, list keys, integer entrynb )
- ``{
-    map|void children = lookup( curr_tree, `children, nil );
-
-    valid_rc_keys = add( valid_rc_keys, select( keys, size(keys)-1), keys);
-    
-    if ( children == nil )
-    {
-       // todo
-       // if ( lookup( curr_tree, `value, nil) != nil )
-       //{
-           tree_preferences = change_map( tree_preferences,
-		    		          add( keys, `nodetype),
-				          `entry);
-           tree_preferences = change_map( tree_preferences,
-		    		          add( keys, `entrynb),
-				          entrynb);
-       //}
-       return( 1 );
-    }
-    else
-    {
-       integer i = 0;
-       list    ret_list  = maplist( `key, `itemmap, children,
-				    ``{ i=i+1;
-					return(set_nodetype_and_dialog_type(itemmap,
-									    lmerge( keys, [`children, key]),
-									    i)); } );
-       
-       integer min_depth = select( sort(ret_list), 0 );
-
-       if ( min_depth == 1 )
-       {
-	  tree_preferences = change_map( tree_preferences,
-					 add( keys, `nodetype),
-					 `dialog);
-	  tree_preferences = change_map( tree_preferences,
-					 add( keys, `dialogtype),
-					 sformat("d%1",size(ret_list)) );
-       }
-       else
-       {
-	  tree_preferences = change_map( tree_preferences,
-					 add( keys, `nodetype),
-					 `dir);
-       }
-
-       // return max_depth
-       return( select( sort(ret_list),size(ret_list)-1));
-    }
- }
-    
- maplist( `key, `value, tree_preferences, ``( set_nodetype_and_dialog_type( value, [ key ], 0 )));
-			      
- y2log ( .milestone, "rc_config", 1, "AAAAAAA Fill set_node ");
- SCR(`Write (.dumpto.tmp.tree, tree_preferences ));
- y2log ( .milestone, "rc_config", 1, "VVVVV", tree_preferences);
- y2log ( .milestone, "rc_config", 1, "AAAAAAA Fill set_node after debug");
- _debug( "PATH3", tree_preferences);
-
- ////////////////////////////////////////////////////////////////////////////////
- // now fill the entrys
- ////////////////////////////////////////////////////////////////////////////////
- SCR(`Write (.dumpto.tmp.tree1, tree_preferences ));
- y2log ( .milestone, "rc_config", 1, "AAAAAAAA TREE end");
-							
- maplist( `entry, rc_config_eddb, 
-	    ``{
-
-		// build the hierarchical key, to store the value "entry"
-
-		string    key   = lookup( entry,`key);
-
-		list|void keys  = lookup( valid_rc_keys, key, nil );
-		
-		// keys are something like [ "base", `children, "suse_config", `children, "ENABLE_SUSECONFIG" ]
-	        // doit only, if the entry is NOW in the rc_config
-		// the eddb stores data for ALL existing variables!
-		
-                if ( keys != nil )
-		{    
-		  string property = lookup( entry, `property);
-		  if (property == "type" || property == "mtype" )
-		  {
-
-		      
-		      string type = lookup( entry,`value);
-		      if ( type == "boolean" )
-		      {
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`type),
-							`options );
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`options),
-							[ "yes", "no" ] );
-		      }
-		      else if ( type == "enum" )
-		      {
-			 tree_preferences = change_map( tree_preferences,
-							add( keys, `type ),
-							`options );
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`options),
-							lookup( entry, `list ) );
-		      }
-		      else if ( type == "integer" )
-		      {
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`type),
-							`options );
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`options),
-							[] );
-		      }
-		      else if ( type == "string" )
-		      {
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`type),
-							`options );
-			 tree_preferences = change_map( tree_preferences,
-							add( keys,`options),
-							[] );
-
-		      }
-		      ////////////////////////////////////////////
-		      // todo: nice to have
-		      // difference mtype type,
-		      // use typedef
-		      // use `integer as `type
-		  }
-	      
-
-		  if ( property == "dialogtype" )
-		  {
-		      tree_preferences = change_map( tree_preferences,
-						     add( keys,`dialogtype),
-						     lookup( entry,`value) );
-		  }
-
-		  ////////////////////////////////
-		// todo: read just_run 
-		}
-	    });
-
-
- y2log ( .milestone, "rc_config", 1, "AAAAAAA RC-SYSTEM to tree");
- SCR(`Write (.dumpto.tmp.tree4, tree_preferences ));
- SCR(`Write (.dumpto.tmp.rcc,   rc_config_keys ));
- y2log ( .milestone, "rc_config", 1, "AAAAAAA RC-SYSTEM to tree");
-
-// reference tree 
-//   map tree_preferences =
-//$[
-//	  "Network"   : $[
-//		   `nodetype:    `dir,
-//		   `descr:    "All A's",
-//		   `children: $[
-//				  "ISDN":$[
-//					`nodetype:`dialog,
-//					`dialogtype:"d4",
-//					`descr:"Set setting of A1",
-//					  `children:$[ "A-opt1"  : $[
-//								    `nodetype:`entry,
-//								    `entrynb:1,
-//								    `type: "options",
-//								    `options:["yes","no"]
-//								   ],       
-//						     "A-opt2"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:2,
-//								  `options:["tcp","udp","dgram"]
-//								  ],
-//						     "A-opt3"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:3,
-//								  `options:["yes","no"]
-//								  ],        
-//						     "A-opt4"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:4,
-//								  `options:["yes","no"]
-//								  ],
-//						     "A-opt5"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:4,
-//								  `options:["yes","no"]
-//								  ]
-//						     
-//						      ]
-//				  ],
-//				  "SuSE automatic WM config generation":$[
-//					`nodetype:`dialog,
-//					`dialogtype:"d5",
-//					`descr:"Settings for SuSE windomanager control",
-//					  `children:$[ "SUSEWM_UPDATE"  : $[
-//								    `nodetype:`entry,
-//								    `entrynb:1,
-//								    `options:["yes","no"]
-//								   ],       
-//						     "SUSEWM_WM"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:2,
-//								  `options:[ "fvwm", "fvwm2", "fvwm95", "bowman", "mwm", "ctwm", "kwm", "all"]
-//								  ],
-//						     "SUSEWM_MWM"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:3,
-//								  `options:["yes","no"]
-//								  ],        
-//						     "SUSEWM_XPM"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:4,
-//								  `options:["yes","no"]
-//								  ],
-//						     "SUSEWM_ADD"  : $[
-//								  `nodetype:`entry,
-//								  `entrynb:5,
-//								  `options:[]
-//								  ]
-//						     
-//						      ]
-//				  ],
-//				  
-//				  "DHCP":$[
-//					`nodetype:`dir,
-//					`dialogtype:"dir",
-//					`descr:"All Settings for DHCP, for Server AND for the Client!",
-//					`children:$[ "DHCP Server": $[
-//							     `nodetype:`dialog,
-//							     `dialogtype:"d3",
-//							     `descr:"Set setting of A2_1"
-//							     ],     
-//						    "DHCP Client": $[
-//							     `nodetype:`dialog,
-//							     `dialogtype:"d2",
-//							     `descr:"Set setting of A2_2" ]
-//							     ]
-//					]
-//			     ]
-//		   ]
-//];
-//
-
-
-//map rc_config_keys =
-//	   $[ "MAIL_LEVEL":$[ `value:"warn",        `descr:"There are two levels of mailing...",`assigned:true ],
-//	    "MOUSE"     :$[ `value:"/dev/psaux",  `descr:"Which device is the mouse?" ],
-//	      "SUSEWM_UPDATE" :$[ `value:      "no1",     `descr:           "SuSEconfig.wm can create a .fvwm2rc, .fvwmrc, .bowmanrc, .fvwm2rc95, .mwmrc, .ctwmrc, depending on the installed packages. If you want your systemwide wm config files to be updated after install / removal of packages set SUSEWM_UPDATE to yes, otherwise to no" ],
-//	      "SUSEWM_WM"     :$[ `value:      "all",               `descr:"This is the (space separated) list of window managers for which you  want to generate the config file. Valid values are:    \"fvwm\", \"fvwm2\", \"fvwm95\", \"bowman\", \"mwm\", \"ctwm\", \"kwm\", \"all\". Default setting is \"all\" which is for generating files for all wms."],
-//	      "SUSEWM_MWM"    :$[ `value:      "yes",               `descr:"If you want the look of the windows similar to mwm say \"yes\" else \"no\" This is only applicable for fvwm derived window managers if this variable is empty, the default is \"no\""],
-//	      "SUSEWM_XPM"    :$[ `value:      "yes",               `descr:"Your fvwm2/95 is slow? Don't want small pixmaps in menus? So set  SUSEWM_XPM to \"no\", if pixmaps in menus are wanted set it to \"yes\",  which is the default value. The package 3dpixms has to be installed."],
-//	      "SUSEWM_ADD"    :$[ `value:      "",       `descr:    "These are additional source files always to be included when SuSEconfig.wm is running, e.g. a local configuration"]
-//
-//	   ];
 
    
    ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1423,10 +1098,39 @@ map rc_config_eddb_path = $[];
 //					 string comment   = SCR( `ReadComment( curr_path ));
 //				      });
 //				       
+ map  rc_config_keys = $[];
+ list rc_dir = SCR( `Dir( .rc ));
+ y2log ( .milestone, "rc_config", 1, "AAAAAAAAAA vor SCRRead");
+
+ foreach( `dir, rc_dir,
+ ``{
+    list rc_variables = SCR(`Dir(topath(sformat(".rc.%1", dir))));
+    
+    // todo remove begin
+    // if ( dir == "system") rc_variables = filter( `entry, rc_variables, ``( substring( entry, 0, 1) == "C" ));
+    // todo remove end
+    
+    integer i=0;
+    while(  i < size(rc_variables) )
+    {
+    	string key     = select( rc_variables, i);
+	string paths = sformat(".rc.%1.%2", dir, key);
+	string descr = SCR( `Read(topath(sformat("%1.comment", paths))));
+	string value = SCR( `Read(topath(paths) ));
+    	change( rc_config_keys, key, $[`value:value,
+				      `descr: descr,
+				      `path:topath(sformat(".rc.%1.%2", dir, key))
+	                              ]
+		);
+    	i=i+1; 
+    }
+ });
+
     
  y2log ( .milestone, "rc_config", 1, "AAAAAAAAAA vor merge");
 
-    list tree_data =  mergeTreeAndRcConfigDataAndBuiltTreeWidgetData( tree_preferences, true, "root" );
+ list tree_data =  process_eddb_create_widgettree_and_fill_rcconfigkeys();
+ 
  y2log ( .milestone, "rc_config", 1, "AAAAAAAAAA nach Merge");
     
   _debug( "TTTTTTTTTTTTTTTTTT", tree_data );
@@ -1571,6 +1275,8 @@ map rc_config_eddb_path = $[];
 		  string new_val = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Value));
 		  string key     = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Label));
 
+		  y2log( .milestone, 1, "ttt", "TTTTTTTTTBB", key); 
+		  
 		  if ( lookup(lookup(rc_config_keys, key, $[]), `value) != new_val )
 		  {
 		     map curr_key = lookup(rc_config_keys, key);
@@ -1602,9 +1308,10 @@ map rc_config_eddb_path = $[];
 	    
             _debug( "dialogtype", dialogtype);
 	    
+            y2log( .milestone, "rc_config", 1, "AAAAAAA2", key, dialogtype, entry_list );
+	    
             if ( dialogtype == "d1" )
             {
-	       y2log( .milestone, "rc_config", 1, "AAAAAAA2", key, entry_list );
             	term curr_dialog = getD1Dialog( entry_list );
             	UI(`ReplaceWidget(`id(`rp), curr_dialog));
 		
@@ -1631,7 +1338,7 @@ map rc_config_eddb_path = $[];
             }
             else if ( dialogtype == "dir" )
             {
-            	term curr_dialog = getDirDialog( getDescr( key, curr_entry ));
+            	term curr_dialog = getDirDialog( getDescr( key));
             	UI(`ReplaceWidget(`id(`rp), curr_dialog ));
             }
         }   

@@ -43,7 +43,9 @@
 	    
 	      // The main dialog. Copied from installation.ycp.
 		 OpenDialog(`opt(`defaultsize),
-			    `VBox(`Left(`Image(image_block, "SuSE")),
+			    `VBox(`Left(
+					//`Image(`suseheader, "SuSE")),	
+					`Image(image_block, "SuSE")),
                                         `HSpacing(85), 
 					`HWeight(70, `VBox(
 							   `Left(`Heading(`id(`title), _("YaST2\nInitializing ..."))),
