@@ -337,6 +337,31 @@ global define void check_set_current_value()
     }
 }
 
+global define list create_table_content(list varids)
+``{
+    list table_content = [];
+
+    foreach(string varid, varids,
+	``{
+	    map descr = Sysconfig::get_description(varid);
+	    string name = descr["name"]:"";
+	    string old = descr["value"]:"";
+	    string new = descr["new_value"]:"";
+	    string file = descr["file"]:"";
+
+	    // display only beginning of comment (to limit table space used)
+	    string comm = descr["comment"]:"";
+	    if (size(comm) > 90)
+	    {
+		comm = substring(comm, 0, 90);
+	    }
+
+	    table_content = add(table_content, `item(`id(varid), name, new, old, file, comm));
+	}
+    );
+
+    return table_content;
+}
 
 /**
  * Summary dialog
@@ -438,33 +463,11 @@ global define symbol SummaryDialog() ``{
 	    // show table with modified variables
 	    if (size(modified) > 0)
 	    {
-		list table_content = [];
-		integer i = 0;
-
-		foreach(string varid, modified,
-		    ``{
-			map descr = Sysconfig::get_description(varid);
-			string name = descr["name"]:"";
-			string old = descr["value"]:"";
-			string new = descr["new_value"]:"";
-
-			// display only beginning of comment (to limit table space used)
-			string comm = descr["comment"]:"";
-			if (size(comm) > 90)
-			{
-			    comm = substring(comm, 0, 90);
-			}
-
-			table_content = add(table_content, `item(`id(i), name, new, old, comm));
-
-			i = i + 1;
-		    }
-		);
 
 		y2milestone("Modified variables: %1", modified);
-		symbol input = display_variables_dialog(_("Modified variables"), _("Detailed list of modified variables"), table_content, _("&Save"), UI::CancelButtonLabel());
+		map result = display_variables_dialog(_("Modified variables"), _("Detailed list of modified variables"), create_table_content(modified), _("&Save"), UI::CancelButtonLabel());
 
-		if (input == `cancel)
+		if (result["ui"]:`dummy == `cancel)
 		{
 		    ret = `again;
 		}
@@ -474,7 +477,32 @@ global define symbol SummaryDialog() ``{
 	{
 	    map search_parameters = display_search_dialog();
 
-	    // TODO: call search
+	    if (search_parameters != $[])
+	    {
+		list found = Sysconfig::search(search_parameters, true);
+
+		if (size(found) > 0)
+		{
+		    map input = display_variables_dialog(_("Found"), _("Detailed list of found variables"), create_table_content(found), _("&Go to"), UI::CancelButtonLabel());
+
+		    if (input["ui"]:`dummy == `cancel)
+		    {
+			ret = `again;
+		    }
+		    else
+		    {
+			string sel = input["selected"]:nil;
+			if (sel != nil)
+			{
+			    UI::ChangeWidget(`id(`tree), `CurrentItem, sel);
+			}
+		    }
+		}
+		else
+		{
+		    UI::MessagePopup("Nothing found.");
+		}
+	    }
 	}
 	else if (ret == `abort || ret == `cancel)
 	{

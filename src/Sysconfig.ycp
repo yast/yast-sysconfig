@@ -39,9 +39,15 @@ global boolean write_only = false;
 
 // all read variables
 map variables = $[];
+
+// modified variables
 map modified_variables = $[];
 
+// comment for non-varable nodes
 map node_comments = $[];
+
+// location for each variable
+map variable_locations = $[];
 
 global list tree_content = [];
 
@@ -59,17 +65,109 @@ global define list(string) search(map params, boolean show_progress) ``{
     list(string) found = [];
 
     // get all configuration files
-    list(string) files = SCR::Dir(.sysedit.section);
+    list(string) files = SCR::Dir(.syseditor.section);
+
+    if (show_progress == true)
+    {
+	UI::OpenDialog(`ProgressBar(`id(`progress), _("Searching..."), size(files), 0));
+    }
+
+    boolean search_varname = params["varname"]:true;
+    boolean search_description = params["description"]:false;
+    boolean search_value = params["value"]:false;
+    boolean case_insensitive = params["insensitive"]:false;
+    string search_string = params["search"]:"";
+
+    if (search_string == "")
+    {
+	return found;
+    }
+
+    if (case_insensitive == true)
+    {
+	search_string = tolower(search_string);
+    }
+
+    integer index = 0;
 
     foreach(string file, files, ``{
 	    // get all variables in file
-	    path var_path = add(.sysedit.value, file);
+	    path var_path = add(.syseditor.value, file);
 	    list variables = SCR::Dir(var_path);
 
-	    // TODO test if this variable matches
+	    y2debug("Searching in file %1", file);
+
+	    foreach(string var, variables,
+		``{
+		    boolean already_found = false;
+
+		    y2debug("Searching in variable %1", var);
+
+		    if (search_varname == true)
+		    {
+			string var2 = var;
+			if (case_insensitive)
+			{
+			    var2 = tolower(var);
+			}
+
+			if (issubstring(var2, search_string))
+			{
+			    found = add(found, var + "$" + file);
+			    already_found = true;
+			}
+		    }
+
+		    // search in variable value if it is requested and previous check was unsuccessful
+		    if (search_value == true && already_found == false)
+		    {
+			string read_value = SCR::Read(add(add(.syseditor.value, file), var));
+
+			if (case_insensitive)
+			{
+			    read_value = tolower(read_value);
+			}
+
+			if (issubstring(read_value, search_string))
+			{
+			    found = add(found, var + "$" + file);
+			    already_found = true;
+			}
+		    }
+
+		    if (search_description == true && already_found == false)
+		    {
+			string read_comment = SCR::Read(add(add(.syseditor.value_comment, file), var));
+
+			if (case_insensitive)
+			{
+			    read_comment = tolower(read_comment);
+			}
+
+			if (issubstring(read_comment, search_string))
+			{
+			    found = add(found, var + "$" + file);
+			}
+		    }
+		}
+	    );
+
+	    if (show_progress == true)
+	    {
+		index = index + 1;
+		UI::ChangeWidget(`id(`progress), `Value, index);
+	    }
 
 	}
     );
+
+    if (show_progress == true)
+    {
+	UI::CloseDialog();
+    }
+
+    y2warning("Found: %1", found);
+    y2warning("Params: %1", params);
 
     return found;
 }
@@ -216,7 +314,6 @@ global define list parse_options(string options) ``{
 
 
 global define map get_description(string varid) ``{
-
     string varname = get_name_from_id(varid);
     string fname = get_file_from_id(varid);
 
@@ -224,11 +321,25 @@ global define map get_description(string varid) ``{
     path value_path = add(add(.syseditor.value, fname), varname);
     string comment = SCR::Read(comment_path);
 
+    // no comment present
+    if (size(comment) == 0)
+    {
+	y2warning("Comment for variable %1 is missing", varid);
+
+	// TODO read comment from previous values
+	list all_variables = SCR::Dir(add(.syseditor.value, fname));
+
+    }
+
     map meta = parse_metadata(comment);
 
-    string deflt = meta["Default"]:"";
-    list parsed = parse_options(deflt);
-    meta["Default"] = parsed[0]:deflt;
+    string deflt = meta["Default"]:nil;
+
+    if (deflt != nil)
+    {
+	list parsed = parse_options(deflt);
+	meta["Default"] = parsed[0]:deflt;
+    }
 
     string new_value = modified_variables[varid]:nil;
 
@@ -238,7 +349,7 @@ global define map get_description(string varid) ``{
 	meta["new_value"] = new_value;
     }
 
-    meta["name"] = get_name_from_id(varid);
+    meta["name"] = varname;
     meta["file"] = get_file_from_id(varid);
     meta["location"] = (varname != "") ? get_location_from_id(varid) : varid;
     meta["comment"] = (varname != "") ? get_only_comment(comment) : (node_comments[varid]:"");
@@ -378,36 +489,15 @@ global define string get_name_from_id(string id) ``{
 }
 
 global define string get_location_from_id(string id) ``{
-    integer pos = findlastof(id, "$");
-
-    if (pos >= 0 && size(id) >= pos + 1)
-    {
-	return substring(id, pos + 1);
-    }
-    else
-    {
-	return "";
-    }
+    return variable_locations[id]:"";
 }
 
 global define string get_file_from_id(string id) ``{
-
     integer pos = findfirstof(id, "$");
 
     if (pos >= 0)
     {
-	string file_location = substring(id, pos + 1);
-
-	pos = findlastof(file_location, "$");
-
-	if (pos >= 0)
-	{
-	    return substring(file_location, 0, pos);
-	}
-	else
-	{
-	    return "";
-	}
+	return substring(id, pos + 1);
     }
     else
     {
@@ -571,6 +661,8 @@ global define boolean Read(list(string) files) ``{
     tree_content = parsed_output[0]:[];
 
     node_comments = parsed_output[1]:$[];
+
+    variable_locations = parsed_output[2]:$[];
 
     return true;
 }

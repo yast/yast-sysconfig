@@ -58,7 +58,7 @@ sub ids_to_item($$)
 	    $first = 0;
 	}
 	
-        $result .= "`item(`id(\"$var\$$location\"), \"$varname\", false)";
+        $result .= "`item(`id(\"$var\"), \"$varname\", false)";
     }
 
     return $result;
@@ -182,6 +182,24 @@ sub convert(@)
     return $result;
 }
 
+sub flip_hash(%)
+{
+    my %input = @_;
+    my %ret;
+
+    for my $location (keys(%input))
+    {
+	my $var = $input{$location};
+	my @vars = split(',', $var);
+
+	for my $v (@vars)
+	{
+	    $ret{$v} = $location;
+	}
+    }
+
+    return %ret;
+}
 
 # convert perl hash to YCP map (in string form)
 sub hash_to_map(%)
@@ -277,7 +295,6 @@ for my $fname (@list)
 	# variable definition
 	elsif ($line =~ /^\s*([-\w\/:]*)\s*=.*/)
 	{
-
 	    my $existing_vars = $locations{$location};
 
 	    if (defined($existing_vars))
@@ -293,6 +310,7 @@ for my $fname (@list)
 
     close(CONFIGFILE);
 }
+
 
 # create sorted list of locations
 my @sorted_locations = sort(keys(%locations));
@@ -310,6 +328,7 @@ push (@rec, "");
 # start conversion
 print "[\n";
 print '['.convert(@rec)."],\n";
-print hash_to_map(%descriptions)."\n";
+print hash_to_map(%descriptions).",\n";
+print hash_to_map(flip_hash(%locations))."\n";
 print "]\n";
 
