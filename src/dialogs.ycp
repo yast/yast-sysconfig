@@ -25,16 +25,12 @@ include "sysconfig/routines.ycp";
  */
  define map display_search_dialog()
 ``{
-    // helptext for popup search
-    string helptextCR = _("Enter a keyword related to the information needed.");
-
     UI::OpenDialog( `opt(`decorated ),
 		`VBox(`HSpacing(60),
 		    // search popup window header
 		      `Heading(_("Search for a Configuration Variable")),
 		      `VSpacing(0.5),
 		      `HBox(`VSpacing(10),
-			    `RichText( helptextCR ),
 			    `HSpacing(2),
 			    `VBox(
 				`VSpacing(1),
@@ -42,7 +38,7 @@ include "sysconfig/routines.ycp";
 				`TextEntry(`id(`search_entry), _("&Search for:")),
 				`VSpacing(1),
 				// check box label
-				`Left(`CheckBox(`id(`ignore), _("&Case Insensitive Search"), true)),
+				`Left(`CheckBox(`id(`ignore), _("&Case Sensitive Search"), false)),
 				// check box label
 				`Left(`CheckBox(`id(`nkey), _("Search &Variable Name"), true)),
 				// check box label
@@ -77,7 +73,7 @@ include "sysconfig/routines.ycp";
     if (ui == `ok)
     {
 	ret = add(ret, "search", (string)UI::QueryWidget(`id(`search_entry), `Value));
-	ret = add(ret, "insensitive", (boolean)UI::QueryWidget(`id(`ignore), `Value));
+	ret = add(ret, "insensitive", !((boolean)UI::QueryWidget(`id(`ignore), `Value)));
 	ret = add(ret, "varname", (boolean)UI::QueryWidget(`id(`nkey), `Value));
 	ret = add(ret, "value", (boolean)UI::QueryWidget(`id(`nvalue), `Value));
 	ret = add(ret, "description", (boolean)UI::QueryWidget(`id(`ndescr), `Value));
