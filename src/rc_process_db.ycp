@@ -420,7 +420,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 		 
 		if ( lookup( curr_map, `dialogtype, nil) == nil )
 		{
-		    // automaic dialog
+		    // automatic dialog
 		   if ( last_entrynb > MAX_AUTO_DIALOG_KEYS )
 		   {
 
@@ -486,6 +486,54 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	 last_rc_branch = rc_branch;
    });
 
+
+   ///////////////////////////////////////////////////////////////////////////////
+   // No look if there are rc-config variables which are not a leaf.
+   // This is a definition error in meta_rc_config, but we fix it here:
+   // - look if such a variable exist
+   //   -> crwate a little subdislog for such Variables
+   ///////////////////////////////////////////////////////////////////////////////
+   
+   foreach( `branch, rc_config_branch_hash, 
+   ``{
+         branch           = substring( branch, 0, size( branch)-1);
+	 string key       = substring( branch,    findlastof( branch, "/" )+1);
+	 map|void curr_map = lookup( rc_config_keys, key, nil);
+	 
+	 
+         // have we found a parent of the last node?
+	 // yes: then its a dialog or dir
+	 // no:  item on the same level or new entry
+
+	 void|symbol curr_type         = lookup( curr_map, `type, nil );
+	 string      parent            = lookup( curr_map, `parent, "");
+	 map         parent_curr_map   = lookup( rc_config_keys, parent, $[]);
+	 string      parent_dialogtype = lookup( parent_curr_map, `dialogtype, "");
+
+
+	 // look if a variable has a "dir" parent -> Ooohps -> change this !
+	 if ( parent_dialogtype == "dir" && curr_type != nil )
+	 {
+	     y2warning( "Uncommon definition for variable: %1", key);
+	     string branch        = lookup( curr_map,         `branch);
+	     string new_branch    = sformat( "%1/%2", branch, tolower(key));
+	     
+	     change( curr_map,       `branch,       new_branch);
+	     change( curr_map,       `entrynb,      1);
+	     change( curr_map,       `parent,       tolower(key));
+			   			           
+	     change( rc_config_keys,          tolower(key), $[ `branch    : branch,
+							     `dialogtype: "d1"
+                                                      	     ]);
+	     // change( rc_config_branch_hash,   new_branch);
+	     change( rc_config_branch_hash_reduced, new_branch );
+	 }
+
+   });
+
+   /////////////////////////////////////////////////////////////////////////////////
+   
+   SCR(`Write (.dumpto.tmp.rc_config_branch_hash_prev, rc_config_branch_hash ));
    y2debug( "8");
 
    // show processing steps ...
@@ -581,11 +629,11 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    boolean debug = false;
    if ( debug )
    {
-       SCR(`Write (.dumpto.tmp.eddb, rc_config_eddb ));
-       SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
-       SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
-       SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
-       SCR(`Write (.dumpto.tmp.hash, subitems_map ));
+       SCR(`Write (.dumpto.tmp.rc_config_eddb, rc_config_eddb ));
+       SCR(`Write (.dumpto.tmp.rc_config_branch_hash, rc_config_branch_hash ));
+       SCR(`Write (.dumpto.tmp.rc_config_branch_hash_reduced, rc_config_branch_hash_reduced ));
+       SCR(`Write (.dumpto.tmp.rc_config_keys, rc_config_keys ));
+       SCR(`Write (.dumpto.tmp.subitems_map,   subitems_map ));
    }
 
    return( lookup( subitems_map, "root", nil) ); 
