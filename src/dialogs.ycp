@@ -125,7 +125,12 @@ include "sysconfig/routines.ycp";
 
     symbol ret = (symbol)UI::UserInput();
     string selected = (string)UI::QueryWidget(`id(`table), `CurrentItem);
-    boolean box = (size(checkboxlabel) > 0) ? (boolean)UI::QueryWidget(`id(`chbox), `Value) : nil;
+    boolean box = nil;
+
+    if (size(checkboxlabel) > 0)
+    {
+	box = (boolean)(UI::QueryWidget(`id(`chbox), `Value));
+    }
 
     UI::CloseDialog();
 

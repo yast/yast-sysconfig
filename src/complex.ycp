@@ -499,8 +499,15 @@ Create it and use powerteak?
  * @return list List of values for combo box widget
  */
  define list combo_list(map<string, any> description, boolean set_default) ``{
-    string new_value = backslash_remove((string) (description["new_value"]:nil));
-    string value = backslash_remove(description["value"]:"");
+    string new_value = (string) (description["new_value"]:nil);
+    string value = description["value"]:"";
+
+    if (description["actions","SingleQt"]:"" == "")
+    {
+	new_value = backslash_remove(new_value);
+	value = backslash_remove(value);
+    }
+
     list ret = [];
 
     if (set_default == true)
@@ -660,7 +667,14 @@ Joined lines are displayed in the combo box.
     // check current value
     if (selected_variable != "")
     {
-	string new_value = backslash_add((string)UI::QueryWidget(`id(`combo), `Value));
+	string new_value = (string)UI::QueryWidget(`id(`combo), `Value);
+	map d = Sysconfig::get_description(selected_variable);
+
+	// check whether single quotes are used in the configuration file
+	if (d["actions", "SingleQt"]:"" == "")
+	{
+	    new_value = backslash_add(new_value);
+	}
 
 	if (Sysconfig::get_name_from_id(selected_variable) != "")
 	{
@@ -669,7 +683,6 @@ Joined lines are displayed in the combo box.
 
 	    if (result == `not_valid)
 	    {
-		map d = Sysconfig::get_description(selected_variable);
 		string t = d["Type"]:"string";
 
 		// popup question dialog: variable value does not match defined type - ask user to set value (%1 is value entered by user, %2 is allowed type - e.g. integer
