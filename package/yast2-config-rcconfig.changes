@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 20 13:27:25 CEST 2001 - mike@suse.de
+
+- change request of draht:
+  for proper work, we have to start firewall2 script before personal firewall
+  script
+
+-------------------------------------------------------------------
 Wed Sep 19 17:46:15 CEST 2001 - mike@suse.de
 
 - added START_FW2 variable for firewall module.
