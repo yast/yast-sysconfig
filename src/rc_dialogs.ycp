@@ -41,7 +41,8 @@
    ``{
 	// y2log ( .milestone, "rc_config", 1, "COMBOOOOOOO", key, entry_map);
 	  // get real value of the entry
-	  string entry_value  = getValue( key );
+	  map    key_map      = lookup( rc_config_keys, key, $[] );
+	  string entry_value  = lookup(key_map, `value, "");
 
 	  // produce now a optionlist with the real entry, therefor
 	  // - first:  delete the real entry from the list, if it is in there
@@ -60,6 +61,33 @@
     }
 	 
 						     
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   // getDescr()                                                                                    //
+   //-----------------------------------------------------------------------------------------------//
+   // Read the description                                                                          //
+   //-----------------------------------------------------------------------------------------------//
+    
+    define getDescr( string key )
+    ``{
+             map key_map          = lookup( rc_config_keys, key, $[] );
+             any descr            = lookup(key_map, `descr, `not_read);
+	     
+	     if ( descr  == `not_read )
+	     {
+	     	descr = SCR( `Read(topath(sformat("%1.comment", lookup( key_map,`path,"")))));
+		if ( descr == nil ) descr = "";
+
+	     	// save it
+	     	key_map        = add( key_map, `descr, descr);
+	     	rc_config_keys = add( rc_config_keys, key, key_map );
+	     }
+
+	     // delete all #
+	     descr = mergestring(splitstring( descr, "#"),"");
+	     return( descr );
+    };
+
+    
     //////////////////////////////////////////////////////////////////////////////////////
     //                         D I A L O G   D E F I N E S                              //
     //////////////////////////////////////////////////////////////////////////////////////

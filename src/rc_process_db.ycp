@@ -449,7 +449,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    // debug
    // SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
    // SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
-   // SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
+    SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
    // SCR(`Write (.dumpto.tmp.hash, subitems_map ));
 
    return( lookup( subitems_map, "root", nil) ); 

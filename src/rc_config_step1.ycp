@@ -197,6 +197,7 @@
 	 }
      });
 
+     
     
      //////////////////////////////////////////////////////////////////////////////////
      // Lets build the main window ...
@@ -205,6 +206,8 @@
      y2debug ( "vor  Merge");
      list tree_data =  process_eddb_create_widgettree_and_fill_rcconfigkeys();
      y2debug ( "nach Merge");
+
+     rc_config_keys = rc_config_keys; 
 
      // Setting up the main window
      term main_window = getMainWindowTerm( tree_data );
