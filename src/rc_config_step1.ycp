@@ -88,8 +88,11 @@
 
 {
     UI(`ChangeWidget(`id(`package),   `Value, 20));
-    Include (`rc_process_db() );
-    Include (`rc_dialogs()    );
+    include "rc_process_db.ycp";
+    include "rc_dialogs.ycp";
+ 
+    //Include (`rc_process_db() );
+    //Include (`rc_dialogs()    );
   
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
