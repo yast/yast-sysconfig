@@ -167,12 +167,26 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-	ret = merge(ret, Sysconfig::parse_options(values_string));
+	list(string) parsed = Sysconfig::parse_options(values_string);
+
+	// add missing items
+	foreach(string option, parsed,
+	    ``{
+		if (!contains(ret, option)) ret = add(ret, option);
+	    }
+	);
     }
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	ret = merge(ret, Sysconfig::parse_options(values_string));
+	list(string) parsed = Sysconfig::parse_options(values_string);
+
+	// add missing items
+	foreach(string option, parsed,
+	    ``{
+		if (!contains(ret, option)) ret = add(ret, option);
+	    }
+	);
     }
 
     // add default value to the list
@@ -183,6 +197,8 @@ global define list combo_list(map description, boolean set_default) ``{
     {
 	if (!contains(ret, value)) ret = add(ret, value);
     }
+
+    y2milestone("combo list: %1", ret);
 
     return ret;
 }
@@ -293,6 +309,35 @@ global define boolean is_node(string id) ``{
     return (findfirstof(id, "$") == nil);
 }
 
+global define void check_set_current_value()
+``{
+    // check current value
+    if (selected_variable != "")
+    {
+	string new_value = UI::QueryWidget(`id(`combo), `Value);
+
+	if (Sysconfig::get_name_from_id(selected_variable) != "")
+	{
+	    // variable was selected (not category)
+	    symbol result = Sysconfig::set_value(selected_variable, new_value, false);
+
+	    if (result == `not_valid)
+	    {
+		map d = Sysconfig::get_description(selected_variable);
+		string t = d["Type"]:"string";
+
+		// variable value does not match defined type - ask user to set value
+		if (UI::AnyQuestionPopup(_("Warning"), sformat(_("Value '%1'\ndoes not match type '%2'\n\nDo you really want to set this value?"), new_value, t), UI::YesButtonLabel(), UI::NoButtonLabel(), `focus_no) == true)
+		{
+		    // force setting of value
+		    Sysconfig::set_value(selected_variable, new_value, true);
+		}
+	    }
+	}
+    }
+}
+
+
 /**
  * Summary dialog
  * @return dialog result
@@ -355,18 +400,7 @@ global define symbol SummaryDialog() ``{
 
 	if (ret == `tree)
 	{
-	    // check current value
-	    if (selected_variable != "")
-	    {
-		string new_value = UI::QueryWidget(`id(`combo), `Value);
-
-		if (Sysconfig::get_name_from_id(selected_variable) != "")
-		{
-		    // variable was selected (not category)
-		    Sysconfig::set_value(selected_variable, new_value, false);
-		}
-	    }
-
+	    check_set_current_value();
 
 	    string selected = UI::QueryWidget(`id(`tree), `CurrentItem);
 	    selected_variable = selected;
@@ -396,31 +430,51 @@ global define symbol SummaryDialog() ``{
 	}
 	else if (ret == `next)
 	{
+	    // check if current value was modified
+	    check_set_current_value();
+
 	    list modified = Sysconfig::get_modified();
-	    list table_content = [];
-	    integer i = 0;
 
-	    foreach(string varid, modified,
-		``{
-		    map descr = Sysconfig::get_description(varid);
-		    string name = descr["name"]:"";
-		    string old = descr["value"]:"";
-		    string new = descr["new_value"]:"";
+	    // show table with modified variables
+	    if (size(modified) > 0)
+	    {
+		list table_content = [];
+		integer i = 0;
 
-		    // display only beginning of comment (to limit table space used)
-		    string comm = descr["comment"]:"";
-		    if (size(comm) > 70)
-		    {
-			comm = substring(comm, 0, 70);
+		foreach(string varid, modified,
+		    ``{
+			map descr = Sysconfig::get_description(varid);
+			string name = descr["name"]:"";
+			string old = descr["value"]:"";
+			string new = descr["new_value"]:"";
+
+			// display only beginning of comment (to limit table space used)
+			string comm = descr["comment"]:"";
+			if (size(comm) > 90)
+			{
+			    comm = substring(comm, 0, 90);
+			}
+
+			table_content = add(table_content, `item(`id(i), name, new, old, comm));
+
+			i = i + 1;
 		    }
+		);
 
-		    table_content = add(table_content, `item(`id(i), name, old, new, comm));
+		y2milestone("Modified variables: %1", modified);
+		symbol input = display_variables_dialog(_("Modified variables"), _("Detailed list of modified variables"), table_content, _("&Save"), UI::CancelButtonLabel());
 
-		    i = i + 1;
+		if (input == `cancel)
+		{
+		    ret = `again;
 		}
-	    );
+	    }
+	}
+	else if (ret == `search)
+	{
+	    map search_parameters = display_search_dialog();
 
-	    y2milestone("Modified variables: %1", modified);
+	    // TODO: call search
 	}
 	else if (ret == `abort || ret == `cancel)
 	{

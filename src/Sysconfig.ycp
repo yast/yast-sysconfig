@@ -21,6 +21,7 @@ import "Summary";
 import "Directory";
 
 include "sysconfig/routines.ycp";
+include "network/ip.ycp";
 
 /**
  * Abort function
@@ -52,6 +53,26 @@ global define boolean Modified() ``{
     y2debug("modified=%1",modified);
     return modified;
 };
+
+global define list(string) search(map params, boolean show_progress) ``{
+
+    list(string) found = [];
+
+    // get all configuration files
+    list(string) files = SCR::Dir(.sysedit.section);
+
+    foreach(string file, files, ``{
+	    // get all variables in file
+	    path var_path = add(.sysedit.value, file);
+	    list variables = SCR::Dir(var_path);
+
+	    // TODO test if this variable matches
+
+	}
+    );
+
+    return found;
+}
 
 global define remove_whitespaces(string input) ``{
     string removed_whitespaces = regexpsub(input, "^[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
@@ -397,8 +418,9 @@ global define string get_file_from_id(string id) ``{
 
 global define symbol set_value(string variable, string new_value, boolean force) ``{
     map desc = get_description(variable);
+    string name = get_name_from_id(variable);
 
-    if (get_name_from_id(variable) == "")
+    if (name == "")
     {
 	return `not_found;
     }
@@ -410,18 +432,85 @@ global define symbol set_value(string variable, string new_value, boolean force)
 
     if (new_value != curr_val)
     {
-	// TODO check if new value is allowed by variable type
-
 	y2milestone("variable: %1 changed from: %2 to: %3", variable, curr_val, new_value);
 
 	if (new_value == old)
 	{
-	    // variable was reset to original value, remove it from map of modified
-	    modified_variables[variable] = nil;
+	    // variable was reset to the original value, remove it from map of modified
+	    y2debug("Variable %1 was reset to the original value", variable);
+	    modified_variables = remove(modified_variables, variable);
 	}
 	else
 	{
-	    modified_variables[variable] = new_value;
+	    boolean valid = false;
+
+	    if (force == false)
+	    {
+		// check data type
+		string type = desc["Type"]:"string";
+
+		if (type == "string" || regexpmatch(type, "^string\(.*\)$") == true)
+		{
+		    // string type is valid always
+		    valid = true;
+		}
+		else if (type == "yesno")
+		{
+		    valid = (new_value == "yes" || new_value == "no");
+		}
+		else if (type == "boolean")
+		{
+		    valid = (new_value == "true" || new_value == "false");
+		}
+		else if (type == "integer")
+		{
+		    valid = regexpmatch(new_value, "^-{0,1}[0-9]*$");
+
+		}
+		else if (regexpmatch(type, "^list\(.*\)$"))
+		{
+		    string listopt = regexpsub(type, "^list\((.*)\)$", "\\1");
+		    list parsed_opts = parse_options(listopt);
+
+		    valid = contains(parsed_opts, new_value);
+		}
+		else if (regexpmatch(type, "^integer\(-{0,1}[0-9]*:-{0,1}[0-9]*\)$"))
+		{
+		    string min = regexpsub(type, "^integer\((-{0,1}[0-9]*):-{0,1}[0-9]*\)$", "\\1");
+		    string max = regexpsub(type, "^integer\(-{0,1}[0-9]*:(-{0,1}[0-9]*)\)$", "\\1");
+
+		    y2milestone("min: %1  max: %2", min, max);
+
+		    integer min_int = tointeger(min);
+		    integer max_int = tointeger(max);
+
+		    y2milestone("min_int: %1  max_int: %2", min_int, max_int);
+		}
+		else if (regexpmatch(type, "^regexp\(.*\)$"))
+		{
+		    string regex = regexpsub(type, "^regexp\((.*)\)$", "\\1");
+		    valid = regexpmatch(new_value, regexp);
+		}
+		else if (type == "ip")
+		{
+		    // check IP adress using function from network/ip.ycp include
+		    valid = check_ip4(new_value);
+		}
+		else
+		{
+		    y2warning("Unknown data type %1 for variable %2", type, name);
+		}
+	    }
+
+	    if (valid == false && force == false)
+	    {
+		return `not_valid;
+	    }
+	    else
+	    {
+		modified_variables[variable] = new_value;
+		return `ok;
+	    }
 	}
     }
 }
@@ -474,7 +563,7 @@ global define boolean Read(list(string) files) ``{
     string param = "";
     foreach(string par, files, ``{param = param + "'" + par + "' ";});
 
-    // create tree definition list
+    // create tree definition list and description map using external Perl script
     SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + param + "> " + tmpdir + "/treedef.ycp");
 
     // read list
@@ -483,30 +572,6 @@ global define boolean Read(list(string) files) ``{
 
     node_comments = parsed_output[1]:$[];
 
-/*
-UI::OpenDialog(`VBox(
-                     `Tree(`id(`dest_dir), `opt(`notify),
-                                   "&Variables:",
-                                   tree_content
-			)
-		    )
-		);
-
-
-symbol ui = UI::UserInput();
-
-while (ui != `cancel)
-{
-    if (ui == `dest_dir)
-    {
-	y2milestone("Selected: %1", UI::QueryWidget(`id(`dest_dir), `CurrentItem));
-    }
-
-    ui = UI::UserInput();
-}
-
-UI::CloseDialog();
-*/
     return true;
 }
 
@@ -516,28 +581,38 @@ UI::CloseDialog();
  */
 global define boolean Write() ``{
 
-    /* Xsysconfig read dialog caption */
+    // write dialog caption
     string caption = _("Saving sysconfig configuration");
 
-    // TODO FIXME And set the right number of stages
-    integer steps = 2;
+    // set the right number of stages
+    integer steps = size(modified_variables);
 
-    integer sl = 500;
-    sleep(sl);
-
-    // TODO FIXME Names of real stages
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
 	    _("Write the settings"),
-	    _("Run SuSEconfig")
 	], [
 	    _("Writing the settings..."),
-	    _("Running SuSEconfig..."),
 	    _("Finished")
 	],
 	""
     );
 
+    // save each changed variable
+    foreach (string vid, string new_val, modified_variables,
+	``{
+	    string file = get_file_from_id(vid);
+	    string name = get_name_from_id(vid);
+	    path value_path = add(add(.syseditor.value, file), name);
+
+	    SCR::Write(value_path, new_val);
+	    Progress::NextStep();
+	}
+    );
+
+    // flush changes
+    SCR::Write(.syseditor, nil);
+
+/*
     // write settings
     if(Abort()) return false;
     Progress::NextStage();
@@ -555,6 +630,7 @@ global define boolean Write() ``{
     sleep(sl);
 
     if(Abort()) return false;
+*/
     return true;
 }
 
@@ -566,6 +642,8 @@ global define boolean Write() ``{
  */
 global define boolean Import (map settings) ``{
     // TODO FIXME: your code here (fill the above mentioned variables)...
+
+    // TODO register files in INI-agent
     sleep(3000);
     return true;
 }
