@@ -343,13 +343,14 @@ global define map get_description(string varid) ``{
     path comment_path = add(add(.syseditor.value_comment, fname), varname);
     path value_path = add(add(.syseditor.value, fname), varname);
     string comment = SCR::Read(comment_path);
+    list all_variables = SCR::Dir(add(.syseditor.value, fname));
+    string used_comment = varname;
 
     // no comment present
     if (size(comment) == 0 && !regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
 	y2warning("Comment for variable %1 is missing", varid);
 
-	list all_variables = SCR::Dir(add(.syseditor.value, fname));
 	list reversed = [];
 
 	integer i = 0;
@@ -381,6 +382,7 @@ global define map get_description(string varid) ``{
 	    while (i < size(reversed) && comment == "")
 	    {
 		v = reversed[i]:"";
+		used_comment = v;
 		comment = SCR::Read(add(add(.syseditor.value_comment, fname), v));
 
 		i = i + 1;
@@ -389,6 +391,49 @@ global define map get_description(string varid) ``{
 	    y2warning("Variable: %1 Using comment from variable: %2", varname, v);
 	}
 
+    }
+
+    // remove config file header at the beginning of the file
+    // header is comment from beginning of the file to the empty line
+    if (used_comment == all_variables[0]:"" && comment != nil)
+    {
+	y2debug("Reading first variable from the file");
+	// comment is read from the first variable
+	// remove header if it's present
+	y2debug("Whole comment: %1", comment);
+	list(string) lines = splitstring(comment, "\n");
+	list filtered = [];
+
+	// remove last empty string from list (caused by last new line char)
+	if (lines[size(lines) - 1]:nil == "")
+	{
+	    lines = remove(lines, size(lines) - 1);
+	}
+
+	if (contains(lines, "") == true)
+	{
+	    y2milestone("Header comment detected");
+	    boolean adding = false;
+
+	    // filter out variables before empty line
+	    filtered = filter(string line, lines, ``{
+
+		    if (line == "")
+		    {
+			adding = true;
+		    }
+		    else if (adding == true)
+		    {
+			return true;
+		    }
+
+		    return false;
+		}
+	    );
+
+	    // merge strings
+	    comment = mergestring(filtered, "\n");
+	}
     }
 
     map meta = parse_metadata(comment);
