@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 11 18:21:36 CEST 2001 - arvin@suse.de
+
+- fixed for gcc 3.0
+
+-------------------------------------------------------------------
 Wed Jul 25 15:26:46 CEST 2001 - lnussel@suse.de
 
 - ported to libstdc++, libg++ no longer necessary
@@ -11,12 +16,12 @@ Tue May  8 14:53:45 CEST 2001 - mike@suse.de
 -------------------------------------------------------------------
 Tue Apr 24 07:08:11 CEST 2001 - jbuch@suse.de
 
-- define -> global define 
+- define -> global define
 
 -------------------------------------------------------------------
 Thu Mar  8 10:48:42 CET 2001 - curry@suse.de
 
-- faster reading and processing of rc.config variables 
+- faster reading and processing of rc.config variables
 
 -------------------------------------------------------------------
 Fri Jan 19 18:42:53 CET 2001 - mike@suse.de
@@ -36,7 +41,7 @@ Mon Jan 15 19:58:51 CET 2001 - mike@suse.de
 -------------------------------------------------------------------
 Wed Jan  3 21:29:01 CET 2001 - mike@suse.de
 
-- new database (added meta information) 
+- new database (added meta information)
   enums allowed
 
 -------------------------------------------------------------------
@@ -57,5 +62,5 @@ Fri Dec  8 18:32:21 CET 2000 - mike@suse.de
 -------------------------------------------------------------------
 Fri Dec  8 17:11:41 CET 2000 - mike@suse.de
 
-- new module for 7.1 
+- new module for 7.1
   graphical /etc/rc.config editor

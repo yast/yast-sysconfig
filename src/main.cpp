@@ -11,11 +11,11 @@
 |                             rc_create_data                           |
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
- 
+
   File:       main.cpp
- 
+
   Author:     Michael K"ohrmann <curry@suse.de>
- 
+
 */
 
 /*!
@@ -33,17 +33,18 @@
   (<code>meta_rc.config</code>) and generates
   ycp-specific output into two files: <code>rc_config_keys</code> and
   <code>tree_data</code>. The first file includes a <code>ycp</code>-map
-  of all rc.config variables and all necessary directories for the 
+  of all rc.config variables and all necessary directories for the
   variable tree in the editor, the second file includes the directory
   tree in shape of a <code>ycp</code>-list.
 */
 
+#include <ctype.h>
 #include <iostream.h>
-#include <string>
-#include <map.h>
-#include <set.h>
-#include <list.h>
 #include <fstream.h>
+#include <string>
+#include <map>
+#include <set>
+#include <list>
 #include <algorithm>
 #include <glob.h>
 #include <unistd.h>
@@ -51,7 +52,11 @@
 #include "RCDirectory.h"
 #include "TreeNode.h"
 
-using namespace std;
+using std::string;
+using std::map;
+using std::set;
+using std::list;
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -155,11 +160,17 @@ string trim(const string& str)
   return s;
 }
 
+// wrapper class for tolower
+struct mytolower : public unary_function <int, int>
+{
+    int operator () (int x) { return tolower (x); }
+};
+
 //return lowercase version of str
 string downcase(const string& str)
 {
   string s=str;
-  transform (s.begin(), s.end(), s.begin(), tolower);
+  transform (s.begin(), s.end(), s.begin(), mytolower());
   return s;
 }
 
@@ -180,7 +191,7 @@ string after(const string& str, const string& pattern)
 {
   string s="";
   string::size_type idx;
-  
+
   if ((idx=str.find(pattern))!=string::npos)
   {
     s=str.substr(idx+pattern.length());
@@ -194,7 +205,7 @@ string after_any(const string& str, const string& pattern)
 {
   string s="";
   string::size_type idx=0;
-  
+
   //search for the fist occurence of pattern
   if ((idx=str.find_first_of(pattern))!=string::npos)
   {
@@ -214,13 +225,13 @@ int split (const string& str, string res[], int max_tok, const string& sep)
 {
   string::size_type idx,idx2,start=0;
   int tok_nr=0;
-  
+
   string::size_type len=str.length();
 
   while(tok_nr<max_tok-1 && start != string::npos && start<len)
   {
     idx = str.find_first_not_of(sep,start);
-  
+
     //consists only of delimiters
     if(idx==string::npos) return tok_nr;
 
@@ -257,7 +268,7 @@ int split (const string& str, string res[], int max_tok, const string& sep)
 {
 	string::size_type idx=0,idx2;
 	int tok_nr=0;
-	
+
 	string::size_type len=str.length();
 
 	while(tok_nr<max_tok-1 && idx != string::npos && idx<len)
@@ -302,7 +313,7 @@ only for single characters !!!!:
 - stringLine.after('#');
 + stringLine.substr(stringLine.find('#')+1);
 :s/\([a-z]*\)\.after(\(.*\))/\1.substr(\1.find(\2)+1)/
-else use 
+else use
   after(stringLine,"pattern");
 
 - value.before('#');
@@ -323,16 +334,16 @@ contains -> find
 
 /*!
   \fn int main()
-  
+
   Main method.
 
   First: all <code>rc.config</code> variables needed by the currently
   running system are read from the files <code>/etc/rc.config</code>
-  and <code>/etc/rc.config.d/</code> and saved in the map 
+  and <code>/etc/rc.config.d/</code> and saved in the map
   RCVariableMap.
 
   Second: all meta data about the saved <code>rc.config</code>
-  variables is loaded from the file 
+  variables is loaded from the file
   <code>/usr/lib/YaST2/meta_rc.config</code> and put into the map.
 
   Third: now the algorithms take the command and generate all data
@@ -404,7 +415,7 @@ int main()
 
   ///////////////////////////////////////////////////////////////////
   //
-  // Get input from configuration files in /etc/rc.config and 
+  // Get input from configuration files in /etc/rc.config and
   // /etc/rc.config.d/
   //
   ///////////////////////////////////////////////////////////////////
@@ -425,7 +436,7 @@ int main()
   // variables in the RCVariables map.
   for (StringList::const_iterator filenameit = rcFileList.begin();
        filenameit != rcFileList.end();
-       ++filenameit) 
+       ++filenameit)
     {
       //filename = globbuffer.gl_pathv[i];
       filename = *filenameit;
@@ -433,18 +444,18 @@ int main()
       if(!fin_filename)
 	{
 	  // must be written to the y2log file
-	  cout << "Unable to open file \'" 
-	       << filename 
+	  cout << "Unable to open file \'"
+	       << filename
 	       << " \' for reading.\n";
 	  continue;
 	}
       // clear description after reading in new configuration file
       descr = "";
-            
+
       while (fin_filename.getline(line,INPUT_LINE_LENGTH))
 	{
 	  stringLine = (string)line;
-	  
+
 	  // filters all comments
 	  if ( stringLine.find('#') != string::npos )
 	    {
@@ -475,7 +486,7 @@ int main()
 	    {
 	      // test if RCVariable "varname" exists in RCVariableMap
 	      RCVariableMap::iterator it = RCVariables.find(varname);
-	      
+
 	      if (it != RCVariables.end())
 		{
 		  // found: set values of found entry
@@ -538,10 +549,10 @@ int main()
   if(!fin)
     {
       // must be written to y2log file
-      cout << "Unable to open file \'" 
-	   << meta_rc_config 
+      cout << "Unable to open file \'"
+	   << meta_rc_config
 	   << " \' for reading.\n";
-    }    
+    }
   while (fin.getline(line,INPUT_LINE_LENGTH))
     {
       // todo: better filter for comments
@@ -555,7 +566,7 @@ int main()
 
       // get the variable name
       varname = stringLine.substr(0,stringLine.find(' '));
-      
+
       // test if RCVariable "varname" exists in RCVariableMap
       RCVariableMap::iterator it = RCVariables.find(varname);
 
@@ -563,14 +574,14 @@ int main()
 	{
 	  // found: set values of found entry
 	  varptr = &it->second;
-  
+
 	  // get property and value
 	  rest     = after_any(stringLine," \t");
 	  property = rest.substr(0,rest.find(' '));
 	  value    = after_any(rest," \t");
-	
+
 	  // set branch of the RCVariable
-	  if (property == "path") 
+	  if (property == "path")
 	    {
 	      varptr->setBranch(value + "/" + downcase(varname));
 
@@ -620,7 +631,7 @@ int main()
 		    }
 		}
 	      RCDirectoryMap::iterator dir_it = RCDirectories.find(lowleveldir);
-	      
+
 	      if (dir_it != RCDirectories.end())
 		{
 		  // found: add variable name to current lowlevel
@@ -650,20 +661,20 @@ int main()
 	      // default
 	      else
 		varptr->setDatatype(value);
-	    }	
+	    }
 	  // set the typedef of the RCVariable
 	  // ("strict" or "not_strict")
 	  else if (property == "typedef")
 	    varptr->setTypedef(value);
 	}
-      else 
+      else
 	{
 	  // variable name not found in map RCVariables: so it
 	  // could be a directory descr.
 	  rest     = after_any(stringLine," \t");
 	  property = rest.substr(0,rest.find(' '));
 	  value    = after_any(rest," \t");
-	  
+
 	  // save all(!) descriptions of directories in a StringMap
 	  if (property == "descr")
 	    DirectoryDescriptions[varname] = value;
@@ -681,7 +692,7 @@ int main()
     {
       if (variable_it->second.getBranch().find("/etc/")!=string::npos)
 	{
-	  RCDirectoryMap::iterator dir_it = RCDirectories.find("etc"); 
+	  RCDirectoryMap::iterator dir_it = RCDirectories.find("etc");
 	  if (dir_it == RCDirectories.end())
 	    continue;
 
@@ -729,9 +740,9 @@ int main()
 	      var_ptr->setBranch(var_ptr->getBranch().substr(0,var_ptr->getBranch().find("/" + downcase(*cii))));
 	      var_ptr->setParent(ci->first);
 	      var_ptr->setEntrynb(entrynb++);
-	      
+
 	      *dirPath = var_ptr->getBranch();
-	      DirectorySet.insert(*dirPath); 
+	      DirectorySet.insert(*dirPath);
 
 	      var_ptr = NULL;
 	    }
@@ -740,7 +751,7 @@ int main()
 	{
 	  // more than 5 variables in this directory
 	  StringVector sv = ci->second.getVariableVector();
-	  
+
 	  // iterate all variables in the current directory: create
 	  // new directories with the downcased name of the variable
 	  for (StringVector::const_iterator cii = sv.begin();
@@ -755,12 +766,12 @@ int main()
 		dir_ptr->setBranch(ci->second.getBranch() + ci->second.getName());
 	      else
 		dir_ptr->setBranch(ci->second.getBranch() + "/" + ci->second.getName());
- 
+
 	      dir_ptr->addVariable(*cii);
 	      NewRCDirectories[downcase(*cii)] = *dir_ptr;
 
-	      *dirPath = ((string)(ci->second.getBranch() + "/" 
-				   + ci->second.getName() 
+	      *dirPath = ((string)(ci->second.getBranch() + "/"
+				   + ci->second.getName()
 				   + "/" + downcase(*cii)));
 	      DirectorySet.insert(*dirPath);
 
@@ -784,8 +795,8 @@ int main()
   ofstream fout_rc_config_keys(rc_config_keys);
   if(!fout_rc_config_keys)
     {
-      cout << "Unable to open file \'" 
-	   << rc_config_keys 
+      cout << "Unable to open file \'"
+	   << rc_config_keys
 	   << " \' for writing.\n";
       return(1);
     }
@@ -795,42 +806,42 @@ int main()
 
   // print all elements of the map RCVariables to fout
   RCVariableMap::const_iterator ci_variables = RCVariables.begin();
-  fout_rc_config_keys << "  \"" 
-		      << ci_variables->first 
+  fout_rc_config_keys << "  \""
+		      << ci_variables->first
 		      << ci_variables->second;
   ++ci_variables;
 
   for (; ci_variables != RCVariables.end(); ++ci_variables )
-    fout_rc_config_keys << ",\n  \"" 
-			<< ci_variables->first 
+    fout_rc_config_keys << ",\n  \""
+			<< ci_variables->first
 			<< ci_variables->second;
-  
+
   fout_rc_config_keys << ",\n";
-  
+
   // print all elements of RCDirectories to fout
   RCDirectoryMap::const_iterator ci_directories = RCDirectories.begin();
-  fout_rc_config_keys << "  \"" 
-		      << ci_directories->first 
+  fout_rc_config_keys << "  \""
+		      << ci_directories->first
 		      << ci_directories->second;
   ++ci_directories;
 
   for (; ci_directories != RCDirectories.end(); ++ci_directories )
-    fout_rc_config_keys << ",\n  \"" 
-			<< ci_directories->first 
+    fout_rc_config_keys << ",\n  \""
+			<< ci_directories->first
 			<< ci_directories->second;
 
   fout_rc_config_keys << ",\n";
 
   // print all elements of NewRCDirectories to fout
   RCDirectoryMap::const_iterator ci_newdirectories = NewRCDirectories.begin();
-  fout_rc_config_keys << "  \"" 
-		      << ci_newdirectories->first 
+  fout_rc_config_keys << "  \""
+		      << ci_newdirectories->first
 		      << ci_newdirectories->second;
   ++ci_newdirectories;
 
   for (; ci_newdirectories != NewRCDirectories.end(); ++ci_newdirectories )
-    fout_rc_config_keys << ",\n  \"" 
-			<< ci_newdirectories->first 
+    fout_rc_config_keys << ",\n  \""
+			<< ci_newdirectories->first
 			<< ci_newdirectories->second;
 
   fout_rc_config_keys << "\n]" << endl;
@@ -974,8 +985,8 @@ void writeListToFile(const list<T>* rootPtr, const char* filename)
 {
   ofstream fout(filename);
   if(!fout)
-    cout << "Unable to open file \'" 
-	 << filename 
+    cout << "Unable to open file \'"
+	 << filename
 	 << " \' for writing.\n";
 
   for (StringList::const_iterator ci = rootPtr->begin();
@@ -997,22 +1008,22 @@ void writeListToFile(const list<T>* rootPtr, const char* filename)
       else if ((string)*ci == "[")
 	fout << " [ ";
       else if ((string)*ci_next == "[")
-	fout << "\n  `item(`id(\"" 
-	     << (string)*ci 
-	     << "\"), \"" 
-	     << (string)*ci 
+	fout << "\n  `item(`id(\""
+	     << (string)*ci
+	     << "\"), \""
+	     << (string)*ci
 	     << "\", false, ";
       else if ((string)*ci_next == "]" || (string)*ci_next == "];" )
-	fout << " `item(`id(\"" 
-	     << (string)*ci 
-	     << "\"), \"" 
-	     << (string)*ci 
+	fout << " `item(`id(\""
+	     << (string)*ci
+	     << "\"), \""
+	     << (string)*ci
 	     << "\", false) ";
       else
-	fout << " `item(`id(\"" 
-	     << (string)*ci 
-	     << "\"), \"" 
-	     << (string)*ci 
+	fout << " `item(`id(\""
+	     << (string)*ci
+	     << "\"), \""
+	     << (string)*ci
 	     << "\", false), ";
     }
   fout.close();

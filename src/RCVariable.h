@@ -11,11 +11,11 @@
 |                             rc_create_data                           |
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
- 
+
   File:       RCVariable.h
- 
+
   Author:     Michael K"ohrmann <curry@suse.de>
- 
+
 */
 
 /*!
@@ -29,7 +29,11 @@
 #ifndef __RCVARIABLE_H
 #define __RCVARIABLE_H
 
+#include <iostream.h>
 #include <string>
+
+using std::string;
+
 
 /*!
   \class RCVariable
@@ -37,9 +41,9 @@
   \author Michael K&ouml;hrmann, <curry@suse.de>
   \version 0.2
   \date 13.02.2001
-  
+
   Objects of this class represent all needed informations about variables
-  of the configuration files <code>/etc/rc.config</code> and 
+  of the configuration files <code>/etc/rc.config</code> and
   <code>/etc/rc.config.d/</code>.
  */
 class RCVariable
@@ -51,7 +55,7 @@ class RCVariable
 
   /*!
     \fn RCVariable()
-    
+
     Constructor.
    */
   RCVariable();
@@ -74,9 +78,9 @@ class RCVariable
   // get methods
   ////////////////////////////////////////////////////////////////////////////////
 
-  /*! 
+  /*!
     Get the name of the current RCVariable.<br>
-    e.g.: <code>ENABLE_SUSECONFIG</code> 
+    e.g.: <code>ENABLE_SUSECONFIG</code>
 
     \return The name of the curren RCVariable.
   */
@@ -103,7 +107,7 @@ class RCVariable
 
   /*!
     Get the description of the RCVariable saved in the
-    configuration files in 
+    configuration files in
     <code>/etc/rc.config*</code>.<br>
     e.g.: <code>`descr : "Some people don't want SuSEconfig to
     modify the system..."</code>
@@ -208,35 +212,35 @@ class RCVariable
 
   /*!
     Set the entrynb of the RCVariable.
-   
+
     \param int entrynb.
   */
   void setEntrynb( int entrynb ) { *itsEntrynb = entrynb; }
 
   /*!
     Set the options of the RCVariable.
-   
+
     \param string options.
   */
   void setOptions( string options ) { *itsOptions = options; }
 
   /*!
     Set the parent directory of the RCVariable.
-  
+
     \param string parent.
   */
   void setParent( string parent ) { *itsParent = parent; }
 
   /*!
     Set the path of the RCVariable.
-  
+
     \param string path.
   */
   void setPath( string path ) { *itsPath = path; }
 
   /*!
     Set the type of the RCVariable.
-  
+
     \param string typ.
   */
   void setType( string typ ) { *itsType = typ; }
@@ -285,7 +289,7 @@ class RCVariable
    */
   friend ostream& operator<<(ostream& s, const RCVariable& x)
     {
-      s << "\" : $[\n" 
+      s << "\" : $[\n"
 	<< "    `branch : \""       << x.getBranch()   << "\",\n"
 	<< "    `datatype : \""     << x.getDatatype() << "\",\n"
 	<< "    `descr : \""        << x.getDescr()    << "\",\n"
@@ -324,16 +328,16 @@ class RCVariable
 
   //! Parent directory of the RCVariable.
   string *itsParent;
-  
+
   //! Path of the RCVariable.
   string *itsPath;
-  
+
   //! Type of the RCVariable.
   string *itsType;
-  
+
   //! Typedef of the RCVariable.
   string *itsTypedef;
-  
+
   //! Value of the RCVariable.
   string *itsValue;
 };

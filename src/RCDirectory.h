@@ -11,11 +11,11 @@
 |                             rc_create_data                           |
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
- 
+
   File:       RCDirectory.h
- 
+
   Author:     Michael K"ohrmann <curry@suse.de>
- 
+
 */
 
 /*!
@@ -30,10 +30,12 @@
 #define __RCDIRECTORY_H
 
 #include <string>
-#include <vector.h>
+#include <vector>
 #include <iostream.h>
 
-using namespace std;
+using std::string;
+using std::vector;
+
 
 //typedef vector<RCVariable*> RCVarVector;
 typedef vector<string> StringVector;
@@ -45,7 +47,7 @@ typedef vector<string> StringVector;
   \author Michael K&ouml;hrmann, <curry@suse.de>
   \version 0.2
   \date 13.02.2001
-  
+
   Objects of this class represent all information about the directories
   needed by the RC-Config-Editor.
  */
@@ -83,7 +85,7 @@ class RCDirectory
 
   /*!
     Get the Name of the current directory.<br>
-    e.g.: <code>Usb</code> 
+    e.g.: <code>Usb</code>
 
     \return The name of the current RCDirectory as a string.
   */
@@ -113,7 +115,7 @@ class RCDirectory
     \return The type of dialog to display in the editor.
   */
   string getDialogtype() const { return *itsDialogtype; }
- 
+
   /*!
     Get the variable vector of the current directory.
 
@@ -134,7 +136,7 @@ class RCDirectory
 
   /*!
     Set the name of the RCDirectory.
-    
+
     \param string name.
    */
   void setName( string name ) { *itsName = name; }
@@ -182,7 +184,7 @@ class RCDirectory
       increaseNumberOfVariables();
       increaseDialogtype();
     }
-  
+
   /*!
     Prints out all Variables located in the current directory.
   */
@@ -191,16 +193,16 @@ class RCDirectory
       cout << *itsName << ":\n";
       for (unsigned int i = 0; i < itsVariableVector->size(); ++i)
 	{
-	  cout << "   " << (*itsVariableVector)[i] << "\n"; 
+	  cout << "   " << (*itsVariableVector)[i] << "\n";
 	}
     }
-  
+
   /*!
     Delete all variable names in the variable vector and reset the number of saved
     variable names.
   */
-  void clearVariableVector() const 
-    { 
+  void clearVariableVector() const
+    {
       itsVariableVector->resize(0);
       *itsNumberOfVariables = 0;
     }
@@ -261,7 +263,7 @@ class RCDirectory
   string *itsDialogtype;
 
   /*!
-    This Vector holds the names of all RCVariables that are located in 
+    This Vector holds the names of all RCVariables that are located in
     the current directory.
   */
   StringVector *itsVariableVector;
@@ -279,7 +281,7 @@ class RCDirectory
     Increases the number of variables placed in the current directory.
    */
   void increaseNumberOfVariables() { ++(*itsNumberOfVariables); }
-  
+
   /*!
     Sets the dialogtype in relation to the number of variables placed in
     the current directory.
