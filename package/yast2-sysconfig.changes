@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 30 10:07:26 CET 2004 - lslezak@suse.cz
+
+- fixes for the new interpreter (nil checking,
+  data types, removed globals, build fix)
+- version 2.9.3
+
+-------------------------------------------------------------------
 Tue Jan 13 11:18:08 CET 2004 - lslezak@suse.cz
 
 - fixes for the new interpreter
