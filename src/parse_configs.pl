@@ -26,6 +26,10 @@
 # module for wild card file name expansion
 use File::Glob ':glob';
 
+# global variable - normal or powertweak mode flag
+# used at tree widget content generation as opened/closed flag
+my $powertweak_mode = "false";
+
 # convert list of variable identifications to list of items
 # required by Yast2 Tree widget
 sub ids_to_item($$)
@@ -58,7 +62,7 @@ sub ids_to_item($$)
 	    $first = 0;
 	}
 	
-        $result .= "`item(`id(\"$var\"), \"$varname\", false)";
+        $result .= "`item(`id(\"$var\"), \"$varname\", $powertweak_mode)";
     }
 
     return $result;
@@ -150,7 +154,7 @@ sub convert(@)
 		    $first = 0;
 		}
 
-		$result .= "`item(`id(\"$new_node\"), \"$current_prefix\", false, [ $x ])";
+		$result .= "`item(`id(\"$new_node\"), \"$current_prefix\", $powertweak_mode, [ $x ])";
 
 		# store new prefix and new id
 		$current_prefix = $prefix;
@@ -176,7 +180,7 @@ sub convert(@)
 	    $result .= ", ";
 	}
 
-	$result .= "`item(`id(\"$new_node\"), \"$current_prefix\", false, [ $x ])";
+	$result .= "`item(`id(\"$new_node\"), \"$current_prefix\", $powertweak_mode, [ $x ])";
     }
 
     return $result;
@@ -240,10 +244,17 @@ my @list = ();
 # collect all files
 for my $arg (@ARGV)
 {
-    my @files = bsd_glob($arg);
+    if ($arg eq "--powertweak")
+    {
+	$powertweak_mode = "true";
+    }
+    else
+    {
+	my @files = bsd_glob($arg);
 
-    # merge lists
-    @list = (@list, @files);
+	# merge lists
+	@list = (@list, @files);
+    }
 }
 
 
@@ -310,7 +321,6 @@ for my $fname (@list)
 
     close(CONFIGFILE);
 }
-
 
 # create sorted list of locations
 my @sorted_locations = sort(keys(%locations));

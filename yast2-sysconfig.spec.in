@@ -15,7 +15,7 @@ Obsoletes:	yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
 Summary:	Editor for /etc/sysconfig
 
 %package -n yast2-powertweak
-Requires:       yast2-sysconfig powertweak
+Requires:       yast2-sysconfig
 Group:		System/YaST
 Summary:	Powertweak configuration
 
