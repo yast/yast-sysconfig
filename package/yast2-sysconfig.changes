@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 23 15:08:50 CEST 2004 - lslezak@suse.cz
+
+- fixed datatype (value returned from command line)
+- version 2.10.3
+
+-------------------------------------------------------------------
 Wed Jun 16 16:17:28 CEST 2004 - lslezak@suse.cz
 
 - updated testsuite (use Testsuite:: module, set testedfiles)
