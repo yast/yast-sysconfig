@@ -948,6 +948,9 @@ global define boolean Import (list settings) ``{
 	    string f = setting["sysconfig_path"]:"";
 	    string v = setting["sysconfig_value"]:"";
 
+		// compatibility mode for older release with relative path
+		if (findfirstof(f, "/") != 0)
+			f = sformat("/etc/sysconfig/%1", f);
 	    string key = sformat("%1$%2", n, f);
 
 	    modified_variables = add(modified_variables, key, v);
