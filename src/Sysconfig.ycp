@@ -181,6 +181,11 @@ global define list(string) search(map params, boolean show_progress) ``{
  * @return string String without white spaces
  */
 global define string remove_whitespaces(string input) ``{
+    if (input == nil)
+    {
+	return nil;
+    }
+
     string removed_whitespaces = regexpsub(input, "^[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
 
     return (removed_whitespaces != nil) ? removed_whitespaces : input;
@@ -507,13 +512,36 @@ global define map parse_metadata(string comment) ``{
 		return;
 	    }
 
-	    string tag = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
-	    string val = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\2");
+	    string meta = regexpsub(metaline, "^##[ \t]*(.*)", "\\1");
 
-	    y2debug("tag: %1 val: '%2'", tag, val);
+	    // split sting to the tag and value part
+	    integer colon_pos = findfirstof(meta, ":");
+	    string tag = "";
+	    string val = "";
+
+	    if (colon_pos == nil)
+	    {
+		// colon is missing
+		tag = meta;
+	    }
+	    else
+	    {
+		tag = substring(meta, 0, colon_pos);
+
+		if (size(meta) > colon_pos + 1)
+		{
+		    val = substring(meta, colon_pos + 1);
+		}
+	    }
+
+	    // remove whitespaces from parts
+	    tag = remove_whitespaces(tag);
+	    val = remove_whitespaces(val);
+
+	    y2milestone("tag: %1 val: '%2'", tag, val);
 
 	    // add tag and value to map if they are present in comment
-	    if (tag != nil && val != nil)
+	    if (tag != "")
 	    {
 		ret = add(ret, tag, val);
 	    }
@@ -580,11 +608,17 @@ global define string get_only_comment(string input) ``{
 }
 
 /**
- * Get variable name from variable identification
+ * Get variable name from variable identification or empty string if input is invalid
  * @param id Variable identification
  * @return string Variable name
+ * @example get_name_from_id("var$file") -> "var"
  */
 global define string get_name_from_id(string id) ``{
+
+    if (id == nil)
+    {
+	return "";
+    }
 
     integer pos = findfirstof(id, "$");
 
@@ -613,6 +647,11 @@ global define string get_location_from_id(string id) ``{
  * @return string File name
  */
 global define string get_file_from_id(string id) ``{
+    if (id == nil)
+    {
+	return "";
+    }
+
     integer pos = findfirstof(id, "$");
 
     if (pos >= 0)
@@ -695,20 +734,46 @@ global define symbol set_value(string variable, string new_value, boolean force,
 		}
 		else if (regexpmatch(type, "^integer\\(-{0,1}[0-9]*:-{0,1}[0-9]*\\)$"))
 		{
-		    string min = regexpsub(type, "^integer\\((-{0,1}[0-9]*):-{0,1}[0-9]*\\)$", "\\1");
-		    string max = regexpsub(type, "^integer\\(-{0,1}[0-9]*:(-{0,1}[0-9]*)\\)$", "\\1");
+		    // check if input is integer
+		    valid = regexpmatch(new_value, "^-{0,1}[0-9]*$");
 
-		    y2milestone("min: %1  max: %2", min, max);
+		    if (valid == true)
+		    {
+			// it is integer, check range
+			string min = regexpsub(type, "^integer\\((-{0,1}[0-9]*):-{0,1}[0-9]*\\)$", "\\1");
+			string max = regexpsub(type, "^integer\\(-{0,1}[0-9]*:(-{0,1}[0-9]*)\\)$", "\\1");
 
-		    integer min_int = tointeger(min);
-		    integer max_int = tointeger(max);
+			y2milestone("min: %1  max: %2", min, max);
 
-		    y2milestone("min_int: %1  max_int: %2", min_int, max_int);
+			integer min_int = tointeger(min);
+			integer max_int = tointeger(max);
+			integer new_int = tointeger(new_value);
+
+			y2milestone("min_int: %1  max_int: %2", min_int, max_int);
+
+			if (max_int != nil && min_int != nil)
+			{
+			    valid = (new_int >= min_int && new_int <= max_int);
+			}
+			else if (max_int == nil)
+			{
+			    valid = (new_int >= min_int);
+			}
+			else if (min_int == nil)
+			{
+			    valid = (new_int <= max_int);
+			}
+			else
+			{
+			    // empty range, valid is set to true
+			    y2warning("empty integer range, assuming any integer");
+			}
+		    }
 		}
 		else if (regexpmatch(type, "^regexp\\(.*\\)$"))
 		{
 		    string regex = regexpsub(type, "^regexp\\((.*)\\)$", "\\1");
-		    valid = regexpmatch(new_value, regexp);
+		    valid = regexpmatch(new_value, regex);
 		}
 		else if (type == "ip")
 		{
@@ -773,12 +838,10 @@ global define list get_modified()
 
 /**
  * Read all sysconfig settings
+ * @param files list of files or directories to read. Directories are not read recursively.
  * @return true on success
  */
 global define boolean Read(list(string) files) ``{
-
-    /* sysconfig read dialog caption */
-    string caption = _("Initializing sysconfig Configuration");
 
     string tmpdir = SCR::Read(.target.tmpdir);
     if (tmpdir == nil || tmpdir == "")

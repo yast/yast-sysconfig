@@ -1,0 +1,25 @@
+// Sysconfig module - testsuite
+//
+// parse_options tests
+//
+// $Id$
+//
+
+{
+
+include "testsuite.ycp";
+
+import "Sysconfig";
+
+TEST( ``(Sysconfig::parse_options(nil) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options("") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options("    ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options(" abc , 123, var") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options(" abc,123  ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options("v,  a  ,  r") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options("0,\"1, 2, 3\", 4, 5 ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options(" ,,  ,") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_options("1, \"\\\"\", 2") ), [ $[], $[], $[] ], nil );
+
+}
+

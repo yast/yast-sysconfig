@@ -209,14 +209,9 @@ global define string create_richtext_description(map description) ``{
 
     if (comment != "" && comment != nil)
     {
-	map display = UI::GetDisplayInfo();
-
-	if (display["TextMode"]:true == false)	// FIXME: workaround for bug #23721 (&lt; is not interpreted in ncurses)
-	{
-	    // convert '<' and '>' to '&lt;' '&gt;'
-	    comment = mergestring(splitstring(comment, "<"), "&lt;");
-	    comment = mergestring(splitstring(comment, ">"), "&gt;");
-	}
+	// convert '<' and '>' to '&lt;' '&gt;'
+	comment = mergestring(splitstring(comment, "<"), "&lt;");
+	comment = mergestring(splitstring(comment, ">"), "&gt;");
 
 	// rich text value
 	result = result + "<P><B>" + _("Description: ") + "</B><BR> " + comment + "</P>";
@@ -480,12 +475,14 @@ global define string possible_values(map description) ``{
 	string min = regexpsub(type, "^integer\\((.*):.*\\)", "\\1");
 	string max = regexpsub(type, "^integer\\(.*:(.*)\\)", "\\1");
 
-	if (max == nil && min != nil)
+	y2milestone("min: %1, max: %2", min, max);
+
+	if (max == "" && min != "")
 	{
 	    // allowed value description
 	    ret = "<I>" + sformat(_("Integer value greater or equal to %1"), min) + "</I>";
 	}
-	else if (min == nil && max != nil)
+	else if (min == "" && max != "")
 	{
 	    // allowed value description
 	    ret = "<I>" + sformat(_("Integer value less or equal to %1"), max) + "</I>";
