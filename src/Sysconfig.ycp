@@ -314,7 +314,7 @@ global define map get_description(string varid) ``{
     string comment = SCR::Read(comment_path);
 
     // no comment present
-    if (size(comment) == 0)
+    if (size(comment) == 0 && regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
 	y2warning("Comment for variable %1 is missing", varid);
 
@@ -362,6 +362,31 @@ global define map get_description(string varid) ``{
 
     map meta = parse_metadata(comment);
 
+    string template_only_comment = "";
+
+    // for network configuration file read comments from configuration template
+    if (regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
+    {
+	string template_comment = SCR::Read(add(add(.sysconfig.network.template, "value_comment"), varname));
+	map template_meta = parse_metadata(template_comment);
+
+	if (size(template_meta) > 0)
+	{
+	    // add missing metadata values from template
+	    foreach(string key, string value, template_meta, ``{
+		    if (!haskey(meta, key))
+		    {
+			meta[key] = value;
+		    }
+		}
+	    );
+
+	    template_only_comment = get_only_comment(template_comment);
+	}
+
+	y2milestone("Meta read from template: %1", template_meta);
+    }
+
     string deflt = meta["Default"]:nil;
 
     if (deflt != nil)
@@ -381,7 +406,7 @@ global define map get_description(string varid) ``{
     meta["name"] = varname;
     meta["file"] = get_file_from_id(varid);
     meta["location"] = (varname != "") ? get_location_from_id(varid) : varid;
-    meta["comment"] = (varname != "") ? get_only_comment(comment) : (node_comments[varid]:"");
+    meta["comment"] = (varname != "") ? template_only_comment + "<BR><BR>" + get_only_comment(comment) : (node_comments[varid]:"");
     meta["value"] = SCR::Read(value_path);
 
     return meta;
@@ -675,10 +700,19 @@ global define boolean Read(list(string) files) ``{
     SCR::Write(.target.string, tmp, agentdef);
     SCR::RegisterAgent(.syseditor, tmp);
 
+
+    // register agent for reading network template
+    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(IniAgent(\"/usr/share/doc/packages/sysconfig/ifcfg.template\"\n,") + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    tmp = tmpdir + "/sysconfig-template-agent.scr";
+
+    SCR::Write(.target.string, tmp, agentdef);
+    SCR::RegisterAgent(.sysconfig.network.template, tmp);
+
+
     // list of all config files
     list(string) configfiles = SCR::Dir(.syseditor.section);
 
-    // create script opstions
+    // create script options
     string param = "";
     foreach(string par, files, ``{param = param + "'" + par + "' ";});
 

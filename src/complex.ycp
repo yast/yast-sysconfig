@@ -115,7 +115,7 @@ Create it and use powerteak?
 
 
 // FIXME:    boolean ret = Sysconfig::Read(["/etc/sysconfig/*"]);
-    boolean ret = (Sysconfig::powertweak_mode) ? Sysconfig::Read([powertweakconfig]) : Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*"]);	// TODO: add metadata file with predefined paths and descriptions
+    boolean ret = (Sysconfig::powertweak_mode) ? Sysconfig::Read([powertweakconfig]) : Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*", "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp"]);	// TODO: add metadata file with predefined paths and descriptions
 
     return ret ? `next : `abort;
 }
