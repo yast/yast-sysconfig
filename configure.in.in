@@ -1,12 +1,12 @@
-## SCR binary configure.in.in
+## YCP module configure.in.in
 
 ## Initialize
 @YAST2-INIT-COMMON@
-@YAST2-INIT-PROG@
+@YAST2-INIT-YCP@
 
 ## some common checks
 @YAST2-CHECKS-COMMON@
-@YAST2-CHECKS-PROG@
+@YAST2-CHECKS-YCP@
 
 ## and generate the output...
 @YAST2-OUTPUT@
