@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Aug 16 14:44:15 CEST 2002 - lslezak@suse.cz
+
+- escape double quotes in values, remove redundant beginning
+  and trailing double quotes (#16727)
+- read multi line values (#17766)
+- added new metadata
+- version 2.6.7
+
+-------------------------------------------------------------------
 Wed Aug 14 15:55:38 CEST 2002 - lslezak@suse.cz
 
 - read really all files at /etc/sysconfig directory

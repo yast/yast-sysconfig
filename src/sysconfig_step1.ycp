@@ -466,7 +466,7 @@ configuration modules like the \"Network configuration\".</p>
 		}
 	    }
 	}
-	else
+	else if (ret != `back)
 	{
             //////////////////////////////////////////////////////////////////////////////////
 	    // User has changed the tree
@@ -508,42 +508,6 @@ configuration modules like the \"Network configuration\".</p>
 		  // compare old and new value
 		  if ( lookup(lookup(rc_config_keys, key, $[]), `value, nil) != new_val )
 		  {
-		    /* TODO: finish escaping (#16727)
-		     string unquoted = "";
-		     integer pos = 0;
-		     boolean bslash = false;
-
-		     while (pos < size(new_val))
-		     {
-			 string char = substring(new_val, pos, 1);
-
-			 if (char == "\\")
-			 {
-			     if (bslash)
-			     {
-				 unquoted = unquoted + "\\\\";
-			     }
-			     bslah = !bslah;
-			 }
-			 else
-			 {
-			    if (char == "\"")
-			    {
-				unquoted = unquoted + "\\\"";
-			    }
-			    else
-			    {
-				unquoted = unquoted + char;
-			    }
-
-			    bslah = false;
-			 }
-
-			 pos = pos + 1;
-		     }
-
-		     y2milestone("unquoted");*/
-
 		     map curr_key = lookup(rc_config_keys, key, nil);
 		     y2milestone( "jTTTTTTTTTBB: %1", curr_key);
 		     curr_key     = add( curr_key, `value, new_val);
@@ -650,6 +614,45 @@ configuration modules like the \"Network configuration\".</p>
 
 			string pathstr = "" + writepath;
 
+			 string new_val = lookup(entry, `value, "");
+
+			 // remove beginning and trailing double quotes  (#16727)
+			 if (size(new_val) >= 2 && substring(new_val, 0, 1) == "\"" && substring(new_val, size(new_val) - 1, 1) == "\"")
+			 {
+			     new_val = (size(new_val) > 2) ? substring(new_val, 1, size(new_val) - 2) : "";
+			 }
+
+			 // escape double quotes and back slashes
+			 string escaped = "";
+			 integer pos = 0;
+
+			 while (pos < size(new_val))
+			 {
+			     string ch = substring(new_val, pos, 1);
+
+			     if (ch == "\\")
+			     {
+				 escaped = escaped + "\\\\";
+			     }
+			     else
+			     {
+				if (ch == "\"")
+				{
+				    escaped = escaped + "\\\"";
+				}
+				else
+				{
+				    escaped = escaped + ch;
+				}
+			     }
+
+			     pos = pos + 1;
+			 }
+
+			 y2debug("new_val: %1, escaped: %2", new_val, escaped);
+			 new_val = escaped;
+
+
 			if (substring(pathstr, 0, size(".etc.powertweak.tweaks")) == ".etc.powertweak.tweaks")
 			{
 			    // test if we have powertweak agent template to write powertweak settings
@@ -657,12 +660,12 @@ configuration modules like the \"Network configuration\".</p>
 			    {
 				powertweak_changed = true;
 				y2debug("powertweak config changed: %1", writepath);
-				write_value(writepath, lookup(entry, `value, nil));
+				write_value(writepath, new_val);
 			    }
 			}
 			else
 			{
-			    write_value(writepath, lookup(entry, `value, nil));
+			    write_value(writepath, new_val);
 			}
 		    });
 
@@ -690,11 +693,7 @@ configuration modules like the \"Network configuration\".</p>
 		    }
 		    else
 		    {
-			//UI(`WaitSuSEconfig());
-			// run SuSEconfig
-		        WFM::CallFunction( `inst_suseconfig( false, false ) );
-			//ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
-			//UI(`CloseDialog());
+//		        WFM::CallFunction( `inst_suseconfig( false, false ) );
 		    }
 
 		    return( `next );
