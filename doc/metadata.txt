@@ -4,16 +4,16 @@
 
 
 Author:  Ladislav Slezak <lslezak@suse.cz>
-Last change: Sep 4 2003
+Last change: 2004-11-16
 
 
 Introduction
 ------------
 
-  Yast2 sysconfig editor can edit /etc/sysconfig files. In this editor users
-can change values in easy way using GUI. Yast2 sysconfig editor needs more
-data (metadata) to display and edit sysconfig variables - metadata was originaly stored
-in meta_sys.config file in yast2-sysconfig package. This file contained
+  Yast2 sysconfig editor can edit /etc/sysconfig files. In this editor users can
+change values in easy way using GUI. Yast2 sysconfig editor needs more data
+(metadata) to display and edit sysconfig variables - metadata was originaly
+stored in meta_sys.config file in yast2-sysconfig package. This file contained
 information about position in tree widget, allowed values, etc.
 
   This separation between data and metadata caused inconsistency - new variable
@@ -21,21 +21,18 @@ in sysconfig file had no metadata and removed variables still had metadata in
 yast2 package. (If variable was renamed both problems occured...)
 
   There was also problem with maintenance of data and metadata: data were
-maintained by package maintainer but metadata by yast2 sysconfig maintainer.
+maintained by package maintainer but metadata by yast2-sysconfig maintainer.
 
   The metadata should contain descriptions of actions required to start when a
 variable is changed. So GUI user does't need to open terminal and write
 commands manualy. This task can be very hard (or impossible) for beginner user.
 
 
-  It was decided to change this situation and make metadata part of
-sysconfig file.
-
 
 Metadata - description of variable
 ----------------------------------
 
-  At first here is small example to see how metadata look. Here is
+  At first here is a small example to see how metadata looks. Here is
 part of /etc/sysconfig/boot file with new metadata:
 
 ## Path:	System/Boot
@@ -52,11 +49,11 @@ PROMPT_FOR_CONFIRM="no"
 
   Metadata are part of variable description comment, metadata line begins with
 double hash character ("##"). It contains pairs <keyword>:<value>. More values
-can be specified in comma separated list, values in list which contain comma or
+can be specified in comma separated list, values which contain comma or
 space character have to be quoted (e.g. "value with spaces").
 
   Long values can be splitted to more lines. To use multiple values use
-backslash (\) as a last character on the line. (Trailing backslash and double
+backslash (\) as the last character on the line. (Trailing backslash and double
 hash character at beginning of the next line will be removed and lines will be
 concatenated.)
 
@@ -64,7 +61,7 @@ concatenated.)
 comment after three hash characer is ignored - part of comment can be hidden
 for yast2 user.
 
-  Metadata block have to be located at beginnig of comment block. Metadata can
+  Metadata block have to be located at the beginnig of comment block. Metadata can
 have any order in metadata block. (Exception is Description tag which is
 related to the previous Path tag.)
 
@@ -78,18 +75,18 @@ possible values entered by user. Typos, invalid values or values out of range
 can be avoided by defining right descriptions.
 
   Action keywords describe actions which are required to activate changes.
-Usually it means starting SuSEconfig/ULconfig module and service restart or
+Usually it means starting SuSEconfig module and service restart or
 reload.
 
   I. Descriptive keywords:
 
-    Path - where variable will be located in tree widget, valid for all next
-           variables in file - path have to be specified at least in first
-           variable in file. First character of subtree name should be upper
-	   case letter.
+    Path - where variable will be located in the tree widget in yast, it's
+	   valid for all following variables in the file - path have to be
+	   specified at least in the first variable in the file. The first
+	   character of subtree name should be upper case letter.
 
-	   Use slash ('/') as path separator, if slash should be a part of path
-	   name put basckslash before slash ('\/').
+	   Use slash character ('/') as a path separator, if slash should be a
+	   part of the path name put backslash before slash ('\/').
 	   
 	   Fillup utility adds missing variables at the end of output - if more
 	   templates are merged to one sysconfig file and each template have
@@ -99,20 +96,20 @@ reload.
 	   specification should be located at unique variable or each variable
 	   should have explicitly defined path.
 
-    Description - description of path, displayed if user selects path in tree instead
-	   of variable. It should contain description of whole subtree - each path
-	   specification should have description. If path has more than one
-	   description last found will be used.
+    Description - description of the path, displayed if user selects the path in
+	   tree instead of variable. It should contain description of whole
+	   subtree - each path specification should have description. If path
+	   has more than one description last found will be used.
 	   
 	   If more packages requires same base package then description should
 	   be located only in the base package. If packages are independent
-	   description should be located in separate file (located in yast2
-	   sysconfig package.)
+	   description should be located in the extra file (located in
+	   yast2-sysconfig package).
 
-	   Desription value is related to previous Path keyword (which can be
-	   located even in previous variables).
+	   The description is related to the previous Path keyword (which can be
+	   located even in another (previous) variable).
 	   
-    Type - type of variable. This keyword specifies data type of value, it is
+    Type - type of the variable. This keyword specifies the data type of value, it is
            used for checking entered value.
 
            Supported types:
@@ -136,8 +133,8 @@ reload.
 		
 	    If this keyword is missing default value "string" will be used.
 
-    Default - default value. Valid value (allowed by keyword Type) which will be
-           set if user press [Default] button in yast2 module.
+    Default - the default value of the variable. Valid value (allowed by keyword Type)
+           which will be set if user click [Default] button in yast module.
 
 
   II. Activation keywords:
@@ -170,10 +167,9 @@ reload.
 
     If the activation command would be too complex (too many dependences or
     checks) a note should be a part of the comment instead of activation metada
-    - e.g. recommended yast2 module, where is activation process described in
-    the documentation...
+    - e.g. recommended yast2 module, where is the activation process documented
 
-    The commands shouldn't do any dangerous action - they will be probably
+    The commands shouldn't do any dangerous actions - they will be probably
     started automatically by beginner user. There is an option to confirm each
     action in the yaST2 module for experts. Restart of some services should be
     used carefully, e.g. variable DISPLAYMANAGER requires xdm restart which
@@ -191,7 +187,7 @@ reload.
 Predefined paths
 ----------------
 
-  All sysconfig variables will be divided into basic categories:
+  All sysconfig variables are divided into basic categories:
 
 Hardware - all hardware related settings (e.g. sysconfig files: sound, keyboard...)
 System - basic system configuration (boot, suseconfig, cron, console, security...)
@@ -199,21 +195,21 @@ Desktop - desktop settings (kde, gnome, xdm...)
 Applications - java, ispell, man...
 Network - network services (apache, mail, nfs...)
 Other - other settings which does not fit into classes above (This section will
-    be used as fallback if no section is specified in sysconfig file - in this
-    case name of subtree will be file name.)
+    be also used as a fallback if no section is specified in sysconfig file - in this
+    case name of subtree will be the file name.)
 
-  In path specification should be used one path from list above as first part
-of path (e.g. path: Hardware/Joystick, path: System/Console). Depth of path can be
+  In path specification should be used one path from list above as the first part
+(e.g. path: Hardware/Joystick, path: System/Console). Depth of path can be
 greater than two - e.g. System/Filesystem/Fam.
 
   Description of predefined paths and paths defined in more templates is read
-from separate file, which is part of yast2 sysconfig module.
+from separate file, which is part of yast2-sysconfig package.
   
 
 Missing metadata
 ----------------
 
-  If variable does not have any metadata previous will be used. If previous
+  If variable does not have any metadata the previous one will be used. If previous
 metadata is missing yast2 cannot offer predefined values to user. In this
 case will be used "Type: string" as default metadata so user can enter any value. 
 
@@ -235,14 +231,14 @@ GAMEPORT_MODULE_2=""
 GAMEPORT_MODULE_3=""
 
 
-  Comment description (and metadata) will be used for all four variables.
+  The comment description (and the metadata) will be used for all four variables.
 
 
 Saving changed values in Yast2 sysconfig module
 -----------------------------------------------
 
     When saving the changed variables yast2 sysconfig module
-will start the following actions:
+will do the following actions:
 
     - start PreSaveCommmand for each changed variable. If it returs non zero
       exit status then it is supposed that it failed and other activation
@@ -258,18 +254,19 @@ will start the following actions:
     - start generic commands
 
 
-  If the activation commands are missing in whole sysconfig file the complete
+  If activation commands are missing in the whole sysconfig file complete
 SuSEconfig will be started for backward compatibility with old sysconfig files.
 Some variables need no activation (e.g. options in /etc/sysconfig/boot file are
 used only at boot), use empty Config: tag (or any from above tags) to not start
 the SuSEconfig script - if some action tag is specified (even empty) the
 backward compatible action (calling the SuSEconfig script) will not be started.
 
-  Each command will be started only once to speed up activation if more
+  Each command will be started only once to speed up the activation if more
 modified variables need the same activation command. The commands are compared
-without any parsing or semantic check when testing whether the command was
-already executed. For this reason the commands should be consistent at least in
-one file (user usually changes only few variables which are in one file).
+without any parsing or semantic check when testing whether the command has
+already been executed. For this reason the commands should be consistent at
+least in one file (user usually changes only few variables which are in one
+file).
 
 
 Global activation keywords
@@ -292,9 +289,8 @@ Update problem
 
   At update old and new config files are merged by fillup utility, but old
 comments are preserved (user's comments will not be deleted or changed...),
-but metadata should be updated to new values - this requires some changes
-in fillup utility.
+but metadata should be updated to new values.
 
-  Sysconfig file must have a template - even files created by Yast, this is
-required for updating metadata at package update.
+  Every sysconfig file should have a template - even files created by Yast,
+this is required for updating metadata during update of the package.
 
