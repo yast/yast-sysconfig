@@ -93,5 +93,35 @@ global define symbol Configure2Dialog () ``{
     return ret;
 }
 
+
+global define symbol display_save_dialog(list table_content) ``{
+
+    UI::OpenDialog(`opt(`decorated), `HBox(
+	`VSpacing(12),
+	`VBox(`HSpacing(70),
+	    //heading of popup
+	    `Heading("Header"),
+	    `Label("helptextCR"),
+	    `VSpacing(0.5),
+
+	    // table column header
+	    `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description")), table_content),
+`VSpacing(0.5),
+	    HBox(
+		// push button label
+		`PushButton(`id(`ok), `opt(`default), UI::OKButtonLabel()),
+		// push button label
+		`PushButton(`id(`cancel), UI::CancelButtonLabel())
+	    )
+			   )
+		    )
+	);
+
+    UI::UserInput();
+
+    UI::CloseDialog();
+
+}
+
 /* EOF */
 }

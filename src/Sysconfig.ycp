@@ -38,6 +38,7 @@ global boolean write_only = false;
 
 // all read variables
 map variables = $[];
+map modified_variables = $[];
 
 map node_comments = $[];
 
@@ -52,13 +53,151 @@ global define boolean Modified() ``{
     return modified;
 };
 
+global define remove_whitespaces(string input) ``{
+    string removed_whitespaces = regexpsub(input, "^[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
+
+    return (removed_whitespaces != nil) ? removed_whitespaces : input;
+}
+
+global define list parse_options(string options) ``{
+    list ret = [];
+
+    // parsing possible values is done by two alghorithms:
+    // first is much faster, but only usable if string
+    // doesn't contain any double qoute characters
+    // second is more general, but of course slower
+
+    if (options == nil)
+    {
+	return [];
+    }
+
+    if (findfirstof(options, "\"") == nil)
+    {
+	// easy case - no qouting, split string to values
+	list(string) values = splitstring(options, ",");
+
+	foreach (string v, values, ``{
+		v = remove_whitespaces(v);
+		if (!contains(ret, v)) ret = add(ret, v);
+	    }
+	);
+    }
+    else
+    {
+	// quoting is used, we cannot easily split input
+	// parsing each character is needed
+	symbol state = `out_of_string;
+	integer index = 0;
+	string str = "";
+
+	while(index < size(options))
+	{
+	    string character = substring(options, index, 1);
+
+	    y2debug("character: %1 state: %2 index: %3", character, state, index);
+
+	    if (character == "\\")
+	    {
+		if (index + 1 < size(options))
+		{
+		    string nextcharacter = substring(options, index + 1, 1);
+
+		    if (nextcharacter == "\"")
+		    {
+			character = "\\\"";
+			index = index + 1;
+		    }
+		}
+	    }
+
+	    if (state == `out_of_string)
+	    {
+		if (character == " " || character == "\t" || character == ",")
+		{
+		    index = index + 1;
+		    continue;
+		}
+		else if (character == "\"")
+		{
+		    state = `in_quoted_string;
+		}
+		else
+		{
+		    state = `in_string;
+
+		    if (character == "\\\"")
+		    {
+			str = "\"";
+		    }
+		    else
+		    {
+			str = character;
+		    }
+		}
+	    }
+	    else if (state == `in_quoted_string)
+	    {
+		if (character == "\"")
+		{
+		    state = `out_of_string;
+		    if (!contains(ret, str)) ret = add(ret, str);
+		    str = "";
+		}
+		else if (character == "\\\"")
+		{
+		    str = str + "\"";
+		}
+		else
+		{
+		    str = str + character;
+		}
+	    }
+	    else if (state == `in_string)
+	    {
+		if (character == ",")
+		{
+		    state = `out_of_string;
+		    str = remove_whitespaces(str);
+		    if (!contains(ret, str)) ret = add(ret, str);
+		    str = "";
+		}
+		else if (character == "\\\"")
+		{
+		    str = str + "\"";
+		}
+		else
+		{
+		    str = str + character;
+		}
+	    }
+
+	    index = index + 1;
+	}
+
+	if (state == `in_quoted_string)
+	{
+	    y2warning("Missing trainling double quote character(\") in input: '%1'", options);
+	    if (!contains(ret, str)) ret = add(ret, str);
+	}
+
+	if (state == `in_string)
+	{
+	    str = remove_whitespaces(str);
+	    if (!contains(ret, str)) ret = add(ret, str);
+	}
+    }
+
+    y2debug("Parsed values: %1", ret);
+
+    return ret;
+}
+
 
 global define map get_description(string varid) ``{
 
     string varname = get_name_from_id(varid);
     string fname = get_file_from_id(varid);
-
-    // TODO: detect changed value
 
     path comment_path = add(add(.syseditor.value_comment, fname), varname);
     path value_path = add(add(.syseditor.value, fname), varname);
@@ -66,11 +205,23 @@ global define map get_description(string varid) ``{
 
     map meta = parse_metadata(comment);
 
-    meta = add(meta, "name", get_name_from_id(varid));
-    meta = add(meta, "file", get_file_from_id(varid));
-    meta = add(meta, "location", varname != "" ? get_location_from_id(varid) : varid);
-    meta = add(meta, "comment", varname != "" ? get_only_comment(comment) : (node_comments[varid]:""));
-    meta = add(meta, "value", SCR::Read(value_path));
+    string deflt = meta["Default"]:"";
+    list parsed = parse_options(deflt);
+    meta["Default"] = parsed[0]:deflt;
+
+    string new_value = modified_variables[varid]:nil;
+
+    // check if value was changed
+    if (new_value != nil)
+    {
+	meta["new_value"] = new_value;
+    }
+
+    meta["name"] = get_name_from_id(varid);
+    meta["file"] = get_file_from_id(varid);
+    meta["location"] = (varname != "") ? get_location_from_id(varid) : varid;
+    meta["comment"] = (varname != "") ? get_only_comment(comment) : (node_comments[varid]:"");
+    meta["value"] = SCR::Read(value_path);
 
     return meta;
 }
@@ -244,6 +395,54 @@ global define string get_file_from_id(string id) ``{
 }
 
 
+global define symbol set_value(string variable, string new_value, boolean force) ``{
+    map desc = get_description(variable);
+
+    if (get_name_from_id(variable) == "")
+    {
+	return `not_found;
+    }
+
+    string modif = modified_variables[variable]:nil;
+    string old = desc["value"]:"";
+
+    string curr_val = (modif != nil) ? modif : old;
+
+    if (new_value != curr_val)
+    {
+	// TODO check if new value is allowed by variable type
+
+	y2milestone("variable: %1 changed from: %2 to: %3", variable, curr_val, new_value);
+
+	if (new_value == old)
+	{
+	    // variable was reset to original value, remove it from map of modified
+	    modified_variables[variable] = nil;
+	}
+	else
+	{
+	    modified_variables[variable] = new_value;
+	}
+    }
+}
+
+global define boolean modified(string varid) ``{
+    return haskey(modified_variables, varid);
+}
+
+global define list get_modified()
+``{
+
+    list ret = [];
+
+    foreach(string varid, string new_value, modified_variables,
+	``{
+	    ret = add(ret, varid);
+	}
+    );
+
+    return ret;
+}
 
 /**
  * Read all sysconfig settings
