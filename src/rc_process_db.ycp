@@ -282,7 +282,6 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 		   {
 		      change( curr_map, `type ,   `options  );
 		      change( curr_map, `options,  opt_list);
-		      y2debug( "EEEE %1", entry );
 		   }
 		   
 	       }
