@@ -531,7 +531,7 @@ global define map<string, any> get_description(string varid) ``{
 	}
     }
 
-    map<string, string> meta = parse_metadata(comment);
+    map<string, any> meta = parse_metadata(comment);
 
     string template_only_comment = "";
 

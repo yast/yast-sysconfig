@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar  5 14:42:53 CET 2004 - lslezak@suse.cz
+
+- data type fixes
+- use Sequencer:: module
+- version 2.9.10
+
+-------------------------------------------------------------------
 Tue Mar  2 08:52:36 CET 2004 - lslezak@suse.cz
 
 - don't use Product:: module

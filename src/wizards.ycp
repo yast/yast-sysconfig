@@ -16,7 +16,7 @@ import "Sysconfig";
 
 import "Popup";
 import "Label";
-include "wizard/sequencer.ycp";
+import "Sequencer";
 
 include "sysconfig/complex.ycp";
 include "sysconfig/dialogs.ycp";
@@ -39,7 +39,7 @@ include "sysconfig/dialogs.ycp";
 	]
     ];
 
-    symbol ret = WizardSequencer(aliases, sequence);
+    symbol ret = Sequencer::Run(aliases, sequence);
 
     return ret;
 }
@@ -88,7 +88,7 @@ include "sysconfig/dialogs.ycp";
 
     Wizard::CreateDialog();
 
-    any ret = WizardSequencer(aliases, sequence);
+    any ret = Sequencer::Run(aliases, sequence);
 
     UI::CloseDialog();
 
