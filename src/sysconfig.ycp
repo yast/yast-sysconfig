@@ -34,7 +34,7 @@ include "sysconfig/cmdline.ycp";
 	// help text header - configuration of 'powertweak' utility
 	"help"      : (Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") :
 	// help text header - sysconfig editor
-	 _("Editor for /etc/sysconfig files"),
+	 _("Editor for /etc/sysconfig Files"),
 	"id"        : (Sysconfig::powertweak_mode == true) ? "powertweak" : "sysconfig",
 	"guihandler": SysconfigSequence,
 	"initialize": Sysconfig::Read,
