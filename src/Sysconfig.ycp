@@ -80,11 +80,53 @@ global define map parse_metadata(string comment) ``{
 
     // get metadata part of comment
     list metalines = get_metadata(comment);
+    list joined_multilines = [];
+    string multiline = "";
 
     y2debug("metadata: %1", metalines);
 
-    // parse each metadata line
+    // join multi line metadata lines
     foreach(string metaline, metalines, ``{
+	    if (substring(metaline, size(metaline) - 1, 1) != "\\")
+	    {
+		if (multiline != "")
+		{
+		    // this not first multiline so remove comment mark
+		    string without_comment = regexpsub(metaline, "^##(.*)", "\\1");
+
+		    if (without_comment != nil)
+		    {
+			metaline = without_comment;
+		    }
+		}
+		joined_multilines = add(joined_multilines, multiline + metaline);
+		multiline = "";
+	    }
+	    else
+	    {
+		string part = substring(metaline, 0, size(metaline) - 1);
+
+		if (multiline != "")
+		{
+		    // this not first multiline so remove comment mark
+		    string without_comment = regexpsub(part, "^##(.*)", "\\1");
+
+		    if (without_comment != nil)
+		    {
+			part = without_comment;
+		    }
+		}
+
+		// add line to the previous lines
+		multiline = multiline + part;
+	    }
+	}
+    );
+
+    y2debug("metadata after multiline joining: %1", joined_multilines);
+
+    // parse each metadata line
+    foreach(string metaline, joined_multilines, ``{
 	    string tag = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
 	    string val = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\2");
 
