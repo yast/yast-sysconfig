@@ -51,6 +51,7 @@ include "sysconfig/dialogs.ycp";
  */
  define symbol SysconfigAutoSequence() ``{
     Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("sysconfig");
 
     symbol ret = MainSequence();
 
@@ -87,6 +88,7 @@ include "sysconfig/dialogs.ycp";
     ];
 
     Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("sysconfig");
 
     any ret = Sequencer::Run(aliases, sequence);
 
