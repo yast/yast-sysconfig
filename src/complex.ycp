@@ -24,6 +24,7 @@ import "Label";
 
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
+include "sysconfig/dialogs.ycp";
 
 /**
  * current selected variable in the tree widget
@@ -68,7 +69,7 @@ global define symbol ReadDialog() ``{
 
 	    // install powertweak package
 
-	    list(string) install = [ "powertweak" ];
+	    list<string> install = [ "powertweak" ];
 
 	    if (ask["extra"]:false == true)
 	    {
