@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jul 06 20:40:12 CEST 2002 - arvin@suse.de
+
+- moved non binary files to /usr/share/YaST2
+
+-------------------------------------------------------------------
 Mon Jul  1 17:13:14 CEST 2002 - msvec@suse.cz
 
 - renamed to yast2-sysconfig
@@ -53,7 +58,7 @@ Fri Feb  8 17:31:05 CET 2002 - mike@suse.de
 Mon Sep 24 14:14:34 CEST 2001 - mike@suse.de
 
 - fixed: broken logfile of scripts
-  fixed: deleted stop of pers. firewall 
+  fixed: deleted stop of pers. firewall
 
 -------------------------------------------------------------------
 Thu Sep 20 14:47:23 CEST 2001 - mike@suse.de
