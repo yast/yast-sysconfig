@@ -172,7 +172,7 @@ int main()
   const char* globpattern[] = {
     "/etc/rc.config.d/*rc.config",
     "/etc/rc.config",
-    "/etc/rc.dialout*"
+    "/etc/rc.dialout"
   };
 
   // struct for glob() (see: man 3 glob)

@@ -31,7 +31,7 @@
   //////////////////////////////////////////////////////////////////////////////////////
 
   
-    //////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
     //  Helptext                                                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -364,16 +364,26 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	string l5_key =  lookup( l5, `linekey, "");
 	  
 	string help_text = "";
-	  
+
+	/*
+	even add helptext if getDescr(..) == "" 
 	help_text = sformat( "<b>%1:</b><p>%2<p><b>%3:</b><p>%4</p><p><b>%5:</b><p>%6</p>",
 			     l1_key, getDescr(l1_key),
-			     l1_key, getDescr(l1_key),
+			     //l1_key, getDescr(l1_key), ???????????????
 			     l2_key, getDescr(l2_key),
 			     l3_key, getDescr(l3_key)   );
 			       
-	  help_text = sformat( "%1<p><b>%2:</b><p>%3</p><p><b>%4:</b><p>%5</p>", help_text,
-			       l4_key, getDescr(l4_key),
-			       l5_key, getDescr(l5_key));
+	help_text = sformat( "%1<p><b>%2:</b><p>%3</p><p><b>%4:</b><p>%5</p>", help_text,
+			     l4_key, getDescr(l4_key),
+			     l5_key, getDescr(l5_key));
+	*/
+	
+	list all_keys = [  l1_key, l2_key, l3_key, l4_key, l5_key ];
+	foreach( `lx_key, all_keys, ``{
+	    string lx_key_help = getDescr ( lx_key );
+	    if (lx_key_help != "" ) help_text = help_text + sformat("<b>%1:</b><p>%2</p>", lx_key, lx_key_help);
+	});
+	
 
 // 	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
 // 		 `HBox(
@@ -857,16 +867,18 @@ Choose \"Cancel\" to edit the values again");
 		} until (doit == `ok  ||  doit == `cancel );
 
 	    any ret = QueryWidget(`id(`table), `CurrentItem);
-
+	    y2debug(sformat("%1", ret ));
+	    
 	    CloseDialog();
 
 	   
 	    if ( doit == `cancel )
 		{
-		    return( nil );
+		    return( `cancel );
 		}
 	    else
 		{
+		    // ret is nil if table is empty 
 		    return( ret );
 		}
 	}; });
@@ -935,9 +947,10 @@ Choose \"Cancel\" to edit the values again");
 		} until (doit == `ok  ||  doit == `cancel );
 
 	    any ret = QueryWidget(`id(`table), `CurrentItem);
-
-	    CloseDialog();
 	   
+	    CloseDialog();
+	    
+	    
 	    if ( doit == `cancel )
 		{
 		    return( nil );

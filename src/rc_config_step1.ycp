@@ -375,15 +375,21 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 	        list  changes_list = maplist( `linekey, `line, rc_config_keys,``( add(line, `linekey, linekey )));
 		changes_list       = filter(`entry, changes_list, ``( lookup(entry, `new, false) == true ));
 
-		string save_val = UI(`SaveDlg( changes_list));
+		any save_val = UI(`SaveDlg( changes_list));
 
-	        if (save_val == nil)
+	        if (save_val == `cancel)
 	        {
    	           // Cancel:
 	           ret = `again;
 	        }
+		else if( save_val == nil )
+		{
+		    // empty table in save dialog and button "ok" was pushed
+		    // leave module 
+		    ret = `cancel;
+		}
 	        else
-		  {
+		{
 		    // Doit new:
 
 		    // this list contains all rc_file paths, that must be saved before starting SuSEconfig
