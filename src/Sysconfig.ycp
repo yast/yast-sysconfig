@@ -21,13 +21,15 @@ import "Summary";
 import "Directory";
 import "Product";
 import "Label";
+import "IP";
 
 include "sysconfig/routines.ycp";
-include "network/ip.ycp";
 
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
     "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions"];
+
+global string powertweakconfig = "/etc/powertweak/tweaks";
 
 // Additional files from Import
 list custom_files = [];
@@ -58,13 +60,6 @@ global boolean powertweak_mode = false;
 map actions = $[];
 
 global boolean ConfirmActions = false;
-
-
-/**
- * Write only, used during autoinstallation.
- * Don't run services and SuSEconfig, it's all done at one place.
- */
-global boolean write_only = false;
 
 /**
  * Data was modified?
@@ -967,17 +962,17 @@ global define symbol set_value(string variable, string new_value, boolean force,
 		else if (type == "ip")
 		{
 		    // check IP adress using function from network/ip.ycp include
-		    valid = check_ip(new_value);
+		    valid = IP::Check(new_value);
 		}
 		else if (type == "ip4")
 		{
 		    // check IP adress using function from network/ip.ycp include
-		    valid = check_ip4(new_value);
+		    valid = IP::Check4(new_value);
 		}
 		else if (type == "ip6")
 		{
 		    // check IP adress using function from network/ip.ycp include
-		    valid = check_ip6(new_value);
+		    valid = IP::Check6(new_value);
 		}
 		else
 		{
@@ -1029,11 +1024,57 @@ global define list get_modified()
 }
 
 /**
- * Read all sysconfig settings
- * @param files list of files or directories to read. Directories are not read recursively.
+ * Get list of all variables
+ * @return list List of variable identifications
+ */
+global define list get_all()
+``{
+    list ret = [];
+
+    foreach(string varid, string new_value, variable_locations,
+	``{
+	    ret = add(ret, varid);
+	}
+    );
+
+    return ret;
+}
+
+/**
+ * Get map of all variables
+ * @return map Map of variable names, key is variable name, value is a list of variable identifications
+ */
+global define map get_all_names()
+``{
+    map ret = $[];
+
+    foreach(string varid, string new_value, variable_locations,
+	``{
+	    string name = get_name_from_id(varid);
+
+	    if (haskey(ret, name) == true)
+	    {
+		ret = add(ret, name, add(ret[name]:[], varid));
+	    }
+	    else
+	    {
+		ret = add(ret, name, [varid]);
+	    }
+	}
+    );
+
+    return ret;
+}
+
+/**
+ * Read all sysconfig variables
  * @return true on success
  */
-global define boolean Read(list(string) files) ``{
+global define boolean Read() ``{
+
+    // TODO: solve custom_files parameter problem (used in Import)
+    // read only powerteak config or all sysconfig files
+    list(string) files = (Sysconfig::powertweak_mode == true) ? [powertweakconfig] : configfiles;
 
     string tmpdir = SCR::Read(.target.tmpdir);
     if (tmpdir == nil || tmpdir == "")
@@ -1109,9 +1150,6 @@ global define boolean Write() ``{
     // SuSEconfig script name
     string SuSEconfigName = (Product::unitedlinux == true) ? "ULconfig" : "SuSEconfig";
 
-    // there is no progress bar yet
-    Progress::off();
-
     // start presave commands
     foreach (string vid, string new_val, modified_variables, ``{
 	    if (abort)
@@ -1153,10 +1191,6 @@ global define boolean Write() ``{
     {
 	return false;
     }
-
-    // reenable progress bar
-	if (!write_only)
-	     Progress::on();
 
     foreach (string vid, string new_val, modified_variables, ``{
 	// get activation map for variable
@@ -1266,7 +1300,7 @@ global define boolean Write() ``{
 	Progress::Title(sformat(_("Starting command: %1..."), "/usr/sbin/powertweakd --no-daemon"));
 
 	y2milestone("Activating powertweak configuration");
-	ret = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
+	ret = (SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon") == 0);
 
 	if (ret == false)
 	{
@@ -1530,6 +1564,12 @@ global define list Summary() ``{
     return summary;
 }
 
+/**
+ * Display confirmation dialog
+ * @param message Confirmation message
+ * @param command Command to confirm
+ * @return symbol `cont - start command, `skip - skip this command, `abort - skip all remaining commands
+ */
 define symbol ConfirmationDialog(string message, string command) ``{
     UI::OpenDialog(
 	`opt(`decorated),
@@ -1563,6 +1603,17 @@ define symbol ConfirmationDialog(string message, string command) ``{
     return ret;
 }
 
+/**
+ * Start activation command, ask user to confirm it when it is required.
+ * Display specified error message when the command fails.
+ * @param start_command Command to start
+ * @param label Progress bar label
+ * @param error Error message displayed when command failes
+ * @param confirm Confirmation messge
+ * @param confirmaction Display confirmation dialog
+ * @return symbol `success - command was started, `failed - command failed (non-zero exit value),
+ * `skip - command was skipped, `abort - command starting was aborted
+ */
 define symbol StartCommand(string start_command, string label, string error, string confirm, boolean confirmaction) ``{
     if (size(start_command) == 0)
     {

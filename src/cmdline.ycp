@@ -1,0 +1,182 @@
+/**
+ * File:
+ *   include/sysconfig/cmdline.ycp
+ *
+ * Package:
+ *   Editor for /etc/sysconfig files
+ *
+ * Summary:
+ *   Command line interface functions.
+ *
+ * Authors:
+ *   Ladislav Slezak <lslezak@suse.cz>
+ *
+ * $Id$
+ *
+ * All command line interface functions (handlers).
+ *
+ */
+
+{
+    import "Sysconfig";
+    import "RichText";
+    import "CommandLine";
+    import "Progress";
+
+    include "sysconfig/complex.ycp";
+
+    textdomain "sysconfig";
+
+    /**
+     * Command line interface - handler for list command
+     * @param options list command options
+     * @return boolean Returns true (succeess)
+     */
+    global define boolean listHandler(map options) ``{
+	// display all variables or only modified ones?
+	boolean all = haskey(options, "all");
+
+	// header (command line mode output)
+	CommandLine::Print((all == true) ? _("All Variables:\n") : _("Modified Variables:\n"));
+
+	list<string> modif = (all == false) ? Sysconfig::get_modified() : Sysconfig::get_all();
+	string result = "";
+
+	foreach(string v, modif, ``{
+		map descr = Sysconfig::get_description(v);
+		// display a new value for modified variables
+		string value = (descr["new_value"]:nil != nil) ? descr["new_value"]:"" : descr["value"]:"";;
+
+		result = result + sformat("%1=\"%2\"\n", Sysconfig::get_name_from_id(v), value);
+	    }
+	);
+
+	CommandLine::Print(result);
+
+	return true;
+    }
+
+    /**
+     * Command line interface - handler for set command
+     * @param options list command options
+     * @return boolean True on success
+     */
+    global define boolean setHandler(map options) ``{
+	if (haskey(options, "variable") && haskey(options, "value"))
+	{
+	    string variable = options["variable"]:nil;
+	    string value = options["value"]:nil;
+	    string vid = variable2id(variable);
+
+	    if (vid == nil)
+	    {
+		return false;
+	    }
+
+	    symbol result = Sysconfig::set_value(vid, value, options["force"]:true, false);
+
+	    // status message - %1 is a device name (/dev/hdc), %2 is a mode name (udma2), %3 is a result (translated Success/Failed text)
+	    CommandLine::Print(sformat(_("\nSetting variable '%1' to '%2': %3"), variable, value,
+	    // result message
+	    (result == `ok) ? _("Success") : _("Failed")));
+	}
+
+	return true;
+    }
+
+
+    /**
+     * Command line interface - handler for details command
+     * @param options details command options
+     * @return boolean True on success
+     */
+    global define boolean detailsHandler(map options) ``{
+	string variable = options["variable"]:nil;
+	string varid = variable2id(variable);
+
+	if (varid == nil)
+	{
+	    return false;
+	}
+
+	// header (command line mode output)
+	CommandLine::Print("\nDescription:\n");
+	map description = Sysconfig::get_description(varid);
+
+	// display a new value for modified variables
+	string value = ((description["new_value"]:nil != nil) ? (_("New value: ") + description["new_value"]:"") : (_("Value: ") + description["value"]:"")) + "\n";
+
+	// convert description into plain text
+	string plaintext = value + create_description(description, false);
+
+	CommandLine::Print(plaintext);
+
+	return true;
+    }
+
+    /**
+     * Convert variable name to the full variable identification
+     * If there are conflicts (same variable is defined more files)
+     * or variable is not found nil is returned
+     * @param variable Variable name
+     * @return string variable identification
+     */
+    global define string variable2id(string variable) ``{
+	if (variable != nil)
+	{
+	    map all_names = Sysconfig::get_all_names();
+	    list vids = all_names[variable]:nil;
+
+	    if (vids == nil)
+	    {
+		// variable was not found
+		// check whether variable name is complete variable identification
+		list all_vids = Sysconfig::get_all();
+		y2milestone("variable: %2 all_vids: %1", all_vids, variable);
+
+		if (contains(all_vids, variable))
+		{
+		    return variable;
+		}
+		else
+		{
+		    // command line output
+		    CommandLine::Print(sformat(_("Variable %1 was not found"), variable));
+		}
+	    }
+	    else if (size(vids) == 1)
+	    {
+		return vids[0]:nil;
+	    }
+	    else
+	    {
+		// duplicated variable, print found files
+		CommandLine::Print(sformat("Variable %1 is located in the following files:\n", variable));
+
+		foreach(string vid, vids, ``{
+			string fname = Sysconfig::get_file_from_id(vid);
+			CommandLine::Print(fname);
+		    }
+		);
+
+		// variable name conflict - full name (with file name) is required
+		CommandLine::Print(sformat(_("\nPlease use full variable name in form <VARIABLE_NAME>$<FILE_NAME>\n(e.g. %1$%2)"), variable, Sysconfig::get_file_from_id(vids[0]:"/etc/sysconfig/unknown")));
+	    }
+	}
+
+	return nil;
+    }
+
+    /**
+     * Write handler - disable progress bar (there is no UI) and write settings to the system.
+     * @return boolean True on sucess
+     */
+    global define boolean writeHandler() ``{
+	// disable progress bar
+	Progress::off();
+
+	// write changes, start activation commands
+	return Sysconfig::Write();
+    }
+
+}

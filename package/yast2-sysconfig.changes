@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov 13 13:50:00 CET 2003 - lslezak@suse.cz
+
+- command line UI
+- use IP:: module
+- version 2.9.0
+
+-------------------------------------------------------------------
 Thu Sep 25 12:32:52 CEST 2003 - lslezak@suse.cz
 
 - use Require module (#31673)
