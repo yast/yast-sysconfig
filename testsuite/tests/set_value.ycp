@@ -9,6 +9,7 @@
 
 include "testsuite.ycp";
 
+import "Pkg";   // override packamanager
 import "Sysconfig";
 
 DUMP("Testing data type validation");

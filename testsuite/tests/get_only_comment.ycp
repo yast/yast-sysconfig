@@ -9,6 +9,7 @@
 
 include "testsuite.ycp";
 
+import "Pkg";   // override packamanager
 import "Sysconfig";
 
 // Note: DUMP is used instead of TEST, because it supports multiline

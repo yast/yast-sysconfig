@@ -9,6 +9,7 @@
 
 include "testsuite.ycp";
 
+import "Pkg";   // override packamanager
 import "Sysconfig";
 
 TEST( ``(Sysconfig::Set([ $[ "sysconfig_key" : "VARIABLE",

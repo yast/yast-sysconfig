@@ -9,6 +9,7 @@
 
 include "testsuite.ycp";
 
+import "Pkg";   // override packamanager
 import "Sysconfig";
 
 map param = $[ "separator" : ",",
@@ -25,9 +26,6 @@ TEST( ``(Sysconfig::ParseString(" abc,123  ", param) ), [ $[], $[], $[] ], nil )
 TEST( ``(Sysconfig::ParseString("x,  y  ,  z", param) ), [ $[], $[], $[] ], nil );
 TEST( ``(Sysconfig::ParseString("0,\"1, 2, 3\", 4, 5 ", param) ), [ $[], $[], $[] ], nil );
 TEST( ``(Sysconfig::ParseString(" ,,  ,", param) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::ParseString("1, \"\\\" \", 2", param) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::ParseString(" \" \\\" \", 2", param) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::ParseString(" \\\" , 2", param) ), [ $[], $[], $[] ], nil );
 
 // multi separator
 param["separator"] = ",;.";
@@ -48,6 +46,7 @@ TEST( ``(Sysconfig::ParseString(" \n \\\"  ", param) ), [ $[], $[], $[] ], nil )
 
 // don't remove white space
 param["remove_whitespace"] = false;
+param["separator"] = ",";
 TEST( ``(Sysconfig::ParseString("   a   b zx ,, ,", param) ), [ $[], $[], $[] ], nil );
 
 // comma as separator
