@@ -16,6 +16,7 @@ import "Sysconfig";
 import "Runlevel";
 import "Directory";
 import "Mode";
+import "Require";
 
 import "Popup";
 import "Label";
@@ -56,10 +57,6 @@ global define symbol ReadDialog() ``{
 
 	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") < 0)
 	{
-	    // include require.ycp only when it is really needed,
-	    // because it starts package manager
-	    include "require.ycp";
-
 	    y2warning("Package powertweak is not installed");
 
 	    // ask user to install powertweak package
@@ -79,7 +76,7 @@ global define symbol ReadDialog() ``{
 		install = add(install, "powertweak-extra");
 	    }
 
-	    just_installed = DoInstallAndRemove(install, []);
+	    just_installed = Require::DoInstallAndRemove(install, []);
 
 	    if (just_installed == false)
 	    {
