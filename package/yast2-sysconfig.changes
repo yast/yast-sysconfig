@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 17 17:46:24 CET 2003 - lslezak@suse.cz
+
+- export/import data in 8.1 format
+- version 2.7.3
+
+-------------------------------------------------------------------
 Thu Jan 16 15:15:01 CET 2003 - lslezak@suse.cz
 
 - autoinstallation support
@@ -10,7 +16,6 @@ Thu Jan 16 15:15:01 CET 2003 - lslezak@suse.cz
 - added missing descriptions of predefined paths
 - added descriptions for translatiors
 - small code clean up
-- version 2.7.3
 
 -------------------------------------------------------------------
 Wed Jan  8 13:19:42 CET 2003 - lslezak@suse.cz
