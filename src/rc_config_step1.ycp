@@ -278,7 +278,7 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
             //////////////////////////////////////////////////////////////////////////////////
 	    map|void search = UI(`SearchDlg());
 
-	    if ( ret != nil )
+	    if ( search != nil )
 	    {
 		string search_str = lookup( search, "search");
 		boolean ignore    = lookup( search, "ignore");
@@ -329,6 +329,10 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 		      if ( toDisplayDialogKey != "" )
 		      {
 			  UI( `ChangeWidget(`id(`key), `CurrentItem, toDisplayDialogKey ));
+		      }
+		      else
+		      {
+			  UI( `ChangeWidget(`id(`key), `CurrentItem, goto_key ));
 		      }
 		   }
 		}
