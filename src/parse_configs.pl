@@ -222,30 +222,42 @@ for my $fname (@list)
 {
     open(CONFIGFILE, $fname);
 
-#    print "file: $fname\n";
-    
     my $location = "Other".$fname;
     my $description = "";
 
     while(my $line = <CONFIGFILE>)
     {
+	chomp($line);
+
 	# path metadata definition
 	if ($line =~ /^##\s*Path\s*:\s*((\s*\s*\S+)*)\s*$/)
 	{
 	    $location = $1;
-#	    print "'$location'\n";
 	}
 	elsif ($line =~ /^##\s*Description\s*:\s*((\s*\s*\S+)*)\s*$/)
 	{
-	    $descriptions{$location} = $1;
-#	    $description = $1;
-#	    print "'$location'\n";
+	    my $descr = $1;
+
+	    while ($descr =~ /(.*)\\$/)
+	    {
+		# remove trailing backslash
+		$descr = $1;
+
+		# read next line
+		$line = <CONFIGFILE>;
+		chomp($line);
+
+		if ($line =~ /^##(.*)/)
+		{
+		    $descr .= $1;
+		}
+	    }
+
+	    $descriptions{$location} = $descr;
 	}
 	# variable definition
 	elsif ($line =~ /^\s*([-\w\/:]*)\s*=.*/)
 	{
-#	    print "Line: $line\n";
-#	    print "Variable: $1\n\n";
 
 	    my $existing_vars = $locations{$location};
 
@@ -257,9 +269,7 @@ for my $fname (@list)
 	    $existing_vars .= $1.'$'.$fname;
 
 	    $locations{$location} = $existing_vars;
-#	    $descriptions{$location} = $description;
 	}
-	    
     }
 
     close(CONFIGFILE);
@@ -281,6 +291,6 @@ push (@rec, "");
 # start conversion
 print "[\n";
 print '['.convert(@rec)."],\n";
-print hash_to_map(%descriptions);
+print hash_to_map(%descriptions)."\n";
 print "]\n";
 

@@ -39,7 +39,7 @@ global define symbol ReadDialog() ``{
     Sysconfig::AbortFunction = ``{ return PollAbort();};
 
 // FIXME:    boolean ret = Sysconfig::Read(["/etc/sysconfig/*"]);
-    boolean ret = Sysconfig::Read(["/local/lslezak/fillup-templates/*"]);	// TODO: add metadata file with predefined paths and descriptions
+    boolean ret = Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*"]);	// TODO: add metadata file with predefined paths and descriptions
 
     return ret ? `next : `abort;
 }
@@ -100,6 +100,147 @@ global define list add_if_missing(list l, string v) ``{
     return (!contains(l, v)) ? add(l, v) : l;
 }
 
+global define remove_whitespaces(string input) ``{
+    string removed_whitespaces = regexpsub(input, "^[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
+
+    return (removed_whitespaces != nil) ? removed_whitespaces : input;
+}
+
+global define list parse_options(string options) ``{
+    list ret = [];
+
+    // parsing possible values is done by two alghorithms:
+    // first is much faster, but only usable if string
+    // doesn't contain any double qoute characters
+    // second is more general, but of course slower
+
+    if (options == nil)
+    {
+	return [];
+    }
+
+    if (findfirstof(options, "\"") == nil)
+    {
+	// easy case - no qouting, split string to values
+	list(string) values = splitstring(options, ",");
+
+	foreach (string v, values, ``{
+		v = remove_whitespaces(v);
+		if (!contains(ret, v)) ret = add(ret, v);
+	    }
+	);
+    }
+    else
+    {
+	// quoting is used, we cannot easily split input
+	// parsing each character is needed
+	symbol state = `out_of_string;
+	integer index = 0;
+	string str = "";
+
+	while(index < size(options))
+	{
+	    string character = substring(options, index, 1);
+
+	    y2debug("character: %1 state: %2 index: %3", character, state, index);
+
+	    if (character == "\\")
+	    {
+		if (index + 1 < size(options))
+		{
+		    string nextcharacter = substring(options, index + 1, 1);
+
+		    if (nextcharacter == "\"")
+		    {
+			character = "\\\"";
+			index = index + 1;
+		    }
+		}
+	    }
+
+	    if (state == `out_of_string)
+	    {
+		if (character == " " || character == "\t" || character == ",")
+		{
+		    index = index + 1;
+		    continue;
+		}
+		else if (character == "\"")
+		{
+		    state = `in_quoted_string;
+		}
+		else
+		{
+		    state = `in_string;
+
+		    if (character == "\\\"")
+		    {
+			str = "\"";
+		    }
+		    else
+		    {
+			str = character;
+		    }
+		}
+	    }
+	    else if (state == `in_quoted_string)
+	    {
+		if (character == "\"")
+		{
+		    state = `out_of_string;
+		    if (!contains(ret, str)) ret = add(ret, str);
+		    str = "";
+		}
+		else if (character == "\\\"")
+		{
+		    str = str + "\"";
+		}
+		else
+		{
+		    str = str + character;
+		}
+	    }
+	    else if (state == `in_string)
+	    {
+		if (character == ",")
+		{
+		    state = `out_of_string;
+		    str = remove_whitespaces(str);
+		    if (!contains(ret, str)) ret = add(ret, str);
+		    str = "";
+		}
+		else if (character == "\\\"")
+		{
+		    str = str + "\"";
+		}
+		else
+		{
+		    str = str + character;
+		}
+	    }
+
+	    index = index + 1;
+	}
+
+	if (state == `in_quoted_string)
+	{
+	    y2warning("Missing trainling double quote character(\") in input: '%1'", options);
+	    if (!contains(ret, str)) ret = add(ret, str);
+	}
+
+	if (state == `in_string)
+	{
+	    str = remove_whitespaces(str);
+	    if (!contains(ret, str)) ret = add(ret, str);
+	}
+    }
+
+    y2debug("Parsed values: %1", ret);
+
+    return ret;
+}
+
+
 global define list combo_list(map description) ``{
     string value = description["value"]:"";
     list ret = [];
@@ -125,24 +266,12 @@ global define list combo_list(map description) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-
-	list(string) values = splitstring(values_string, ",");
-
-	foreach (string v, values, ``{
-		if (!contains(ret, v)) ret = add(ret, v);
-	    }
-	);
+	ret = merge(ret, parse_options(values_string));
     }
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-
-	list(string) values = splitstring(values_string, ",");
-
-	foreach (string v, values, ``{
-		if (!contains(ret, v)) ret = add(ret, v);
-	    }
-	);
+	ret = merge(ret, parse_options(values_string));
     }
 
     // add default value to the list
@@ -166,12 +295,27 @@ global define string possible_values(map description) ``{
     }
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
-	ret = regexpsub(type, "^list\\((.*)\\)", "\\1");
+	list spaces = [];
+	list values = parse_options(regexpsub(type, "^list\\((.*)\\)", "\\1"));
+
+	foreach(string value, values, ``{
+		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
+	    }
+	);
+
+	ret = mergestring(spaces, ", ");
     }
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
-	ret = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	ret = ret +  " <I>" + _("or any value") + "</I>";
+	list spaces = [];
+	list values = parse_options(regexpsub(type, "^string\\((.*)\\)", "\\1"));
+
+	foreach(string value, values, ``{
+		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
+	    }
+	);
+
+	ret = mergestring(spaces, ", ") + " <I>" + _("or any value") + "</I>";
     }
     else if (regexpmatch(type, "^regexp\\(.*\\)"))
     {
@@ -214,11 +358,11 @@ global define void update_combo(map description) ``{
 
     if (combo_editable(description))
     {
-	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`editable, `hstretch), _("&Setting of: ") + varname,  combo_list(description)));
+	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`editable, `hstretch), _("&Setting of: ") + varname, combo_list(description)));
     }
     else
     {
-	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`hstretch), _("&Setting of: ") + varname,  combo_list(description)));
+	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`hstretch), _("&Setting of: ") + varname, combo_list(description)));
     }
 
     // disable combo for non-leaf nodes
