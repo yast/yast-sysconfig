@@ -3,7 +3,7 @@
 # neededforbuild  gpp libgpp yast2-devel-packages
 
 @HEADER@
-Requires:	yast2 perl
+Requires:	yast2 yast2-network perl
 
 BuildArchitectures:	noarch
 
