@@ -216,8 +216,15 @@ global define string create_richtext_description(map description) ``{
 	string restart = description["actions", "Rest"]:nil;
 	string reload = description["actions", "Reld"]:nil;
 	string command = description["actions", "Cmd"]:nil;
+	string precommand = description["actions", "Pre"]:nil;
 
 	// check whether action is defined
+	if (precommand != nil)
+	{
+	    // header in the variable description text, bash command is appended
+	    result = result + "<P><B>" + _("Prepare Command: ") + "</B> " + precommand + "</P>";
+	}
+
 	if (conf_modules != nil)
 	{
 	    // parse string with options, then add them to the rich text

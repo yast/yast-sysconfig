@@ -348,6 +348,7 @@ for my $fname (@list)
     my $ServiceRestart = undef;
     my $ServiceReload = undef;
     my $Command = undef;
+    my $PreSaveCommand = undef;
     my $Meta_found = 0;
 
     # hack for /etc/sysconfig/network/ifcfg-* files
@@ -450,6 +451,10 @@ for my $fname (@list)
 	    {
 		$tmp{'Cmd'} = $Command;
 	    }
+	    if (defined($PreSaveCommand))
+	    {
+		$tmp{'Pre'} = $PreSaveCommand;
+	    }
 	    
 	    $actions{$1.'$'.$fname} = \%tmp;
 	}
@@ -459,7 +464,7 @@ for my $fname (@list)
 	    if ($Meta_found == 0)
 	    {
 		# reset all other action tag values
-		$ServiceReload = $ServiceRestart = $Command = undef;
+		$ServiceReload = $ServiceRestart = $Command = $PreSaveCommand = undef;
 	    }
 
 	    $Config = $1;
@@ -479,7 +484,7 @@ for my $fname (@list)
 	    if ($Meta_found == 0)
 	    {
 		# reset all other action tag values
-		$ServiceReload = $Config = $Command = undef;
+		$ServiceReload = $Config = $Command = $PreSaveCommand = undef;
 	    }
 
 	    $ServiceRestart = $1;
@@ -499,7 +504,7 @@ for my $fname (@list)
 	    if ($Meta_found == 0)
 	    {
 		# reset all other action tag values
-		$ServiceRestart = $Config = $Command = undef;
+		$ServiceRestart = $Config = $Command = $PreSaveCommand = undef;
 	    }
 
 	    $ServiceReload = $1;
@@ -519,7 +524,7 @@ for my $fname (@list)
 	    if ($Meta_found == 0)
 	    {
 		# reset all other action tag values
-		$ServiceRestart = $Config = $Command = undef;
+		$ServiceRestart = $Config = $ServiceReload = $PreSaveCommand = undef;
 	    }
 
 	    $Command = $1;
@@ -529,6 +534,26 @@ for my $fname (@list)
 	    {
 		# Read multiline metadata value
 		$Command .= ReadMulti();
+	    }
+
+	    $Meta_found = 1;
+	}
+	# generic command started before changed variable is saved
+	elsif ($line =~ /^##\s*PreSaveCommand\s*:\s*((\s*\S+)*)\s*$/)
+	{
+	    if ($Meta_found == 0)
+	    {
+		# reset all other action tag values
+		$ServiceRestart = $Config = $Command = $ServiceReload = undef;
+	    }
+
+	    $PreSaveCommand = $1;
+
+	    # read multiline metadata
+	    if ($PreSaveCommand =~ /(.*)\\$/)
+	    {
+		# Read multiline metadata value
+		$PreSaveCommand .= ReadMulti();
 	    }
 
 	    $Meta_found = 1;

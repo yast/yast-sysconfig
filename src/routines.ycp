@@ -11,6 +11,8 @@
 
 textdomain "sysconfig";
 
+import "Sysconfig";
+import "Popup";
 
 /**
  * Check for pending Abort press

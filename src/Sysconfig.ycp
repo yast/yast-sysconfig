@@ -1094,8 +1094,59 @@ global define boolean Write() ``{
     // will be complete SuSEconfig started?
     boolean CompleteSuSEconfig = false;
 
+    // aborted?
+    boolean abort = false;
+
     // SuSEconfig script name
     string SuSEconfigName = (Product::unitedlinux == true) ? "ULconfig" : "SuSEconfig";
+
+    // there is no progress bar yet
+    Progress::off();
+
+    // start presave commands
+    foreach (string vid, string new_val, modified_variables, ``{
+	    if (abort)
+	    {
+		return;
+	    }
+
+	    // get activation map for variable
+	    string presave = actions[vid, "Pre"]:nil;
+
+	    if (presave != nil)
+	    {
+		string confirm = _("A command will be executed");
+		string label = sformat(_("Starting command: %1..."), presave);
+		string error = sformat(_("Command %1 failed"), presave);
+
+		symbol precommandresult = StartCommand(presave, label, error, confirm, ConfirmActions);
+
+		if (precommandresult == `abort)
+		{
+		    abort = true;
+		}
+		else if (precommandresult == `failed)
+		{
+		    // PreSaveCommand returned non zero value
+		    // remove activation data for failed variable
+		    // (insert empty Command: to not start complete SuSEconfig)
+		    actions[vid] = $["Cmd" : ""];
+		}
+		else if (precommandresult != `success && precommandresult != `skip)
+		{
+		    y2error("Unknown return value from StartCommand(): %1", precommandresult);
+		}
+	    }
+	}
+    );
+
+    if (abort)
+    {
+	return false;
+    }
+
+    // reenable progress bar
+    Progress::on();
 
     foreach (string vid, string new_val, modified_variables, ``{
 	// get activation map for variable
@@ -1213,7 +1264,6 @@ global define boolean Write() ``{
     }
 
     // now start required activation commands
-    boolean abort = false;
     Progress::NextStage();
 
     // start SuSEconfig
