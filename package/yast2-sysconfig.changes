@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr  2 16:33:02 CEST 2004 - lslezak@suse.cz
+
+- changed license to GPL
+- version 2.9.13
+
+-------------------------------------------------------------------
 Fri Mar 26 14:29:59 CET 2004 - lslezak@suse.cz
 
 - [Default] button - fixed layout problem (#36745)
