@@ -277,11 +277,17 @@ sub change_dir ()
 	$base = $base . " ";
       }
 
+       my $xpath = $path;
+       if ($property eq "path")
+       {
+	  $xpath       =~ s:/:\$:g;
+       }
+
       while ( length($property) < $longest_property ) {
 	$property = $property . " ";
       }
 
-       $globalline = "\n" . $base . " " . $property . " "  . $path;
+       $globalline = "\n" . $base . " " . $property . " "  . $xpath;
 
        print TARGET $globalline;
     }

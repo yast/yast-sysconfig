@@ -155,6 +155,7 @@
 	});
     };
 
+
     /**
      * Write value to file
      * @param key path to variable .etc.sysconfig.*
@@ -236,7 +237,9 @@
 	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") > 0)
 	{
 	    // popup dialog question
-	    if (UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.\nDo you want to create it and use powerteak?"), YesButtonLabel(), NoButtonLabel(), `focus_no) == true)
+	    if (UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.
+Create it and use powerteak?
+"), YesButtonLabel(), NoButtonLabel(), `focus_no) == true)
 	    {
 		// create powertweak config
 		integer exit = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
@@ -342,16 +345,17 @@ to set up</p>
 <br>
 <p><b>Warning:</b><br>Incorrect configuration of packet filters may cause a false sense
 of security. If unsure, use the SuSEpersonal-firewall. The SuSEfirewall2
-requires the linux kernel 2.4 to run.</p>")));
+requires the Linux kernel 2.4 to run.</p>
+")));
      }
      else
      {
 	 if (powertweak_only_mode == true)
 	 {
 	     // warning help text 1/2
-	     curr_dialog = getDirDialog(_("<p>Here you can tune hardware or kernel parameters.</p>")
+	     curr_dialog = getDirDialog(_("<p>Here, tune hardware or kernel parameters.</p>")
 	        // warning help text 2/2
-		+ _("<p><b>WARNING: Setting wrong value can result in system lock or data loss!</b></p>")
+		+ _("<p><b>WARNING: Setting a wrong value can result in system lock or data loss!</b></p>")
 	     );
 	 }
 	 else
@@ -501,8 +505,45 @@ configuration modules like the \"Network configuration\".</p>
 		  key = new_key;
 		  y2milestone("key: %1", key);
 
+		  // compare old and new value
 		  if ( lookup(lookup(rc_config_keys, key, $[]), `value, nil) != new_val )
 		  {
+		    /* TODO: finish escaping (#16727)
+		     string unquoted = "";
+		     integer pos = 0;
+		     boolean bslash = false;
+
+		     while (pos < size(new_val))
+		     {
+			 string char = substring(new_val, pos, 1);
+
+			 if (char == "\\")
+			 {
+			     if (bslash)
+			     {
+				 unquoted = unquoted + "\\\\";
+			     }
+			     bslah = !bslah;
+			 }
+			 else
+			 {
+			    if (char == "\"")
+			    {
+				unquoted = unquoted + "\\\"";
+			    }
+			    else
+			    {
+				unquoted = unquoted + char;
+			    }
+
+			    bslah = false;
+			 }
+
+			 pos = pos + 1;
+		     }
+
+		     y2milestone("unquoted");*/
+
 		     map curr_key = lookup(rc_config_keys, key, nil);
 		     y2milestone( "jTTTTTTTTTBB: %1", curr_key);
 		     curr_key     = add( curr_key, `value, new_val);

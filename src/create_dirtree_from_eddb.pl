@@ -49,6 +49,7 @@ sub main()
 	    if ( $line_array[1] eq 'path' )
 	      {
 		$rc_path            = "root".$line_array[2];
+		$rc_path =~ s:\$:/:g;
 		$rc_array{$rc_name} = $rc_path."/".$rc_name;
 		$rc_command         = "mkdir -p ".$rc_path."/".$rc_name;
 

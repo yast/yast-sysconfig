@@ -18,7 +18,7 @@ Group = System
 Icon = rc_config.png
 
 ; *one* *short* descriptive line for y2cc
-Helptext = _("Configure powertweak settings - only for experts!")
+Helptext = _("Configure powertweak settings -- only for experts!")
 
 ; arguments, seperated by space
 Arguments = .powertweak

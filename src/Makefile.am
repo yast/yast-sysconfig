@@ -15,7 +15,7 @@ ydata_DATA = meta_sys.config	\
 
 ybin_PROGRAMS = syscreate_data
 
-EXTRA_DIST = $(ynclude_DATA) $(client_DATA) $(config_DATA) $(ydata_DATA) $(ybin_PROGRAMS)
+EXTRA_DIST = $(ynclude_DATA) $(client_DATA) $(config_DATA) $(ydata_DATA) $(ybin_PROGRAMS) sysconfig_check
 
 syscreate_data_SOURCES =		\
 	RCDirectory.cpp RCDirectory.h	\

@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Wed Aug 14 15:55:38 CEST 2002 - lslezak@suse.cz
+
+- read really all files at /etc/sysconfig directory
+- changed tree level separator from '/' to '$' (allows displaying
+  powertweak variables with '/' in name), fixed metadata scripts,
+  regenerated metadata file
+- merged proofread text
+- added script for searching missing variables in metadata file
+- added new metadata
+- changed maintainer to lslezak@suse.cz
+- version 2.6.6
+
+-------------------------------------------------------------------
 Fri Aug  9 16:03:09 CEST 2002 - lslezak@suse.de
 
 - added ycpdoc comments
