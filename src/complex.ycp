@@ -448,7 +448,7 @@ global define string possible_values(map description) ``{
     {
 	string regex = regexpsub(type, "^regexp\\((.*)\\)", "\\1");
 	// Translation: %1 is regular expression string
-	ret = sformat(_("<I>Value matching regular expression</I> %1"), regex);
+	ret = "<I>" + _("Value matching regular expression:") + "</I>" + regex;
     }
     else if (type == "integer")
     {
