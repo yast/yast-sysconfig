@@ -23,7 +23,7 @@ import "Product";
 import "Label";
 import "IP";
 import "String";
-import "Runlevel";
+import "Service";
 
 
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
@@ -1142,7 +1142,7 @@ global define boolean Write() ``{
 	}
 
 	// activate powertweak at startup
-	ret = Runlevel::ServiceAdjust("powertweakd", "enable");
+	ret = Service::Enable("powertweakd");
 	return ret;
     }
 
