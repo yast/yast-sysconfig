@@ -272,6 +272,13 @@ for my $fname (@list)
     my $location = "Other".$fname;
     my $description = "";
 
+    # hack for /etc/sysconfig/network/ifcfg-* files
+    if ($fname =~ '^/etc/sysconfig/network/ifcfg-(.*)')
+    {
+	$location = "Hardware/Network/$1";
+	$descriptions{$location} = "Configuration of network device $1";
+    }
+
     while(my $line = <CONFIGFILE>)
     {
 	chomp($line);
