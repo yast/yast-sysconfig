@@ -1,0 +1,31 @@
+@HEADER-COMMENT@
+# neededforbuild yast2-devel-packages gpp libgpp
+
+@HEADER@
+Requires:	yast2
+
+Provides:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
+Obsoletes:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
+
+Summary:	Editor for /etc/sysconfig
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+@configdir@/sysconfig.y2cc
+@clientdir@/sysconfig_step1.ycp
+@clientdir@/sysconfig.ycp
+@ydatadir@/meta_sys.config
+@yncludedir@/sysconfig/sys_dialogs.ycp
+@ybindir@/syscreate_data
+%doc @docdir@

@@ -363,9 +363,9 @@ int main(int argc, char* argv[])
   const int MAX_DIR_DEPTH     =    20;
 
   // variables for the file names
-  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/meta_sys.config";
-  char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/rc_config_keys";
-  char  tree_data_arr[FILENAME_LENGTH]       = "/usr/lib/YaST2/tree_data";
+  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/data/meta_sys.config";
+  char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/data/rc_config_keys";
+  char  tree_data_arr[FILENAME_LENGTH]       = "/usr/lib/YaST2/data/tree_data";
   char *meta_rc_config                       = meta_rc_config_arr;
   char *rc_config_keys                       = rc_config_keys_arr;
   char *tree_data                            = tree_data_arr;
@@ -447,9 +447,9 @@ int main(int argc, char* argv[])
   if ((argc == 2) && ( strcmp(argv[1], "-f" ) == 0 ))
   {
      firewall_mode  = true;
-     meta_rc_config = "/usr/lib/YaST2/meta_fw.config";
-     rc_config_keys = "/usr/lib/YaST2/fw_config_keys";
-     tree_data      = "/usr/lib/YaST2/fw_tree_data";
+     meta_rc_config = "/usr/lib/YaST2/data/meta_fw.config";
+     rc_config_keys = "/usr/lib/YaST2/data/fw_config_keys";
+     tree_data      = "/usr/lib/YaST2/data/fw_tree_data";
   }
   else if  (argc == 1)
   {

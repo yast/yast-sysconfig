@@ -1,60 +1,44 @@
-/*
-   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\|////////////////////////////////////
-   \\							                 //
-   \\                                                                    //    
-   \\                    __   __    ____ _____ ____                      //    
-   \\                    \ \ / /_ _/ ___|_   _|___ \                     //    
-   \\                     \ V / _` \___ \ | |   __) |                    //    
-   \\                      | | (_| |___) || |  / __/                     //    
-   \\                      |_|\__,_|____/ |_| |_____|                    //    
-   \\                                                         -o)        //
-   --------------------------------------------------------   /\\  --------
-   \\	                                        	     _\_v  
-   \\
-   \\   Author:        Michael Hager <mike@suse.de>
-   \\   
-   \\   Description:   Dialog defines for rc_config editior
-   \\   
-   \\   Purpose:
-   \\   
-   \\   external data:  rc_config_eddb, rc_config_keys
-   \\
-   ------------------------------------------------------------------------
-   \\ $Id$
- 
+/**
+ * File:	clients/sysconfig.ycp
+ * Module:	Editor for /etc/sysconfig
+ * Summary:	Dialogs include
+ * Authors:	Michael Hager <mike@suse.de>
+ *
+ * $Id$
  */
 
 {
-  textdomain "rc_config";
+
+  textdomain "sysconfig";
   //////////////////////////////////////////////////////////////////////////////////////
   //                     Utility- D I A L O G   D E F I N E S                         //
   //////////////////////////////////////////////////////////////////////////////////////
 
-  
+
     /////////////////////////////////////////////////////////////////////////////////////
     //  Helptext                                                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
   UI(``{  global define HelpMsgStart()``{
-      return( // helptext for popup 
+      return( // helptext for popup
 	     _("<p>With this editor, edit the variables in /etc/sysconfig configfiles</p>
 "));
   }});
-    
 
-    
+
+
   //////////////////////////////////////////////////////////////////////////////////////
   //  Helptext                                                                        //
   //////////////////////////////////////////////////////////////////////////////////////
-    
+
   UI(``{ global define HelpMsgBody() ``{
-      return(  // helptext for popup 
+      return(  // helptext for popup
 	     _("<p>After you save your changes, this editor changes the variables in the
 corresponding  sysconfig file. Then it runs
 SuSEconfig, which changes the underlying configuration files, stops and starts daemons,
 and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
 ") +
- 
+
 	     _("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
 
 	     _("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
@@ -63,26 +47,26 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
   }});
 
 
-    
+
   //////////////////////////////////////////////////////////////////////////////////////
   //  Helptext                                                                        //
   //////////////////////////////////////////////////////////////////////////////////////
 
   UI(``{ global define HelpMsgNotice()``{
-      return( // helptext for popup 
+      return( // helptext for popup
 	     _("<p>
 Many of these variables are set by specialized YaST2
 configuration modules like the \"Network configuration\".</p>
 "));
   }});
 
-  
+
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // getComboList                                                                                  //
   //-----------------------------------------------------------------------------------------------//
   // read the possible entrys of combobox, and mark the real value, so that it is shown as default //
   //-----------------------------------------------------------------------------------------------//
-    
+
   global define getComboList( string key, map entry_map )
       ``{
       // get real value of the entry
@@ -93,7 +77,7 @@ configuration modules like the \"Network configuration\".</p>
       // - first:  delete the real entry from the list, if it is in there
       // - second: add the real value
 
-	  // first: 
+	  // first:
       list   entry_opts   = filter( `item, lookup( entry_map, `options, []), ``( item != entry_value ));
       // second:
       entry_opts = add( entry_opts, entry_value );
@@ -105,14 +89,14 @@ configuration modules like the \"Network configuration\".</p>
 
       return( entry_opts );
   }
-	 
-						     
+
+
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // getDescr()                                                                                    //
   //-----------------------------------------------------------------------------------------------//
   // Read the description                                                                          //
   //-----------------------------------------------------------------------------------------------//
-    
+
   global define getDescr( string key )
       ``{
       map key_map          = lookup( rc_config_keys, key, $[] );
@@ -134,14 +118,14 @@ configuration modules like the \"Network configuration\".</p>
 	  if ( substring( key, size(key)-2, 1 ) == "_" )
 	  {
 	      string  comment_key = substring( key, 0, size(key)-2 ) + "_0";
-		     
+
 	      map comment_key_map          = lookup( rc_config_keys, comment_key, $[] );
 	      descr                        = lookup( comment_key_map, `descr, nil);
 
 	      if ( descr == nil ) descr = "";
 	  }
       }
-	     
+
       // delete all "#"
       descr = mergestring(splitstring( descr, "#"),"");
       return( descr );
@@ -189,13 +173,13 @@ configuration modules like the \"Network configuration\".</p>
 		 key_map        = add( key_map, `datatype, mytype);
 		 rc_config_keys = add( rc_config_keys, key, key_map );
 	     }
-	     
+
 	     return( mytype );
     }
 
 
 
-    
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // getComboBoxOption()                                                                           //
     //-----------------------------------------------------------------------------------------------//
@@ -229,9 +213,9 @@ configuration modules like the \"Network configuration\".</p>
 	    return(`editable);
 	}
     }
-    
 
-    
+
+
     //////////////////////////////////////////////////////////////////////////////////////////////////
     //                              D I A L O G   D E F I N E S                                     //
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -266,16 +250,16 @@ Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
 	    CloseDialog();
 	};
     });
-    
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog DisplayLogFile                                                                         //
     //-----------------------------------------------------------------------------------------------//
     // Display Suseconfig logfile                                                                    //
     //-----------------------------------------------------------------------------------------------//
-    
+
     UI( ``{
 	global define DisplayLogFile( string msg_text ) ``{
-	    
+
 	    term text = `RichText( `opt(`plainText), msg_text );
 	    y2debug( "<<--%1", text);
 
@@ -285,17 +269,17 @@ Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
 			      text,	// e.g. `Richtext()
 			      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
 			   )
-		); 
+		);
 
 	    SetFocus(`id(`ok_help) );
-	  
+
 	    any r = UserInput();
 	    CloseDialog();
 	    return (r);
 	};
-    });      
+    });
 
-  
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog AskShowLog                                                                             //
     //-----------------------------------------------------------------------------------------------//
@@ -305,12 +289,12 @@ Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
     UI( ``{
 	global define AskShowLog( ) ``{
 
-	    OpenDialog(`opt(`decorated), 
+	    OpenDialog(`opt(`decorated),
 		       `VBox( `Heading( _("SuSEConfig Logging")) ,
 			      `VBox( `Label( _("Your changes have been saved and SuSEconfig has run.
 Do you want to view the SuSEConfig log?
 ")),
-				     `HBox( 
+				     `HBox(
 					 `PushButton( `id(`log),  _("Show Log File") ),
 					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
 					 )
@@ -320,7 +304,7 @@ Do you want to view the SuSEConfig log?
 	    any r = UserInput();
 	    CloseDialog();
 
-	     
+
 	    return (r);
 	};
     });
@@ -328,12 +312,12 @@ Do you want to view the SuSEConfig log?
     UI( ``{
 	global define AskFwShowLog( ) ``{
 
-	    OpenDialog(`opt(`decorated), 
+	    OpenDialog(`opt(`decorated),
 		       `VBox( `Heading( _("Logging")) ,
-			      `VBox( `Label( _("Your changes have been saved and the firewalls have been restarted. 
+			      `VBox( `Label( _("Your changes have been saved and the firewalls have been restarted.
 Do you want to view the relevant log file?
 ")),
-				     `HBox( 
+				     `HBox(
 					 `PushButton( `id(`log),  _("Show Log File") ),
 					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
 					 )
@@ -343,7 +327,7 @@ Do you want to view the relevant log file?
 	    any r = UserInput();
 	    CloseDialog();
 
-	     
+
 	    return (r);
 	};
     });
@@ -355,7 +339,7 @@ Do you want to view the relevant log file?
 
     UI( ``{
 	global define WaitSuSEconfig( ) ``{
-	    OpenDialog(`opt(`decorated), 
+	    OpenDialog(`opt(`decorated),
 		       `VBox( `Heading( _("SuSEConfig is running ...")) ,
 			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time."))
 			   )
@@ -369,7 +353,7 @@ Do you want to view the relevant log file?
 
     UI( ``{
 	global define WaitRestartFirewall( ) ``{
-	    OpenDialog(`opt(`decorated), 
+	    OpenDialog(`opt(`decorated),
 		       `VBox( `Heading( _("(Re)Start firewall ...")) ,
 			      `Label( _("\nThis procedure can take some time."))
 			   )
@@ -404,44 +388,44 @@ Do you want to view the relevant log file?
 	string l3_key =  lookup( l3, `linekey, "");
 	string l4_key =  lookup( l4, `linekey, "");
 	string l5_key =  lookup( l5, `linekey, "");
-	  
+
 	string help_text = "";
 
 	/*
-	even add helptext if getDescr(..) == "" 
+	even add helptext if getDescr(..) == ""
 	help_text = sformat( "<b>%1:</b><p>%2<p><b>%3:</b><p>%4</p><p><b>%5:</b><p>%6</p>",
 			     l1_key, getDescr(l1_key),
 			     //l1_key, getDescr(l1_key), ???????????????
 			     l2_key, getDescr(l2_key),
 			     l3_key, getDescr(l3_key)   );
-			       
+
 	help_text = sformat( "%1<p><b>%2:</b><p>%3</p><p><b>%4:</b><p>%5</p>", help_text,
 			     l4_key, getDescr(l4_key),
 			     l5_key, getDescr(l5_key));
 	*/
-	
+
 	list all_keys = [  l1_key, l2_key, l3_key, l4_key, l5_key ];
 	foreach( `lx_key, all_keys, ``{
 	    string lx_key_help = getDescr ( lx_key );
 	    if (lx_key_help != "" ) help_text = help_text + sformat("<b>%1:</b><p>%2</p>", lx_key, lx_key_help);
 	});
-	
 
-// 	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
-// 		 `HBox(
-// 		       `VBox( `Top(`ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-// 			      `Top(`ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-// 			      `Top(`ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-// 			      `Top(`ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-// 			      `Top(`ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
-// 			      `HStretch()
-// 			      ),
-// 		       `HSpacing(1),
-// 		       `HWeight(100,`RichText( help_text)), 
-// 		       `HSpacing(1)
-// 		       )));
 
-	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
+//	  return(`VBox( `HSpacing(60),`VSpacing(1.2),
+//		 `HBox(
+//		       `VBox( `Top(`ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+//			      `Top(`ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+//			      `Top(`ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+//			      `Top(`ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
+//			      `Top(`ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
+//			      `HStretch()
+//			      ),
+//		       `HSpacing(1),
+//		       `HWeight(100,`RichText( help_text)),
+//		       `HSpacing(1)
+//		       )));
+
+	  return(`VBox( `HSpacing(60),`VSpacing(1.2),
 			`HBox(
 			      `VBox( `Top(`ComboBox ( `id("d5_1"),
 						      `opt(getComboBoxOption(l1_key),`hstretch),
@@ -466,15 +450,15 @@ Do you want to view the relevant log file?
 				     `HStretch()
 				     ),
 			      `HSpacing(1),
-			      `HWeight(100,`RichText( help_text)), 
+			      `HWeight(100,`RichText( help_text)),
 			      `HSpacing(1)
-			      )));	  
+			      )));
 
     };
 
-			     
-	  
-   
+
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog d4                                                                                     //
     //-----------------------------------------------------------------------------------------------//
@@ -493,39 +477,39 @@ Do you want to view the relevant log file?
 	if (l2 == nil) l2 = $[];
 	if (l3 == nil) l3 = $[];
 	if (l4 == nil) l4 = $[];
-	  
+
 	string l1_key =  lookup( l1, `linekey, "");
 	string l2_key =  lookup( l2, `linekey, "");
 	string l3_key =  lookup( l3, `linekey, "");
 	string l4_key =  lookup( l4, `linekey, "");
-	  
+
 	string help_text = "";
-	  
+
 	help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
 			     l1_key, getDescr(l1_key),
 			     l2_key, getDescr(l2_key),
 			     l3_key, getDescr(l3_key)   );
-			       
+
 	help_text = sformat( "%1<p><b>%2:</b><br>%3</p>", help_text,
 			     l4_key, getDescr(l4_key));
-	  
-// 	  return(`VBox( `HSpacing(60),
-// 			`VSpacing(1.2), 
-// 			`HBox(
-// 			      `VBox( `Top(`ComboBox ( `id("d4_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-// 				     `Top(`ComboBox ( `id("d4_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-// 				     `Top(`ComboBox ( `id("d4_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-// 				     `Top(`ComboBox ( `id("d4_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-// 				     `HStretch()
-// 				     ),
-// 			      `HSpacing(1),
-// 			      `HWeight(100,`RichText( help_text)),
-// 			      `HSpacing(1)
-// 			      ) )
-// 		 );
+
+//	  return(`VBox( `HSpacing(60),
+//			`VSpacing(1.2),
+//			`HBox(
+//			      `VBox( `Top(`ComboBox ( `id("d4_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+//				     `Top(`ComboBox ( `id("d4_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+//				     `Top(`ComboBox ( `id("d4_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+//				     `Top(`ComboBox ( `id("d4_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
+//				     `HStretch()
+//				     ),
+//			      `HSpacing(1),
+//			      `HWeight(100,`RichText( help_text)),
+//			      `HSpacing(1)
+//			      ) )
+//		 );
 
 	  return(`VBox( `HSpacing(60),
-			`VSpacing(1.2), 
+			`VSpacing(1.2),
 			`HBox(
 			      `VBox( `Top(`ComboBox ( `id("d4_1"),
 						      `opt(getComboBoxOption(l1_key),`hstretch),
@@ -549,11 +533,11 @@ Do you want to view the relevant log file?
 			      `HWeight(100,`RichText( help_text)),
 			      `HSpacing(1)
 			      ) )
-		 );	  
+		 );
 
     };
 
-   
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog d3                                                                                     //
@@ -575,27 +559,27 @@ Do you want to view the relevant log file?
 	string l1_key =  lookup( l1, `linekey, "");
 	string l2_key =  lookup( l2, `linekey, "");
 	string l3_key =  lookup( l3, `linekey, "");
-	  
+
 	string help_text = "";
-	  
+
 	help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
 			     l1_key, getDescr(l1_key),
 			     l2_key, getDescr(l2_key),
 			     l3_key, getDescr(l3_key)   );
-			       
 
-// 	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
-// 		 `HBox(
-// 		       `VBox( `Top( `ComboBox ( `id("d3_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-// 			      `Top( `ComboBox ( `id("d3_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-// 			      `Top( `ComboBox ( `id("d3_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-// 			      `VStretch()
-// 			      ),
-// 		       `HSpacing(1),
-// 		       `HWeight(100,`RichText( help_text)),
-// 		       `HSpacing(1) )));
 
-	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
+//	  return(`VBox( `HSpacing(60),`VSpacing(1.2),
+//		 `HBox(
+//		       `VBox( `Top( `ComboBox ( `id("d3_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+//			      `Top( `ComboBox ( `id("d3_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+//			      `Top( `ComboBox ( `id("d3_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+//			      `VStretch()
+//			      ),
+//		       `HSpacing(1),
+//		       `HWeight(100,`RichText( help_text)),
+//		       `HSpacing(1) )));
+
+	  return(`VBox( `HSpacing(60),`VSpacing(1.2),
 			`HBox(
 			      `VBox( `Top( `ComboBox ( `id("d3_1"),
 						       `opt(getComboBoxOption(l1_key),`hstretch),
@@ -636,21 +620,21 @@ Do you want to view the relevant log file?
 
 	string l1_key =  lookup( l1, `linekey, "");
 	string l2_key =  lookup( l2, `linekey, "");
-	  
+
 	string help_text = "";
-	  
+
 	help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p>",
 			     l1_key, getDescr(l1_key),
 			     l2_key, getDescr(l2_key)   );
-			       
-// 	  return( 
-// 	  `VBox(`HSpacing(60),`VSpacing(1.2),
-// 		  `Left( `ComboBox ( `id("d2_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-// 		  `Left( `ComboBox ( `id("d2_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-// 		`VSpacing(1),
-// 		`RichText( help_text) ));
 
-	  return( 
+//	  return(
+//	  `VBox(`HSpacing(60),`VSpacing(1.2),
+//		  `Left( `ComboBox ( `id("d2_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+//		  `Left( `ComboBox ( `id("d2_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+//		`VSpacing(1),
+//		`RichText( help_text) ));
+
+	  return(
 		 `VBox(`HSpacing(60),`VSpacing(1.2),
 		       `Left( `ComboBox ( `id("d2_1"),
 					  `opt(getComboBoxOption(l1_key),`hstretch),
@@ -661,38 +645,38 @@ Do you want to view the relevant log file?
 					  lookup(l2, `linekey, ""),
 					  getComboList(l2_key, l2))),
 		       `VSpacing(1),
-		       `RichText( help_text) ));	  
+		       `RichText( help_text) ));
    };
 
 
-   
-   
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog d1                                                                                     //
     //-----------------------------------------------------------------------------------------------//
     // Predefined standard dialog for one entrie                                                     //
     //-----------------------------------------------------------------------------------------------//
-   
+
     global define getD1Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
 
 	if (l1 == nil) l1 = $[];
-	  
-	string l1_key =  lookup( l1, `linekey, "");
-	  
-	string help_text = "";
-	  
-	help_text = sformat( "<b>%1:</b><br>%2", l1_key, getDescr(l1_key)   );
-			       
-// 	  return( 
-// 	  `VBox(`HSpacing(60),`VSpacing(1.2),
-// 		  `Left(`ComboBox ( `id("d1_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-// 		`VSpacing(1),
-// 		`RichText( help_text) ));
 
-	  return( 
+	string l1_key =  lookup( l1, `linekey, "");
+
+	string help_text = "";
+
+	help_text = sformat( "<b>%1:</b><br>%2", l1_key, getDescr(l1_key)   );
+
+//	  return(
+//	  `VBox(`HSpacing(60),`VSpacing(1.2),
+//		  `Left(`ComboBox ( `id("d1_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+//		`VSpacing(1),
+//		`RichText( help_text) ));
+
+	  return(
 		 `VBox(`HSpacing(60),`VSpacing(1.2),
 		       `Left(`ComboBox ( `id("d1_1"),
 					 `opt(getComboBoxOption(l1_key),`hstretch),
@@ -702,14 +686,14 @@ Do you want to view the relevant log file?
 		       `RichText( help_text) ));
    };
 
-   
-   
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog dir                                                                                    //
     //-----------------------------------------------------------------------------------------------//
     // Predefined standard dialog for displaying only a message                                      //
     //-----------------------------------------------------------------------------------------------//
-   
+
     global define getDirDialog( string curr_text )
 	``{
 	return( `VBox(`HSpacing(60),`VSpacing(1), `RichText( curr_text) ));
@@ -723,10 +707,10 @@ Do you want to view the relevant log file?
     global define getMainWindowTerm( list tree_data )
 	``{
 	return(
-	    // Main dialog edit rc_config 
+	    // Main dialog edit rc_config
 	    `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("&Config options"), tree_data )),
 		  `HSpacing(1),
-		  `HWeight( 65, `VBox(`VSpacing(0.2), 
+		  `HWeight( 65, `VBox(`VSpacing(0.2),
 				      `ReplacePoint(`id(`rp),
 						    `Label("This is a label")  )
 		      )
@@ -741,12 +725,12 @@ Do you want to view the relevant log file?
     //-----------------------------------------------------------------------------------------------//
     //-----------------------------------------------------------------------------------------------//
 
-    
+
     UI(``{
 	global define SearchDlg()
 	    ``{
 	    // helptext for popup search
-	    string helptextCR = _("Enter a keyword related to the information needed."); 
+	    string helptextCR = _("Enter a keyword related to the information needed.");
 
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(60),
@@ -776,7 +760,7 @@ Do you want to view the relevant log file?
 				  )
 			    )
 		);
-	  
+
 	    SetFocus(`id(`search_entry));
 	    symbol  doit            = `cancel;
 
@@ -786,7 +770,7 @@ Do you want to view the relevant log file?
 		    // Check the User input / change popup ...
 		    //-------------------------------
 		    doit = UserInput();
-		   
+
 		} until (doit == `ok  ||  doit == `cancel );
 
 	    map answer = $[];
@@ -795,7 +779,7 @@ Do you want to view the relevant log file?
 	    answer = add( answer, "nkey",   QueryWidget(`id(`nkey),   `Value));
 	    answer = add( answer, "nvalue", QueryWidget(`id(`nvalue), `Value));
 	    answer = add( answer, "ndescr", QueryWidget(`id(`ndescr), `Value));
-    
+
 
 	    CloseDialog();
 
@@ -815,7 +799,7 @@ Do you want to view the relevant log file?
     //-----------------------------------------------------------------------------------------------//
     //-----------------------------------------------------------------------------------------------//
 
-    
+
     UI(``{
 	global define HelpDlg()
 	    ``{
@@ -843,24 +827,24 @@ Do you want to view the relevant log file?
 				   )
 			    )
 		);
-	    
+
 	    SetFocus(`id(`ok));
-	
+
 	    UserInput();
 	    //
 	    CloseDialog();
 
 	    return;
-    
+
 	}; });
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Save dialog                       							     //
+    // Save dialog							     //
     //------------------------------------------------------------------------------------------------//
     //------------------------------------------------------------------------------------------------//
 
-    
+
     UI(``{
 	global define SaveDlg( list entry_list )
 	    ``{
@@ -868,7 +852,7 @@ Do you want to view the relevant log file?
 	    string helptextCR = _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
-"); 
+");
 
 	    list table_list = maplist( `entry, entry_list,
 				       ``{
@@ -876,18 +860,18 @@ Choose \"Cancel\" to edit the values again.
 
 					   // delete # from description
 					   descr = mergestring(splitstring(descr, "#"),"");
-				      
+
 					   // delete \n from description
 					   descr = mergestring(splitstring(descr, "\n"),"");
-				      
+
 					   return (`item( `id(lookup( entry, `linekey, "x")),
 							  lookup( entry, `linekey, ""),
 							  lookup( entry, `value,   ""),
 							  substring( descr, 0, 70)));
 				       });
-			              		 
 
-  	    OpenDialog( `opt(`decorated ),
+
+	    OpenDialog( `opt(`decorated ),
 			`HBox( `VSpacing(12),
 			       `VBox(`HSpacing(70),
 				     //heading of popup
@@ -905,7 +889,7 @@ Choose \"Cancel\" to edit the values again.
 				   )
 			    )
 		);
-	  
+
 	    SetFocus(`id(`table));
 	    symbol  doit            = `cancel;
 
@@ -915,37 +899,37 @@ Choose \"Cancel\" to edit the values again.
 		    // Check the User input / change popup ...
 		    //-------------------------------
 		    doit = UserInput();
-		   
+
 		} until (doit == `ok  ||  doit == `cancel );
 
 	    any ret = QueryWidget(`id(`table), `CurrentItem);
 	    y2debug(sformat("%1", ret ));
-	    
+
 	    CloseDialog();
 
-	   
+
 	    if ( doit == `cancel )
 		{
 		    return( `cancel );
 		}
 	    else
 		{
-		    // ret is nil if table is empty 
+		    // ret is nil if table is empty
 		    return( ret );
 		}
 	}; });
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Goto dialog, wich appeas after a search 							     //
+    // Goto dialog, wich appeas after a search							     //
     //------------------------------------------------------------------------------------------------//
     //------------------------------------------------------------------------------------------------//
 
-    
+
     UI(``{
 	global define GotoDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
-	    string helptextCR = _("Here, view the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search."); 
+	    string helptextCR = _("Here, view the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search.");
 
 	    list table_list = maplist( `entry, entry_list,
 				       ``{
@@ -953,17 +937,17 @@ Choose \"Cancel\" to edit the values again.
 
 					   // delete # from description
 					   descr = mergestring(splitstring(descr, "#"),"");
-				      
+
 					   // delete \n from description
 					   descr = mergestring(splitstring(descr, "\n"),"");
-				      
+
 					   return (`item( `id(lookup( entry, `linekey, "x")),
 							  lookup( entry, `linekey, ""),
 							  lookup( entry, `value,   ""),
 							  substring( descr, 0, 70)));
 				       });
-			              		 
-				      
+
+
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(80),
 			      //heading of popup
@@ -985,7 +969,7 @@ Choose \"Cancel\" to edit the values again.
 				  )
 			    )
 		);
-	  
+
 	    SetFocus(`id(`table));
 	    symbol  doit            = `cancel;
 
@@ -995,14 +979,14 @@ Choose \"Cancel\" to edit the values again.
 		    // Check the User input / change popup ...
 		    //-------------------------------
 		    doit = UserInput();
-		   
+
 		} until (doit == `ok  ||  doit == `cancel );
 
 	    any ret = QueryWidget(`id(`table), `CurrentItem);
-	   
+
 	    CloseDialog();
-	    
-	    
+
+
 	    if ( doit == `cancel )
 		{
 		    return( nil );
@@ -1013,5 +997,5 @@ Choose \"Cancel\" to edit the values again.
 		}
 	}; });
 
-						      
+
 }

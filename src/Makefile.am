@@ -2,19 +2,19 @@
 # Makefile.am for y2c_sysconfig/src
 #
 
-iinfodir = $(YAST2DIR)
-
-ynclude_HEADERS = sys_dialogs.ycp
-
 client_DATA = sysconfig_step1.ycp sysconfig.ycp
+
+yncludedir = @yncludedir@/sysconfig
+ynclude_DATA = sys_dialogs.ycp
 
 config_DATA = sysconfig.y2cc
 
-iinfo_DATA = meta_sys.config
-
-EXTRA_DIST = $(client_DATA) $(config_DATA) $(iinfo_DATA)
+ydata_DATA = meta_sys.config
 
 ybin_PROGRAMS = syscreate_data
+
+EXTRA_DIST = $(ynclude_DATA) $(client_DATA) $(config_DATA) $(ydata_DATA) $(ybin_PROGRAMS)
+
 syscreate_data_SOURCES =		\
 	RCDirectory.cpp RCDirectory.h	\
 	RCVariable.cpp RCVariable.h	\

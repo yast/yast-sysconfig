@@ -4,8 +4,6 @@
 
 SUBDIRS = autodocs
 
-docdir = @DOCDIR@
-
 doc_DATA = README
 
 EXTRA_DIST = $(doc_DATA)
