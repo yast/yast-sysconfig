@@ -80,21 +80,16 @@
 	     	rc_config_keys = add( rc_config_keys, key, key_map );
 	     }
 
-	     y2debug(descr);
-	     y2debug("xRRREE");
 
 	     // I4l_XXX_3 has no comment, but I4L_XXX_0 has!!!
 	     if ( descr == "" )
 	     {
 		 if ( substring( key, size(key)-2, 1 ) == "_" )
 		 {
-		     y2debug("RRREE");
-		     comment_key = substring( key, 0, size(key)-2 ) + "_0";
-           	     y2debug(comment_key);
+		     string  comment_key = substring( key, 0, size(key)-2 ) + "_0";
 		     
 		     map comment_key_map          = lookup( rc_config_keys, comment_key, $[] );
 		     descr                        = lookup( comment_key_map, `descr, nil);
-           	     y2debug(descr);
 
 		     if ( descr == nil ) descr = "";
 		 }
