@@ -87,10 +87,10 @@
 */
 
 {
-    Include "rc_process_db.ycp";
-    Include "rc_dialogs.ycp";
-
-    
+    UI(`ChangeWidget(`id(`package),   `Value, 20));
+    Include (`rc_process_db() );
+    Include (`rc_dialogs()    );
+  
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
     boolean test_mode    = lookup ( user_settings, "test_mode", false );
@@ -112,9 +112,7 @@
     ``{
 	  string|void descr = getDescr( key );
 
-	  y2log( .milestone, "d", "1", descr);
 	  if ( descr == nil || descr == "" ) descr = sformat(UI(_("Subdialog for %1")), key);
-	  
 
 	  return( descr );
       };
@@ -126,55 +124,49 @@
  
     list rc_config_eddb =
     [
-      $[ `key:"base",              `property:"path",        `value:"/" ], 
-      $[ `key:"base",              `property:"type",        `value:"node" ], 
-      $[ `key:"base",              `property:"descr",        `value:"Basic configuration parameter" ], 
-      $[ `key:"LANGUAGE",          `property:"type",        `value:"enum", `list:["german","english"] ], 
-      $[ `key:"LANGUAGE",          `property:"path",        `value:"/base/rr/sec/lang" ],
-      $[ `key:"CHECK_ETC_HOSTS",          `property:"path",        `value:"/base/rr/sec/lang" ],
-      $[ `key:"CHECK_ETC_HOSTS",          `property:"type",        `value:"boolean" ],
-      $[ `key:"LANGUAGE",          `property:"type",        `value:"string" ],
-      $[ `key:"KBD_TTY",           `property:"mtype",       `value:"enum", `list:["tty1","tty2"]],
-      $[ `key:"ENABLE_SUSECONFIG", `property:"path",        `value:"/base2/suseconfig" ],
-      $[ `key:"SUSECONFIG_OFF",    `property:"path",        `value:"/base/suseconfig" ],
-      $[ `key:"SUSECONFIG_OFF",    `property:"mtype",       `value:"enum", `list:["xx","yy"]],
-      $[ `key:"SUSECONFIG_OFF2",    `property:"path",        `value:"/base/suseconfig" ],
-      $[ `key:"SUSECONFIG_OFF2",    `property:"mtype",       `value:"enum", `list:["xx","yy"]],
-      $[ `key:"suseconfig",        `property:"path",        `value:"/base" ],
-      $[ `key:"suseconfig",        `property:"dialogtype",  `value:"d3" ],
-      $[ `key:"ENABLE_SUSECONFIG", `property:"type",        `value:"boolean" ]
-      
+      $[ `key:"base",              `property:"path",        `value:"/" ]
     ];
 
-    
-    define xy2debug( string s) ``{ y2log(.milestone, "s", 1, s); };
-    
-    xy2debug ( "vor read eddb");
-    list rc_config_eddb_raw = SCR( `Read( .suseconfig.meta_rc_config ));
-    xy2debug ( "nach read eddb");
 
-    rc_config_eddb = maplist( `entry, rc_config_eddb_raw, 
-       ``{
-	     string|void enum_list = lookup( entry, `list, nil );
-	     if ( enum_list == nil )
-	     {
-		return( $[
-			  `key     :lookup(entry, "key"),
-			  `property:lookup(entry, "property"),
-			  `value   :lookup(entry,"value")
-		]);
-	     }
-	     else
-	     {
-		return( $[
-			  `key     :lookup(entry, "key"),
-			  `property:lookup(entry, "property"),
-			  `value   :lookup(entry,"value"),
-			  `list    :splitstring(enum_list, ",") 
-		]);
-	     }
-       });
-     xy2debug ( "nach ma eddb");
+    // show processing steps ...
+
+    y2debug ( "vor read eddb");
+    list rc_config_eddb_raw = SCR( `Read( .suseconfig.meta_rc_config ));
+    y2debug ( "nach read eddb");
+    
+    // show processing steps ...
+    UI(`ChangeWidget(`id(`package),   `Value, 35));
+
+    if ( rc_config_eddb_raw != "" )
+    {
+	 rc_config_eddb = maplist( `entry, rc_config_eddb_raw, 
+				   ``{
+				       if (lookup( entry, "error") != nil)
+				       {
+					   y2error( "Error at: %1", entry);
+				       }
+				       
+				       string|void enum_list = lookup( entry, "list", nil );
+				       if ( enum_list == nil )
+				       {
+					   return( $[
+						     `key     :lookup(entry, "key"),
+						     `property:lookup(entry, "property"),
+						     `value   :lookup(entry,"value")
+					   ]);
+				       }
+				       else
+				       {
+					   return( $[
+						     `key     :lookup(entry, "key"),
+						     `property:lookup(entry, "property"),
+						     `value   :lookup(entry,"value"),
+						     `list    :splitstring(enum_list, ",") 
+					   ]);
+				       }
+				   });
+    }
+    y2debug ( "nach ma eddb");
     
 	     
    
@@ -234,7 +226,7 @@
      
      y2debug ( "vor  Merge");
      list tree_data =  process_eddb_create_widgettree_and_fill_rcconfigkeys();
-     y2debug ( "nach Merge");
+     y2debug(  "nach Merge" );
 
      rc_config_keys = rc_config_keys; 
 
@@ -242,7 +234,9 @@
      term main_window = getMainWindowTerm( tree_data );
     
      // translator: Main window header
+     y2debug("10");
      UI(`SetContents(_("Edit rc_config"), main_window, help_text, true, true ));
+     y2debug("11");
 
      // Initial Settings:
      term curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
@@ -262,6 +256,7 @@ set by specialized configuration modules like the \"Network configuration\"<\p>"
      boolean descr_read       = true;
      boolean value_read       = true;
      
+     y2debug("12");
      repeat
      {
         ret= UI(`UserInput());
@@ -350,8 +345,6 @@ set by specialized configuration modules like the \"Network configuration\"<\p>"
 		  string new_val = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Value));
 		  string key     = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Label));
 
-		  y2log( .milestone, 1, "ttt", "TTTTTTTTTBB", key); 
-		  
 		  if ( lookup(lookup(rc_config_keys, key, $[]), `value) != new_val )
 		  {
 		     map curr_key = lookup(rc_config_keys, key);
@@ -440,9 +433,33 @@ set by specialized configuration modules like the \"Network configuration\"<\p>"
 	        }
 	        else
 	        {
-	           // Doit:
-	           maplist( `entry, changes_list, ``(SCR( `Write(lookup(entry, `path), lookup(entry, `value)))));
-	           return( `next );
+		    // Doit:
+		    list ret_list = maplist( `entry, changes_list, ``(SCR( `Write(lookup(entry, `path), lookup(entry, `value)))));
+		    
+		    y2milestone("Starting SuSEconfig");
+
+		    UI(`WaitSuSEconfig());
+		    any ret = Shell( "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1");
+		    UI(`CloseDialog());
+
+		    y2debug( "Shellret %1 %2", ret, ret_list);
+
+		    if ( ret == 0 )
+		    {
+			any retAsk = UI(`AskShowLog() );
+
+			if ( retAsk == `log )
+			{
+			    string text = ReadString( "/var/log/SuSEconfig.log" );
+			    UI(`DisplayLogFile( text ));
+			}
+		    }
+		    else
+		    {
+			UI(`ErrorMessage());		        	 
+		    }
+
+		    return( `next );
 	        }
             }
 

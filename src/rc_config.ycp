@@ -38,24 +38,34 @@
 
        
     UI(``{
-	   define ImageOpenDialog( byteblock image_block)
+	   define ImageOpenDialog()
 	      ``{
-	    
-	      // The main dialog. Copied from installation.ycp.
+  	         // The main dialog. Copied from installation.ycp.
 		 OpenDialog(`opt(`defaultsize),
 			    `VBox(`Left(
 					//`Image(`suseheader, "SuSE")),	
-					`Image(image_block, "SuSE")),
+					`Image(`suseheader, "SuSE")),
                                         `HSpacing(85), 
 					`HWeight(70, `VBox(
-							   `Left(`Heading(`id(`title), _("YaST2\nInitializing ..."))),
-							   `HVCenter(`ReplacePoint(`id(`contents), `Empty())),
+							   `Left(`Heading(`id(`title), _("YaST2\nLoad rc.config database ..."))),
+							   `HVCenter(`ReplacePoint(`id(`contents),
+										   `VBox(
+											 `VSpacing(4),
+											 `HBox(
+											       `HSpacing(10),
+											       `Top(`ProgressBar(`id(`package), " ", 100)),
+											       `HSpacing(12)
+											       )
+											 )
+										   )),
 							   `HBox(
 								 // back pushbutton: the user input is ignored and the last dialog is called
 								 `PushButton(`id(`back), `opt(`disabled), _("&Back")),
-							
 								 `HStretch(),
-
+								 `PushButton(`id(`help), `opt(`disabled), _("&Help")),
+								 `HStretch(),
+								 `PushButton(`id(`search),`opt(`disabled), _("&Search")),
+								 `HStretch(),
 								 // next pushbutton: finish the configuration
 								 `PushButton(`id(`next), `opt(`disabled), _("&Finish"))
 								 )
@@ -68,49 +78,14 @@
 
        
      
-//  UI(``{
-//    
-//    // The main dialog. Copied from installation.ycp.
-//    OpenDialog(`opt(`defaultsize),
-//		      `VBox(`Left(`ReplacePoint(`id(`img),`Image(`suseheader, "SuSE"))),
-//			    `HBox(`HWeight(30, `RichText(`id(`help), "")),
-//					       `HWeight(70, `VBox(
-//								  `Left(`Heading(`id(`title), _("YaST2\nInitializing ..."))),
-//								  `HVCenter(`ReplacePoint(`id(`contents), `Empty())),
-//								  `HBox(
-//									// back pushbutton: the user input is ignored and the last dialog is called
-//									`PushButton(`id(`back), `opt(`disabled), _("&Back")),
-//							  
-//									`HStretch(),
-//
-//									// next pushbutton: finish the configuration
-//									`PushButton(`id(`next), `opt(`disabled), _("&Finish"))
-//									)
-//								  )
-//							)
-//					       )
-//			    )
-//		     );
-//	
-//    define SetWizardImage(byteblock|void imagedata) ``{
-//	  if (imagedata == nil)
-//	  {
-//	      y2log(.warning, "installation", 1, "SetWizardImage(): Invalid image - using fallback" );
-//	      ReplaceWidget( `id(`img), `Image(`suseheader, "SuSE") );
-//	  }
-//	  else
-//	      ReplaceWidget( `id(`img), `Image(imagedata, "SuSE") );
-//    };
-  
-    
     define SetContents(string title, term contents, string helptext,
 		       boolean has_back, boolean has_next) ``{
-      ChangeWidget(`id(`next), `Enabled, has_next);
-      ChangeWidget(`id(`back), `Enabled, has_back);
-//      ChangeWidget(`id(`help), `Value, helptext);
-      ChangeWidget(`id(`title), `Value, title);
+      ChangeWidget(`id(`next),   `Enabled, has_next);
+      ChangeWidget(`id(`back),   `Enabled, has_back);
+      ChangeWidget(`id(`search), `Enabled, true);
+      ChangeWidget(`id(`help),   `Enabled, true);
+      ChangeWidget(`id(`title),  `Value, title);
       ReplaceWidget(`id(`contents), contents);
-      // ControlWidget(TheWizardDialog(), `id(`next), `SetFocus());
     };
 
 
@@ -196,9 +171,12 @@
   });
 
 
-   byteblock image = ReadByteblock("/usr/lib/YaST2/images/stagea.gif");
-   UI(`ImageOpenDialog(image));
+  UI(`ImageOpenDialog());
 
+  y2debug( "Initializing ...");
+  UI(`ChangeWidget(`id(`package),   `Label, "Read /etc/rc.config and and additional describing data ..."));
+  UI(`ChangeWidget(`id(`package),   `Value, 10));
+ 
   integer arg_n = size(Args()) - 1;
   boolean test_mode = false;
   

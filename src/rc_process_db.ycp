@@ -22,7 +22,16 @@
    ------------------------------------------------------------------------
    \\ $Id$
 
+
+
+   Attention:
+   in rc_config_branch_hash the branch has a trailing "/"
+   in rc_config_branch_hash_reduced NOT! 
+
 */
+
+
+
 
 {
 
@@ -101,9 +110,12 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 
 
    y2debug("1");
+      // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 40));
+
    
    //////////////////////////////////////////////////////////////////////////////
-   // put all branch from the eddb into rc_config_keys,
+   // put all branches from the eddb into rc_config_keys,
    // which belong to a rc_variable that is already in rc_config_keys  
    //////////////////////////////////////////////////////////////////////////////
 
@@ -112,7 +124,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    ``{
         string property = lookup( entry, `property, "" );
   	string key      = lookup( entry, `key,      "" );
-  
+
   	if ( property == "path" && (lookup( rc_config_keys, key, nil ) != nil) )
   	{
             string branch = lookup( entry, `value, "/etc" );
@@ -120,12 +132,14 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
             // unify branch entrys:
 	    if ( substring(branch, 0, 1)              != "/" ) branch = "/" + branch;
 	    if ( substring(branch, size(branch)-1, 1) == "/" ) branch = substring( branch, 0, size(branch)-1 );
-	    
+
   	    change( lookup( rc_config_keys, key ), `branch, branch );
   	}
     });
 
    y2debug("2");
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 45));
 
    
 	     
@@ -160,6 +174,9 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 
    y2debug("3");
 
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 50));
+
    
 		 
    //////////////////////////////////////////////////////////////////////////////
@@ -179,7 +196,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	  
 	  while (  branch != ""   )
 	  {
-	      change( buffer, branch );
+	      change( buffer, branch + "/" );
 	      branch = substring( branch, 0, findlastof( branch, "/" ));
 	  }
 
@@ -187,10 +204,11 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    });
    
    
-   rc_config_branch_hash = toset(flatten( rc_config_branch_hash ));
 
    y2debug("4");
 
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 55));
    
 
    
@@ -199,8 +217,14 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    // the rc_config_keys
    //////////////////////////////////////////////////////////////////////////////
 
+   rc_config_branch_hash = toset(flatten( rc_config_branch_hash ));
+   
+   list missing_branches = [];
+   
    foreach( `branch, rc_config_branch_hash, 
    ``{
+         branch   = substring( branch, 0, size(branch)-1);
+	 
 	 string   key      = substring( branch, findlastof( branch, "/" )+1);
 	 map|void curr_map = lookup( rc_config_keys, key, nil);
 	 
@@ -211,15 +235,19 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	     if (rc_branch == "") rc_branch = "/";
 	     
 	     change( rc_config_keys, key, $[ `branch:rc_branch] );
+	     change( missing_branches, rc_branch + "/");
 	 }
    });
 
+   rc_config_branch_hash = flatten( [rc_config_branch_hash, missing_branches]);
+
+   // Does the sort, too !
+   rc_config_branch_hash = toset(rc_config_branch_hash );
+
    y2debug("5");
 
-   // Now all the branch-data in the
-   // rc_config_branch_hash is valid and complete 
-   // ---------------------------------------------------
-
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 60));
    
    
    ////////////////////////////////////////////////////////////////////////
@@ -248,8 +276,15 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	       }
 	       else if ( type == "enum" )
 	       {
-		   change( curr_map, `type ,   `options  );
-		   change( curr_map, `options, lookup( entry, `list ));
+		   list|void opt_list =  lookup( entry, `list );
+
+		   if ( opt_list != nil )
+		   {
+		      change( curr_map, `type ,   `options  );
+		      change( curr_map, `options,  opt_list);
+		      y2debug( "EEEE %1", entry );
+		   }
+		   
 	       }
 	       else if ( type == "integer" )
 	       {
@@ -275,14 +310,21 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	       change( curr_map, `dialogtype, lookup( entry,`value)  );
 	   }
 
-		  ////////////////////////////////
-		// todo: read just_run 
+	   if ( property == "descr" )
+	   {
+	       change( curr_map, `descr, lookup( entry,`value)  );
+	   }
+	   
+	   ////////////////////////////////
+	   // todo: read just_run and additional tags 
        }
 
     });
 
    y2debug("6");
 
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 65));
 
    
    ////////////////////////////////////////////////////////////////////////
@@ -331,18 +373,34 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    //   ],
    // ...
 
-   SCR(`Write (.dumpto.tmp.treev1, rc_config_keys ));
    
    // _reduced: like other hash, but only dir and dialogs
    list rc_config_branch_hash_reduced = [];
    
    y2debug("7");
+   
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 72));
 
-   string  last_branch    = "";
+   integer quarter_size    = size( rc_config_branch_hash )/4;
+   integer half_size       = size( rc_config_branch_hash )/4;
+   integer three_size      = quarter_size + half_size;
+   integer curr_nb = 0;
+   // end show processing steps ...
+
+
+   
+   string  last_rc_branch    = "";
    integer last_entrynb = 0;
    
    foreach( `branch, rc_config_branch_hash, 
    ``{
+         curr_nb = curr_nb +1;
+         if ( curr_nb == (quarter_size) )  UI(`ChangeWidget(`id(`package),   `Value, 78));
+         if ( curr_nb == (half_size) )     UI(`ChangeWidget(`id(`package),   `Value, 84));
+         if ( curr_nb == (three_size) )    UI(`ChangeWidget(`id(`package),   `Value, 90));
+       
+         branch           = substring( branch, 0, size( branch)-1);
          
 	 string key       = substring( branch,    findlastof( branch, "/" )+1);
          string rc_branch = substring( branch, 0, findlastof( branch, "/" )  );
@@ -350,8 +408,13 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	 map|void curr_map = lookup( rc_config_keys, key, nil);
 	 
 	 
-	 if ( last_branch == branch )
+         // have we found a parent of the last node?
+	 // yes: then its a dialog or dir
+	 // no:  item on the same level or new entry
+	 
+	 if ( last_rc_branch == branch )
 	 {
+	     // dialog or dir?
 	     if ( last_entrynb != 0 )
 	     {
 	        // dialog:
@@ -390,16 +453,10 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 			 });
 		      
 		      change( curr_map, `dialogtype,   "dir");
-		      
-		      y2log( curr_map );
-		      xy2debug( rc_branch );
-		      xy2debug( branch );
-		      xy2debug( key );
-		      
 		   }
 		   else
 		   {
-		      change( curr_map, `dialogtype, sformat( "d%1", last_entrynb));
+		       change( curr_map, `dialogtype, sformat( "d%1", last_entrynb));
 		   }
 		      
 		}
@@ -414,7 +471,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	     // insert dir and dialog in the special hash
 	     change( rc_config_branch_hash_reduced, branch );
 	 }
-	 else if ( last_branch == rc_branch )
+	 else if ( last_rc_branch == rc_branch )
 	 {
 	     // item on the same level
 	     last_entrynb = last_entrynb +1;
@@ -427,11 +484,13 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	     change( curr_map, `entrynb,   last_entrynb);
 	 }
 
-	 last_branch = rc_branch;
+	 last_rc_branch = rc_branch;
    });
 
    y2debug( "8");
 
+   // show processing steps ...
+   UI(`ChangeWidget(`id(`package),   `Value, 95));
    
    ////////////////////////////////////////////////////////////////////////
    // Let`s build the WidgetTree
@@ -449,80 +508,86 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    map subitems_map = $[];
 
    foreach( `branch, rc_config_branch_hash_reduced, 
-   ``{
-	   boolean initial_show_node = false;
-	   string  rc_branch        = substring( branch,   0, findlastof( branch,    "/" )  );
-	   string  key              = substring( branch,      findlastof( branch,    "/" )+1);
-	   string  parent_key       = "";
+	    ``{
+       boolean initial_show_node = false;
+       string  rc_branch        = substring( branch,   0, findlastof( branch,    "/" )  );
+       string  key              = substring( branch,      findlastof( branch,    "/" )+1);
+       string  parent_key       = "";
 
-	   if ( rc_branch == "" )
-	   {
-	       rc_branch          = "/";
-	       parent_key        = "root";
-	       if ( branch != "/etc" ) initial_show_node = true;         
-	   }
-	   else
-	   {
-	       parent_key = substring( rc_branch,   findlastof( rc_branch, "/" )+1);
-	   }
+       if ( rc_branch == "" )
+       {
+	   rc_branch          = "/";
+	   parent_key        = "root";
+	   // if ( branch != "/etc" ) initial_show_node = true;         
+       }
+       else
+       {
+	   parent_key = substring( rc_branch,   findlastof( rc_branch, "/" )+1);
+       }
 
-	   // y2log( .milestone, "XX", 1, sformat( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key ));
+       // y2log( .milestone, "XX", 1, sformat( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key ));
 	   
-	   list|void subitems = lookup( subitems_map, key, nil);
+       list|void subitems = lookup( subitems_map, key, nil);
 
-	   // do we have subitems or is it a leaf
-	   if ( subitems != nil )
+       // do we have subitems or is it a leaf
+       if ( subitems != nil )
+       {
+	   // subitems exist (we are a dialog or a dir)
+	       
+	   list|void parent_subitems = lookup( subitems_map, parent_key, nil);
+
+	   // does our parent already have a list with subitems,
+	   // or must we create this list
+	       
+	   if ( parent_subitems != nil )
 	   {
-	       // subitems exist (we are a dialog or a dir)
-	       
-	       list|void parent_subitems = lookup( subitems_map, parent_key, nil);
-
-	       // does our parent already have a list with subitems,
-	       // or must we create this list
-	       
-	       if ( parent_subitems != nil )
-	       {
-		   // parent has list
-		   // add this item with the subitems
-		   change( parent_subitems,  `item( `id(key), key, initial_show_node, subitems));
-	       }
-	       else
-	       {
-		   // parent has no list until now
-		   change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node, subitems) ]);
-	       }
+	       // parent has list
+	       // add this item with the subitems
+	       change( parent_subitems,  `item( `id(key), key, initial_show_node, subitems));
 	   }
 	   else
 	   {
-	       // subitems do not exist (we are a leaf)
-	       
-		 list|void parent_subitems = lookup( subitems_map, parent_key, nil);
-
-		 // does our parent already have a list with subitems,
-		 // or must we create this list
-		 
-		 if ( parent_subitems != nil )
-		 {
-		     // parent has list
-		     // add this item 
-		     change( parent_subitems,  `item( `id(key), key, initial_show_node));
-		 }
-		 else
-		 {
-		     // parent has no list until now
-		     change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node) ]);
-		 }
+	       // parent has no list until now
+	       change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node, subitems) ]);
 	   }
+       }
+       else
+       {
+	   // subitems do not exist (we are a leaf)
+	       
+	   list|void parent_subitems = lookup( subitems_map, parent_key, nil);
+
+	   // does our parent already have a list with subitems,
+	   // or must we create this list
+		 
+	   if ( parent_subitems != nil )
+	   {
+	       // parent has list
+	       // add this item 
+	       change( parent_subitems,  `item( `id(key), key, initial_show_node));
+	   }
+	   else
+	   {
+	       // parent has no list until now
+	       change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node) ]);
+	   }
+       }
 
    });
 
    y2debug( "9");
+   if ( curr_nb == (three_size) )    UI(`ChangeWidget(`id(`package),   `Value, 100));
 
-   // debug
-    SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
-    SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
-    SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
-    SCR(`Write (.dumpto.tmp.hash, subitems_map ));
+   // todo: false 
+   boolean debug = false;
+   if ( debug )
+   {
+       SCR(`Write (.dumpto.tmp.eddb, rc_config_eddb ));
+       SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
+       SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
+       SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
+       SCR(`Write (.dumpto.tmp.hash, subitems_map ));
+   }
 
    return( lookup( subitems_map, "root", nil) ); 
 };

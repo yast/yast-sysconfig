@@ -70,9 +70,8 @@
     define getDescr( string key )
     ``{
              map key_map          = lookup( rc_config_keys, key, $[] );
-             any descr            = lookup(key_map, `descr, `not_read);
+             any descr            = lookup(key_map, `descr, nil);
 
-	     y2log(descr);
 	     if ( descr == nil )
 	     {
 		descr = "";
@@ -82,15 +81,130 @@
 	     	rc_config_keys = add( rc_config_keys, key, key_map );
 	     }
 
-	     // delete all #
+	     y2debug(descr);
+	     y2debug("xRRREE");
+
+	     // I4l_XXX_3 has no comment, but I4L_XXX_0 has!!!
+	     if ( descr == "" )
+	     {
+		 if ( substring( key, size(key)-2, 1 ) == "_" )
+		 {
+		     y2debug("RRREE");
+		     comment_key = substring( key, 0, size(key)-2 ) + "_0";
+           	     y2debug(comment_key);
+		     
+		     map comment_key_map          = lookup( rc_config_keys, comment_key, $[] );
+		     descr                        = lookup( comment_key_map, `descr, nil);
+           	     y2debug(descr);
+
+		     if ( descr == nil ) descr = "";
+		 }
+	     }
+	     
+	     // delete all "#"
 	     descr = mergestring(splitstring( descr, "#"),"");
 	     return( descr );
     };
 
     
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                         D I A L O G   D E F I N E S                              //
-    //////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    //                              D I A L O G   D E F I N E S                                     //
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   // Dialog DisplayLogFile                                                                         //
+   //-----------------------------------------------------------------------------------------------//
+   // Displays a message to the user in a small dialog with an OK                                   //
+   //-----------------------------------------------------------------------------------------------//
+
+   UI( ``{
+       define ErrorMessage() ``{
+	  // ok pushbutton: confirm the dialog
+	  OpenDialog(
+		     `opt(`decorated),
+		     `HBox(
+			   `HSpacing(1),
+			   `VBox(
+				 `VSpacing(0.2),
+				 `Heading( _("Error" )),
+				 `VSpacing(0.2),
+				 `Label(_("An error occured, during execution SuSEconfig\nProbably \"/sbin/SuSEconfig\" is missing or the module has no root permission")),
+				 `PushButton(`opt(`default), _("&OK and Exit")),
+				 `VSpacing(0.2)
+				 ),
+			   `HSpacing(1)
+			   )
+		     );
+	  UserInput();
+	  CloseDialog();
+      };
+   });
+    
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   // Dialog DisplayLogFile                                                                         //
+   //-----------------------------------------------------------------------------------------------//
+   // Display Suseconfig logfile                                                                    //
+   //-----------------------------------------------------------------------------------------------//
+    
+   UI( ``{
+      define DisplayLogFile( string msg_text ) ``{
+	  term text = `RichText( `opt(`plainText), msg_text );	  
+	  OpenDialog(`opt ( `decorated ),
+		     `VBox (`HSpacing(75),
+			    `Heading( _("SuSEConfig Logging" )),
+				      text,	// e.g. `Richtext()
+				      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
+				)
+			 ); 
+
+	  SetFocus(`id(`ok_help) );
+	  
+	  any r = UserInput();
+	  CloseDialog();
+	  return (r);
+      };
+   });      
+
+  
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   // Dialog AskShowLog                                                                             //
+   //-----------------------------------------------------------------------------------------------//
+   // Ask the User, if he wants to show the SuSEConfig logfile                                      //
+   //-----------------------------------------------------------------------------------------------//
+
+   UI( ``{
+     define AskShowLog( ) ``{
+	 OpenDialog(`opt(`decorated), 
+		     `VBox( `Heading( _("SuSEConfig Logging" )) ,
+			    `VBox( `Label( _("Your changes are set, and SuSEconfig was run.\nWould now you like to see the logging of SuSEConfig?" )),
+				   `HBox( 
+					 `PushButton( `id(`log),  _("Show Logfile") ),
+					 `PushButton( `id(`no_log), `opt(`default), _("Don't show logfile and exit") )
+					 )
+				   )
+			    )
+		     );
+	      any r = UserInput();
+	      CloseDialog();
+
+	     
+	      return (r);
+      };
+    });
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   // Dialog WaitSuSEconfig                                                                             //
+   //-----------------------------------------------------------------------------------------------//
+
+   UI( ``{
+     define WaitSuSEconfig( ) ``{
+	 OpenDialog(`opt(`decorated), 
+		     `VBox( `Heading( _("SuSEConfig is running ..." )) ,
+			    `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time." ))
+			 )
+		     );
+      };
+    });
 
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,14 +246,19 @@
 			       l4_key, getDescr(l4_key),
 			       l5_key, getDescr(l5_key));
 
-	  return( 
-	  `VBox(`VSpacing(1.2),
-		  `Left( `ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		  `Left( `ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		  `Left( `ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-		  `Left( `ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-		  `Left( `ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
-		  `VWeight(1,`RichText( `opt(`shrinkable), help_text) )));
+	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
+		 `HBox(
+		       `VBox( `Top(`ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+			      `Top(`ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+			      `Top(`ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+			      `Top(`ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
+			      `Top(`ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
+			      `HStretch()
+			      ),
+		       `HSpacing(1),
+		       `HWeight(100,`RichText( help_text)), 
+		       `HSpacing(1)
+		       )));
     };
 
 			     
@@ -179,13 +298,20 @@
 	  help_text = sformat( "%1<p><b>%2:</b><br>%3</p>", help_text,
 			       l4_key, getDescr(l4_key));
 	  
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
-		 `Left( `ComboBox ( `id("d4_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		 `Left( `ComboBox ( `id("d4_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		 `Left( `ComboBox ( `id("d4_3"), `opt(`editable), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-		 `Left( `ComboBox ( `id("d4_4"), `opt(`editable), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-		`RichText( `opt(`shrinkable),  help_text) ));
+	  return(`VBox( `HSpacing(60),
+			`VSpacing(1.2), 
+			`HBox(
+			      `VBox( `Top(`ComboBox ( `id("d4_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+				     `Top(`ComboBox ( `id("d4_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+				     `Top(`ComboBox ( `id("d4_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+				     `Top(`ComboBox ( `id("d4_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
+				     `HStretch()
+				     ),
+			      `HSpacing(1),
+			      `HWeight(100,`RichText( help_text)),
+			      `HSpacing(1)
+			      ) )
+		 );
     };
 
    
@@ -218,13 +344,25 @@
 			       l2_key, getDescr(l2_key),
 			       l3_key, getDescr(l3_key)   );
 			       
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
-		 `Left( `ComboBox ( `id("d3_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		 `Left( `ComboBox ( `id("d3_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		 `Left( `ComboBox ( `id("d3_3"), `opt(`editable), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-		`VSpacing(1),
-		`RichText( help_text) ));
+
+	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
+		 `HBox(
+		       `VBox( `Top( `ComboBox ( `id("d3_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+			      `Top( `ComboBox ( `id("d3_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+			      `Top( `ComboBox ( `id("d3_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+			      `VStretch()
+			      ),
+		       `HSpacing(1),
+		       `HWeight(100,`RichText( help_text)),
+		       `HSpacing(1) )));
+	
+//	  return( 
+//	    `VBox(`HSpacing(60),`VSpacing(1.2),
+//		   `Left( `ComboBox ( `id("d3_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+//		   `Left( `ComboBox ( `id("d3_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+//		   `Left( `ComboBox ( `id("d3_3"), `opt(`editable), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+//		  `VSpacing(1),
+//		  `RichText( help_text) ));
     };
 
 
@@ -316,8 +454,7 @@
 		`HSpacing(1),
 		`HWeight( 65, `VBox(`VSpacing(0.2), 
 				    `ReplacePoint(`id(`rp),
-						  `Label("This is a label")  ),
-				    `PushButton(`id(`search), `opt(`default),    _("&Search"))
+						  `Label("This is a label")  )
 				    )
 			  )
 		));
@@ -433,20 +570,22 @@ Choose \"Cancel\" to edit the values again");
 			              		 
 
   	    OpenDialog( `opt(`decorated ),
-			`VBox(`HSpacing(70),
-			      //heading of popup
-			      `Heading(_("Save rc.config variables")),
-			      `Label(  helptextCR ),
-			      `VSpacing(0.5),
-			      `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description") ), table_list ),
-			      `VSpacing(0.5),
-			      `HBox(
-				    // popup create partition:
-				    `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-				    // popup create partition:
-				    `PushButton(`id(`cancel), _("&Cancel"))
-				    )
-			      )
+			`HBox( `VSpacing(12),
+			       `VBox(`HSpacing(70),
+				     //heading of popup
+				     `Heading(_("Save rc.config variables")),
+				     `Label(  helptextCR ),
+				     `VSpacing(0.5),
+				     `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description") ), table_list ),
+				     `VSpacing(0.5),
+				     `HBox(
+					   // popup create partition:
+					   `PushButton(`id(`ok), `opt(`default),    _("&OK")),
+					   // popup create partition:
+					   `PushButton(`id(`cancel), _("&Cancel"))
+					   )
+				     )
+			       )
 			);
 	  
 	   SetFocus(`id(`table));
