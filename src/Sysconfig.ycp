@@ -65,13 +65,19 @@ map<string, any> actions = $[];
 
 global boolean ConfirmActions = false;
 
+boolean config_modified = false;
+
 /**
  * Data was modified?
  * @return true if modified
  */
 global define boolean Modified() ``{
-    return (size(modified_variables) > 0);
+    return (size(modified_variables) > 0) || config_modified;
 };
+
+global define void SetModified() {
+    config_modified = true;
+}
 
 /**
  * Get variable name from variable identification or empty string if input is invalid
@@ -1342,7 +1348,7 @@ global define boolean Import (list settings) ``{
     Set(settings_maps);
 
     // register agent for user defined files, read values
-    return Sysconfig::Read();
+    return true;
 }
 
 /**
