@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Feb  5 14:03:09 CET 2003 - lslezak@suse.cz
+
+- don't show comments after three hash characters
+- added metadata documentation
+- added missing 'descriptions' in *.spec
+- version 2.7.5
+
+-------------------------------------------------------------------
 Mon Feb  3 14:31:59 CET 2003 - lslezak@suse.cz
 
 - merged proof-read texts

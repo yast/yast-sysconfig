@@ -688,7 +688,7 @@ global define symbol MainDialog() ``{
 
 		   `HBox(
 			 // back pushbutton: the user input is ignored and the last dialog is called
-			 `PushButton(`id(`back), `opt(`key_F9), AbortButtonLabel()),
+			 `PushButton(`id(`abort), `opt(`key_F9), AbortButtonLabel()),
 			 `HStretch(),
 			 `PushButton(`id(`help), `opt(`key_F1), HelpButtonLabel()),
 			 `HStretch(),

@@ -502,7 +502,10 @@ global define map parse_metadata(string comment) ``{
     foreach(string metaline, joined_multilines, ``{
 
 	    /* Ignore lines with ### -- general comments */
-	    // FIXME if(regexpmatch(metaline, "^###")) return;
+	    if (regexpmatch(metaline, "^###"))
+	    {
+		return;
+	    }
 
 	    string tag = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
 	    string val = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\2");
@@ -563,7 +566,7 @@ global define string get_only_comment(string input) ``{
 
 	    if (com_line != nil)
 	    {
-		com_line = regexpsub(com_line, "^ *(.*)", "\\1");
+		com_line = regexpsub(com_line, "^[ \t]*(.*)", "\\1");
 	    }
 
 	    if (com_line != nil)
