@@ -12,6 +12,8 @@
   import "Mode";
   Mode::normal = true;	// system is already installed
 
+  include "ui/common_messages.ycp";
+
   textdomain "sysconfig";
   global boolean firewall_mode   = false;
   global boolean powertweak_only_mode = false;
@@ -42,7 +44,10 @@
   user_settings = add(user_settings, "rc_config_status", `off);
 
     UI(``{
-	   global define ImageOpenDialog()
+	   /**
+	    * Create main window dialog
+	    */
+	   global define void ImageOpenDialog()
 	      ``{
 	         // The main dialog. Copied from installation.ycp.
 		 OpenDialog(`opt(`defaultsize),
@@ -64,16 +69,16 @@
 										   )),
 							   `HBox(
 								 // back pushbutton: the user input is ignored and the last dialog is called
-								 `PushButton(`id(`back), `opt(`disabled), _("&Back")),
+								 `PushButton(`id(`back), `opt(`disabled), BackButtonLabel()),
 								 `HStretch(),
 								// push button label
-								 `PushButton(`id(`help), `opt(`disabled), _("&Help")),
+								 `PushButton(`id(`help), `opt(`disabled), HelpButtonLabel()),
 								 `HStretch(),
 								// push button label
 								 `PushButton(`id(`search),`opt(`disabled), _("&Search")),
 								 `HStretch(),
 								// push button label
-								 `PushButton(`id(`next), `opt(`disabled), _("&Finish"))
+								 `PushButton(`id(`next), `opt(`disabled), FinishButtonLabel())
 								 )
 							   )
 						 )
@@ -83,8 +88,15 @@
 	   };
 
 
-
-    global define SetContents(string title, term contents, string helptext,
+    /**
+     * Set contents of dialog
+     * @param title Dialog title
+     * @param contents Dialog contents
+     * @param helptext Help text
+     * @param has_back Enable/disable Back button
+     * @param has_next Enable/disable Next button
+     */
+    global define void SetContents(string title, term contents, string helptext,
 		       boolean has_back, boolean has_next) ``{
       ChangeWidget(`id(`next),   `Enabled, has_next);
       ChangeWidget(`id(`back),   `Enabled, has_back);

@@ -9,29 +9,29 @@
 
 {
 
+  include "ui/common_messages.ycp";
+
   textdomain "sysconfig";
   //////////////////////////////////////////////////////////////////////////////////////
   //                     Utility- D I A L O G   D E F I N E S                         //
   //////////////////////////////////////////////////////////////////////////////////////
 
-
-    /////////////////////////////////////////////////////////////////////////////////////
-    //  Helptext                                                                        //
-    //////////////////////////////////////////////////////////////////////////////////////
-
-  UI(``{  global define HelpMsgStart()``{
+  /**
+   * Return part of help text
+   * @return string help text
+   */
+  UI(``{  global define string HelpMsgStart()``{
       return( // helptext for popup
 	     _("<p>With this editor, edit the variables in /etc/sysconfig configfiles</p>
 "));
   }});
 
 
-
-  //////////////////////////////////////////////////////////////////////////////////////
-  //  Helptext                                                                        //
-  //////////////////////////////////////////////////////////////////////////////////////
-
-  UI(``{ global define HelpMsgBody() ``{
+  /**
+   * Return part of help text
+   * @return string help text
+   */
+  UI(``{ global define string HelpMsgBody() ``{
       return(  // helptext for popup - part 1/3
 	     _("<p>After you save your changes, this editor changes the variables in the
 corresponding  sysconfig file. Then it runs
@@ -49,12 +49,11 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
   }});
 
 
-
-  //////////////////////////////////////////////////////////////////////////////////////
-  //  Helptext                                                                        //
-  //////////////////////////////////////////////////////////////////////////////////////
-
-  UI(``{ global define HelpMsgNotice()``{
+  /**
+   * Return part of help text
+   * @return string help text
+   */
+  UI(``{ global define string HelpMsgNotice()``{
       return( // helptext for popup
 	     _("<p>
 Many of these variables are set by specialized YaST2
@@ -63,13 +62,14 @@ configuration modules like the \"Network configuration\".</p>
   }});
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // getComboList                                                                                  //
-  //-----------------------------------------------------------------------------------------------//
-  // read the possible entrys of combobox, and mark the real value, so that it is shown as default //
-  //-----------------------------------------------------------------------------------------------//
-
-  global define getComboList( string key, map entry_map )
+  /**
+   * Return content of combo box - read the possible entries of combo box
+   * and mark the current value as default
+   * @param key variable name
+   * @param entry_map map with configuration
+   * @return list combo box content
+   */
+  global define list getComboList( string key, map entry_map )
       ``{
       // get real value of the entry
       map    key_map      = lookup( rc_config_keys, key, $[] );
@@ -93,16 +93,15 @@ configuration modules like the \"Network configuration\".</p>
   }
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // getDescr()                                                                                    //
-  //-----------------------------------------------------------------------------------------------//
-  // Read the description                                                                          //
-  //-----------------------------------------------------------------------------------------------//
-
-  global define getDescr( string key )
+  /**
+   * Get description for variable
+   * @param key variable name
+   * @return string description
+   */
+  global define string getDescr( string key )
       ``{
       map key_map          = lookup( rc_config_keys, key, $[] );
-      any descr            = lookup(key_map, `descr, nil);
+      string descr         = lookup(key_map, `descr, nil);
 
       if ( descr == nil )
       {
@@ -134,15 +133,15 @@ configuration modules like the \"Network configuration\".</p>
   };
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // getTypedef()                                                                                  //
-    //-----------------------------------------------------------------------------------------------//
-    // Returns the typedef of the given key                                                          //
-    //-----------------------------------------------------------------------------------------------//
-    global define getTypedef( string key )
+    /**
+     * Returns the typedef of the given key
+     * @param key key name
+     * @return string typedef of key (e.g. "not_strict")
+     */
+    global define string getTypedef( string key )
     ``{
              map key_map          = lookup( rc_config_keys, key, $[] );
-             any typedef          = lookup(key_map, `typedef, nil);
+             string typedef       = lookup(key_map, `typedef, nil);
 
 	     if ( typedef == nil )
 	     {
@@ -153,19 +152,18 @@ configuration modules like the \"Network configuration\".</p>
 		 rc_config_keys = add( rc_config_keys, key, key_map );
 	     }
 
-
 	     return( typedef );
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // getType()                                                                                     //
-    //-----------------------------------------------------------------------------------------------//
-    // Returns the type of the given key                                                             //
-    //-----------------------------------------------------------------------------------------------//
-    global define getType( string key )
+    /**
+     * Returns the type of the given key
+     * @param key key name
+     * @return string type of key (e.g. "integer")
+     */
+    global define string getType( string key )
     ``{
              map key_map          = lookup( rc_config_keys, key, $[] );
-             any mytype          = lookup(key_map, `datatype, nil);
+             string mytype          = lookup(key_map, `datatype, nil);
 
 	     if ( mytype == nil )
 	     {
@@ -182,12 +180,12 @@ configuration modules like the \"Network configuration\".</p>
 
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // getComboBoxOption()                                                                           //
-    //-----------------------------------------------------------------------------------------------//
-    // Returns the necessary options for the ComboBox value depending on the type and typedef        //
-    //-----------------------------------------------------------------------------------------------//
-    global define getComboBoxOption( string key )
+    /**
+     * Returns the necessary options for the ComboBox value depending on the type and typedef
+     * @return symbol ComboBox option
+     * @param key variable name
+     */
+    global define symbol getComboBoxOption( string key )
 	``{
 	if ( getType(key) == "boolean" )        // boolean: distinction of cases
 	{
@@ -222,152 +220,16 @@ configuration modules like the \"Network configuration\".</p>
     //                              D I A L O G   D E F I N E S                                     //
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog                                                                                        //
-    //-----------------------------------------------------------------------------------------------//
-    // Displays a message to the user in a small dialog with an OK                                   //
-    //-----------------------------------------------------------------------------------------------//
 
-    UI( ``{
-	global define ErrorMessage() ``{
-	    // ok pushbutton: confirm the dialog
-	    OpenDialog(
-		`opt(`decorated),
-		`HBox(
-		    `HSpacing(1),
-		    `VBox(
-			`VSpacing(0.2),
-			// error popup header
-			`Heading( _("Error")),
-			`VSpacing(0.2),
-			// Error popup message
-			`Label(_("An error occured during execution of SuSEconfig.
-Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
-")),
-			// push button label
-			`PushButton(`opt(`default), _("&OK and Exit")),
-			`VSpacing(0.2)
-			),
-		    `HSpacing(1)
-		    )
-		);
-	    UserInput();
-	    CloseDialog();
-	};
-    });
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog DisplayLogFile                                                                         //
-    //-----------------------------------------------------------------------------------------------//
-    // Display Suseconfig logfile                                                                    //
-    //-----------------------------------------------------------------------------------------------//
-
-    UI( ``{
-	global define DisplayLogFile( string msg_text ) ``{
-
-	    term text = `RichText( `opt(`plainText), msg_text );
-	    y2debug( "<<--%1", text);
-
-	    OpenDialog(`opt ( `decorated ),
-		       `VBox (`HSpacing(75),
-			      // header in error popup
-			      `Heading( _("Logging")),
-			      text,
-			      // push button label
-			      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
-			   )
-		);
-
-	    SetFocus(`id(`ok_help) );
-
-	    any r = UserInput();
-	    CloseDialog();
-	    return (r);
-	};
-    });
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog AskShowLog                                                                             //
-    //-----------------------------------------------------------------------------------------------//
-    // Ask the User, if he wants to show the SuSEConfig logfile                                      //
-    //-----------------------------------------------------------------------------------------------//
-
-    UI( ``{
-	global define AskShowLog( ) ``{
-
-	    OpenDialog(`opt(`decorated),
-			// popup header
-		       `VBox( `Heading( _("SuSEConfig Logging")) ,
-				// popup question
-			      `VBox( `Label( _("Your changes have been saved and SuSEconfig has run.
-Do you want to view the SuSEConfig log?
-")),
-				     `HBox(
-					// push button label
-					 `PushButton( `id(`log),  _("Show Log File") ),
-					// push button label
-					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
-					 )
-				  )
-			   )
-		);
-	    any r = UserInput();
-	    CloseDialog();
-
-
-	    return (r);
-	};
-    });
-
-    UI( ``{
-	global define AskFwShowLog( ) ``{
-
-	    OpenDialog(`opt(`decorated),
-			// popup header
-		       `VBox( `Heading( _("Logging")) ,
-				// popup question
-			      `VBox( `Label( _("Your changes have been saved and the firewalls have been restarted.
-Do you want to view the relevant log file?
-")),
-				     `HBox(
-					// push button label
-					 `PushButton( `id(`log),  _("Show Log File") ),
-					// push button label
-					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
-					 )
-				  )
-			   )
-		);
-	    any r = UserInput();
-	    CloseDialog();
-
-
-	    return (r);
-	};
-    });
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog WaitSuSEconfig                                                                             //
-    //-----------------------------------------------------------------------------------------------//
-/*
-    UI( ``{
-	global define WaitSuSEconfig( ) ``{
-	    OpenDialog(`opt(`decorated),
-		       `VBox( `Heading( _("SuSEConfig is running ...")) ,
-			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time."))
-			   )
-		);
-	};
-    });
-*/
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog WaitRestartFirewall                                                                             //
     //-----------------------------------------------------------------------------------------------//
 
     UI( ``{
-	global define WaitRestartFirewall( ) ``{
+	/**
+	 * Display popup window with 'restarting firewall' message
+	 */
+	global define void WaitRestartFirewall( ) ``{
 	    OpenDialog(`opt(`decorated),
 			// popup window header
 		       `VBox( `Heading( _("(Re)Start firewall ...")) ,
@@ -379,13 +241,12 @@ Do you want to view the relevant log file?
     });
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog d5                                                                                     //
-    //-----------------------------------------------------------------------------------------------//
-    // Predefined standard dialog for 5 entries                                                      //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getD5Dialog( list entry_list )
+    /**
+     * Predefined standard dialog for 5 entries
+     * @param entry_list dialog content list
+     * @return term dialog content term
+     */
+    global define term getD5Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
@@ -474,15 +335,12 @@ Do you want to view the relevant log file?
     };
 
 
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog d4                                                                                     //
-    //-----------------------------------------------------------------------------------------------//
-    // Predefined standard dialog for 4 entries                                                      //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getD4Dialog( list entry_list )
+    /**
+     * Predefined standard dialog for 4 entries
+     * @param entry_list dialog content list
+     * @return term dialog content term
+     */
+    global define term getD4Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
@@ -555,14 +413,12 @@ Do you want to view the relevant log file?
     };
 
 
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog d3                                                                                     //
-    //-----------------------------------------------------------------------------------------------//
-    // Predefined standard dialog for 3 entries                                                      //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getD3Dialog( list entry_list )
+    /**
+     * Predefined standard dialog for 3 entries
+     * @param entry_list dialog content list
+     * @return term dialog content term
+     */
+    global define term getD3Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
@@ -619,14 +475,12 @@ Do you want to view the relevant log file?
 
 
 
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog d2                                                                                     //
-    //-----------------------------------------------------------------------------------------------//
-    // Predefined standard dialog for 2 entries                                                      //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getD2Dialog( list entry_list )
+    /**
+     * Predefined standard dialog for 2 entries
+     * @param entry_list dialog content list
+     * @return term dialog content term
+     */
+    global define term getD2Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
@@ -666,6 +520,11 @@ Do you want to view the relevant log file?
    };
 
 
+    /**
+     * Return last path element (.etc.sysconfig.file.variable -> variable)
+     * @param p path
+     * @return string last element
+     */
     global define string get_last_path_elemnt(path p)
     ``{
 	if (size(p) == 0)
@@ -690,13 +549,12 @@ Do you want to view the relevant log file?
     }
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog d1                                                                                     //
-    //-----------------------------------------------------------------------------------------------//
-    // Predefined standard dialog for one entrie                                                     //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getD1Dialog( list entry_list )
+    /**
+     * Predefined standard dialog for one entry
+     * @param entry_list dialog content list
+     * @return term dialog content term
+     */
+    global define term getD1Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
@@ -729,23 +587,23 @@ Do you want to view the relevant log file?
 
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog dir                                                                                    //
-    //-----------------------------------------------------------------------------------------------//
-    // Predefined standard dialog for displaying only a message                                      //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getDirDialog( string curr_text )
+    /**
+     * Predefined standard dialog for displaying only a message
+     * @param curr_text Directory description text
+     * @return term dialog content term
+     */
+    global define term getDirDialog( string curr_text )
 	``{
 	return( `VBox(`HSpacing(60),`VSpacing(1), `RichText( curr_text) ));
     };
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Layout Mainwindow                                                                             //
-    //-----------------------------------------------------------------------------------------------//
-
-    global define getMainWindowTerm( list tree_data )
+    /**
+     * Return main window term
+     * @param tree_data tree widget content
+     * @return term window content
+     */
+    global define term getMainWindowTerm( list tree_data )
 	``{
 	return(
 	    // Main dialog edit rc_config
@@ -754,22 +612,19 @@ Do you want to view the relevant log file?
 		  `HSpacing(1),
 		  `HWeight( 65, `VBox(`VSpacing(0.2),
 				      `ReplacePoint(`id(`rp),
-						    `Label("This is a label")  )
+						    `Empty()  )
 		      )
 		      )
 		));
     };
 
 
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Search dialog                                                                                 //
-    //-----------------------------------------------------------------------------------------------//
-    //-----------------------------------------------------------------------------------------------//
-
-
     UI(``{
-	global define SearchDlg()
+	/**
+	 * Display search dialog
+	 * @return map with search dialog input values or nil if 'Cancel' was preessed
+	 */
+	global define map SearchDlg()
 	    ``{
 	    // helptext for popup search
 	    string helptextCR = _("Enter a keyword related to the information needed.");
@@ -802,9 +657,9 @@ Do you want to view the relevant log file?
 			      `VSpacing(0.5),
 			      `HBox(
 				  // push button label
-				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
+				  `PushButton(`id(`ok), `opt(`default), OKButtonLabel()),
 				  // push button label
-				  `PushButton(`id(`cancel), _("&Cancel"))
+				  `PushButton(`id(`cancel), CancelButtonLabel())
 				  )
 			    )
 		);
@@ -842,14 +697,12 @@ Do you want to view the relevant log file?
 	}; });
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Search dialog                                                                                 //
-    //-----------------------------------------------------------------------------------------------//
-    //-----------------------------------------------------------------------------------------------//
-
-
     UI(``{
-	global define HelpDlg()
+	/**
+	 * Display (and close) help dialog. Displayed message depends on sysconfig
+	 * editor mode (normal, firewall, powertweak).
+	 */
+	global define void HelpDlg()
 	    ``{
 
 	    string helptextCR = "";
@@ -881,7 +734,7 @@ Do you want to view the relevant log file?
 				   `RichText( helptextCR ),
 				   `VSpacing(1.5),
 				    // push button label
-				   `PushButton(`id(`ok), `opt(`default),    _("&OK"))
+				   `PushButton(`id(`ok), `opt(`default), OKButtonLabel())
 				   )
 			    )
 		);
@@ -889,23 +742,21 @@ Do you want to view the relevant log file?
 	    SetFocus(`id(`ok));
 
 	    UserInput();
-	    //
+
 	    CloseDialog();
-
-	    return;
-
 	}; });
 
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Save dialog							     //
-    //------------------------------------------------------------------------------------------------//
-    //------------------------------------------------------------------------------------------------//
 
 
     UI(``{
 
-	global define SaveDlg( list entry_list, boolean powertweak_only)
+	/**
+	 * Show dialog with changed variables, ask user to save them.
+	 * @param powertweak_only Header of dialog: sysconfig or powertweak?
+	 * @param entry_list variables to save
+	 * @return symbol `cancel if 'Cancel' was pressed, `empty if table in empty, `notempty otherwise
+	 */
+	global define symbol SaveDlg( list entry_list, boolean powertweak_only)
 	    ``{
 	    // helptext in popup window
 	    string helptextCR = _("Here, see the values YaST2 will change.
@@ -973,9 +824,9 @@ Choose \"Cancel\" to edit the values again.
 				     `VSpacing(0.5),
 				     `HBox(
 					 // push button label
-					 `PushButton(`id(`ok), `opt(`default),    _("&OK")),
+					 `PushButton(`id(`ok), `opt(`default), OKButtonLabel()),
 					 // push button label
-					 `PushButton(`id(`cancel), _("&Cancel"))
+					 `PushButton(`id(`cancel), CancelButtonLabel())
 					 )
 				   )
 			    )
@@ -993,7 +844,8 @@ Choose \"Cancel\" to edit the values again.
 
 		} until (doit == `ok  ||  doit == `cancel );
 
-	    any ret = QueryWidget(`id(`table), `CurrentItem);
+	    string ret = QueryWidget(`id(`table), `CurrentItem);
+
 	    y2debug(sformat("%1", ret ));
 
 	    CloseDialog();
@@ -1006,7 +858,7 @@ Choose \"Cancel\" to edit the values again.
 	    else
 		{
 		    // ret is nil if table is empty
-		    return( ret );
+		    return (ret == nil) ? `empty : `notempty;
 		}
 	}; });
 
@@ -1017,7 +869,12 @@ Choose \"Cancel\" to edit the values again.
 
 
     UI(``{
-	global define GotoDlg( list entry_list )
+	/**
+	 * Display result of search in dialog
+	 * @param entry_list search result
+	 * @return string selected variable or nil if 'Cancel' was pressed
+	 */
+	global define string GotoDlg( list entry_list )
 	    ``{
 	    // helptext for search popup
 	    string helptextCR = _("Here, view the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search.");
@@ -1054,9 +911,9 @@ Choose \"Cancel\" to edit the values again.
 			      `VSpacing(0.5),
 			      `HBox(
 				    // push button label
-				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
+				  `PushButton(`id(`ok), `opt(`default), OKButtonLabel()),
 				    // push button label
-				  `PushButton(`id(`cancel), _("&Cancel"))
+				  `PushButton(`id(`cancel), CancelButtonLabel())
 				  )
 			    )
 		);
@@ -1073,7 +930,7 @@ Choose \"Cancel\" to edit the values again.
 
 		} until (doit == `ok  ||  doit == `cancel );
 
-	    any ret = QueryWidget(`id(`table), `CurrentItem);
+	    string ret = QueryWidget(`id(`table), `CurrentItem);
 
 	    CloseDialog();
 

@@ -114,7 +114,13 @@
     /////                                    D E F I N E S                                       /////
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    global define getDirDescr( string key )
+    /**
+     * Get directory description string
+     * @param key directory name
+     * @return string directory description
+     */
+
+    global define string getDirDescr( string key )
     ``{
 	  string descr = getDescr( key );
 
@@ -138,7 +144,10 @@
 
     list registered_list = [];
 
-    global define sync_sysconfig()
+    /**
+     * Flush changed data in INI-agent
+     */
+    global define void sync_sysconfig()
     ``{
 	foreach( `entry, registered_list, ``{
 	    y2debug("Sync %1", entry );
@@ -146,8 +155,12 @@
 	});
     };
 
-    global define write_value( path   key,                                     //  .etc.sysconfig.network.dhcpcd.IP
-			       string value )                                    //  "10.10.0.12"
+    /**
+     * Write value to file
+     * @param key path to variable .etc.sysconfig.*
+     * @param value new value
+     */
+    global define void write_value( path  key, string value )
     ``{
 
 	list    path_list   = splitstring( "" + key, "." );                 // ["", "etc", "sysconfig", "network", "dhcpcd"]
@@ -455,7 +468,7 @@ configuration modules like the \"Network configuration\".</p>
 	    // User has changed the tree
             //////////////////////////////////////////////////////////////////////////////////
 
-	    any key = UI(`QueryWidget(`id(`key), `CurrentItem));
+	    string key = UI(`QueryWidget(`id(`key), `CurrentItem));
 
 	    /////////////////////////////////////////////////////////////////
 	    // save Changes
@@ -569,14 +582,14 @@ configuration modules like the \"Network configuration\".</p>
 	        list  changes_list = maplist( `linekey, `line, rc_config_keys,``( add(line, `linekey, linekey )));
 		changes_list       = filter(`entry, changes_list, ``( lookup(entry, `new, false) == true ));
 
-		any save_val = UI::SaveDlg(changes_list, powertweak_only_mode);
+		symbol save_val = UI::SaveDlg(changes_list, powertweak_only_mode);
 
 	        if (save_val == `cancel)
 	        {
 	           // Cancel:
 	           ret = `again;
 	        }
-		else if( save_val == nil )
+		else if( save_val == `empty )
 		{
 		    // empty table in save dialog and button "ok" was pushed
 		    // leave module
@@ -618,13 +631,13 @@ configuration modules like the \"Network configuration\".</p>
 		    // activate powertweak changes
 		    if (powertweak_changed == true)
 		    {
+			y2milestone("activating powertweak configuration");
 			SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
 
 			// activate powertweak at startup
 			Runlevel::ServiceAdjust("powertweakd", "enable");
 		    }
 
-		    any ret = 0;
 		    if ( firewall_mode )
 		    {
 			UI(`WaitRestartFirewall());
@@ -650,7 +663,7 @@ configuration modules like the \"Network configuration\".</p>
             if ( ret == `back )
             {
 		// push button label
-                 UI(`ChangeWidget(`id(`next), `Label,  _("&Next") ) );
+                 UI(`ChangeWidget(`id(`next), `Label,  NextButtonLabel() ) );
             }
 
             if ( ret != `back )

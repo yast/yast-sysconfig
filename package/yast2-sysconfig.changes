@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Aug  9 16:03:09 CEST 2002 - lslezak@suse.de
+
+- added ycpdoc comments
+- use OKButtonLabel(), Cancel...(), ...
+- code cleanup - removed obsoleted functions, any type
+- version 2.6.5
+
+-------------------------------------------------------------------
 Thu Aug  8 08:51:27 CEST 2002 - lslezak@suse.de
 
 - added new meta data
