@@ -46,3 +46,5 @@ Summary:	Powertweak configuration
 %files -n yast2-powertweak
 %defattr(-,root,root)
 @configdir@/powertweak.y2cc
+@clientdir@/powertweak.ycp
+
