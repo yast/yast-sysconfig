@@ -1,0 +1,12 @@
+/**
+ * Author:	Ladislav Slezak <lslezak@suse.cz>
+ * Summary:	Alias - enable 'yast2 powertweak' command
+ * $Id$
+ */
+
+{
+    return WFM::CallFunction ("sysconfig", add(WFM::Args (), ".powertweak"));
+}
+
+
+

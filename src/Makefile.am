@@ -2,7 +2,7 @@
 # Makefile.am for sysconfig/src
 #
 
-client_DATA = sysconfig_step1.ycp sysconfig.ycp
+client_DATA = sysconfig_step1.ycp sysconfig.ycp powertweak.ycp
 
 yncludedir = @yncludedir@/sysconfig
 ynclude_DATA = sys_dialogs.ycp

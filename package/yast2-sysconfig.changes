@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Sep  2 16:23:02 CEST 2002 - lslezak@suse.cz
+
+- log missing comments
+- added new metadata
+- added powetweak alias (allow 'yast2 powertweak')
+- new icon for yast2-powertweak
+- version 2.6.9
+
+-------------------------------------------------------------------
 Tue Aug 27 20:00:00 CEST 2002 - jsuchome@suse.cz
 
 - provide/obsolete old translation packages
