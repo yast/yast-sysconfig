@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Nov 15 16:31:21 CET 2004 - lslezak@suse.cz
+
+- merged commandline mode fixes from 9.1 branch:
+  - fixed option properties (#48133)
+  - added 'clear' command to set empty value ("")
+- version 2.11.2
+
+-------------------------------------------------------------------
 Wed Oct 27 09:07:43 CEST 2004 - lslezak@suse.cz
 
 - adapted to new Mode:: API
