@@ -232,7 +232,11 @@ sub hash_to_map(%)
 	}
 
 	# escape double quote characters
-	$path =~ s/[^\\]"/\\"/g;
+	my $n = 1;
+	while($n)
+	{
+	    $n = $path =~ s/([^\\])"/$1\\"/go;
+	}
 
 	# output nil if value is undefined
 	$result .= (defined($description)) ? "\"$path\" : \"$description\"" : "\"$path\" : nil";
@@ -476,6 +480,11 @@ for my $fname (@list)
 		$Config .= ReadMulti();
 	    }
 
+	    if ($Config eq '""')
+	    {
+		$Config = '';
+	    }
+
 	    $Meta_found = 1;
 	}
 	# services to restart
@@ -494,6 +503,11 @@ for my $fname (@list)
 	    {
 		# Read multiline metadata value
 		$ServiceRestart .= ReadMulti();
+	    }
+
+	    if ($ServiceRestart eq '""')
+	    {
+		$ServiceRestart = '';
 	    }
 
 	    $Meta_found = 1;
@@ -516,6 +530,11 @@ for my $fname (@list)
 		$ServiceReload .= ReadMulti();
 	    }
 
+	    if ($ServiceReload eq '""')
+	    {
+		$ServiceReload = '';
+	    }
+
 	    $Meta_found = 1;
 	}
 	# generic command
@@ -536,6 +555,11 @@ for my $fname (@list)
 		$Command .= ReadMulti();
 	    }
 
+	    if ($Command eq '""')
+	    {
+		$Command = '';
+	    }
+
 	    $Meta_found = 1;
 	}
 	# generic command started before changed variable is saved
@@ -554,6 +578,11 @@ for my $fname (@list)
 	    {
 		# Read multiline metadata value
 		$PreSaveCommand .= ReadMulti();
+	    }
+
+	    if ($PreSaveCommand eq '""')
+	    {
+		$PreSaveCommand = '';
 	    }
 
 	    $Meta_found = 1;
