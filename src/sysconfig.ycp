@@ -22,10 +22,10 @@ y2milestone ("----------------------------------------");
 y2milestone ("Sysconfig module started");
 
 import "Sysconfig";
+import "CommandLine";
 
 include "sysconfig/wizards.ycp";
 include "sysconfig/cmdline.ycp";
-include "commandline/commandline.ycp";
 
     /**
      * Command line definition
@@ -80,7 +80,7 @@ include "commandline/commandline.ycp";
 
 
 /* main ui function */
-boolean ret = CommandLineRun(cmdline);
+boolean ret = CommandLine::Run(cmdline);
 
 y2debug("ret == %1", ret);
 

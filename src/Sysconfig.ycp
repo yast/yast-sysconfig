@@ -28,7 +28,9 @@ import "Service";
 
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
     "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
-    "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions"];
+    "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions",
+    "/etc/sysconfig/powersave/*"
+    ];
 
 global string powertweakconfig = "/etc/powertweak/tweaks";
 

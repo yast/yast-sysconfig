@@ -314,13 +314,13 @@ Create it and use powerteak?
 	string precommand = (string) (description["actions", "Pre"]:nil);
 
 	// check whether action is defined
-	if (size(precommand) > 0)
+	if (precommand != nil && size(precommand) > 0)
 	{
 	    // header in the variable description text, bash command is appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Prepare Command: ") + ((richtext) ?"</B> ":"") + precommand + ((richtext) ?"</P>":"\n");
 	}
 
-	if (size(conf_modules) > 0)
+	if (conf_modules != nil && size(conf_modules) > 0)
 	{
 	    // parse string with options, then add them to the rich text
 	    list<string> conf = String::ParseOptions(conf_modules, Sysconfig::parse_param);
@@ -328,21 +328,21 @@ Create it and use powerteak?
 	    result = result + ((richtext) ?"<P><B>":"") + _("Configuration Script: ") + ((richtext) ?"</B> ":"") + mergestring(conf, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
-	if (size(reload) > 0)
+	if (reload != nil && size(reload) > 0)
 	{
 	    list<string> services = String::ParseOptions(reload, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Reload: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
-	if (size(restart) > 0)
+	if (restart != nil && size(restart) > 0)
 	{
 	    list<string> services = String::ParseOptions(restart, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Restart: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
-	if (size(command) > 0)
+	if (command != nil && size(command) > 0)
 	{
 	    // header in the variable description text, bash command is appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Activation Command: ") + ((richtext) ?"</B> ":"") + command + ((richtext) ?"</P>":"\n");
@@ -374,6 +374,8 @@ Create it and use powerteak?
 	// rich text value
 	result = result + ((richtext) ?"<P><B>":"") + _("Description: ") + ((richtext) ?"</B><BR> ":"") + comment + ((richtext) ?"</P>":"");
     }
+
+    y2debug("variable description : %1", result);
 
     return result;
 }
