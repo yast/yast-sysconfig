@@ -49,14 +49,7 @@ global define symbol SysconfigSequence() ``{
 	]
     ];
 
-    // dialog header
-    string caption = (Sysconfig::powertweak_mode) ? _("Powertweak Configuration") : _("System Configuration Editor");
-    // text in label widget
-    term contents = `Label(_("Initializing ..."));
-
     Wizard::CreateDialog();
-    Wizard::SetContentsButtons(caption, contents, "",
-	    Label::BackButton(), Label::NextButton());
 
     any ret = WizardSequencer(aliases, sequence);
 
@@ -70,15 +63,7 @@ global define symbol SysconfigSequence() ``{
  * @return sequence result
  */
 global define symbol SysconfigAutoSequence() ``{
-    // dialog header
-    string caption = (Sysconfig::powertweak_mode) ? _("Powertweak Configuration") : _("System Configuration Editor");
-
-    // text in label widget
-    term contents = `Label(_("Initializing ..."));
-
     Wizard::CreateDialog();
-    Wizard::SetContentsButtons(caption, contents, "",
-	    Label::BackButton(), Label::NextButton());
 
     any ret = MainSequence();
 
