@@ -18,6 +18,33 @@ Tue Nov 19 11:14:39 CET 2002 - lslezak@suse.cz
 - version 2.7.0
 
 -------------------------------------------------------------------
+Thu Oct  3 12:20:20 CEST 2002 - lslezak@suse.cz
+
+- added possible values ("grub", "lilo") for LOADER_TYPE variable
+  (#20385)
+- version 2.6.15
+
+-------------------------------------------------------------------
+Fri Sep 27 13:26:37 CEST 2002 - lslezak@suse.cz
+
+- use string::size_type instead of int - fixes endless loop
+  at start on 64-bit architectures (#20236)
+- version 2.6.14
+
+-------------------------------------------------------------------
+Thu Sep 19 18:35:23 CEST 2002 - lslezak@suse.cz
+
+- do not start SuSEconfig after saving powertweak configuration
+- version 2.6.13
+
+-------------------------------------------------------------------
+Wed Sep 11 16:17:19 CEST 2002 - lslezak@suse.cz
+
+- fixed progress label (rc.config -> sysconfig) (#19398)
+- added new metadata
+- version 2.6.12
+
+-------------------------------------------------------------------
 Fri Sep  6 17:01:56 CEST 2002 - lslezak@suse.cz
 
 - fixed metadata
