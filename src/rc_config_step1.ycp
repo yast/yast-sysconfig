@@ -305,8 +305,8 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 		     rc_config_keys = add( rc_config_keys, key, curr_key);
 		  }
 		  
-		  // y2log( .milestone, 1, "ttt", "TTTTTTTTTBB", new_val); 
-		  // y2log( .milestone, 1, "ttt", "TTTTTTTTTBB", new_lab); 
+		  // y2milestone( "TTTTTTTTTBB: %1", new_val); 
+		  // y2milestone( "TTTTTTTTTBB: %1", new_lab); 
 		  i=i+1;
 	       }
 	    }

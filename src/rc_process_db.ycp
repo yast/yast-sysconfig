@@ -572,7 +572,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	   parent_key = substring( rc_branch,   findlastof( rc_branch, "/" )+1);
        }
 
-       // y2log( .milestone, "XX", 1, sformat( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key ));
+       // y2milestone( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key );
 	   
        list|void subitems = lookup( subitems_map, key, nil);
 
