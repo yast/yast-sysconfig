@@ -502,6 +502,12 @@ Create it and use powerteak?
     string new_value = (string) (description["new_value"]:nil);
     string value = description["value"]:"";
 
+    // use default value (or emty string) instead of the curent value in autoyast
+    if (Mode::config())
+    {
+	value = (haskey(description, "Default")) ? description["Default"]:"" : "";
+    }
+
     if (description["actions","SingleQt"]:"" == "")
     {
 	new_value = backslash_remove(new_value);
@@ -509,16 +515,12 @@ Create it and use powerteak?
     }
 
     list ret = [];
+    string deflt = (string) (description["Default"]:nil);
 
-    if (set_default == true)
+    if (set_default == true && deflt != nil)
     {
-	string def = (string) (description["Default"]:nil);
-
-	if (def != nil)
-	{
-	    y2debug("Adding default value: %1", def);
-	    if (!contains(ret, def)) ret = add(ret, def);
-	}
+	y2debug("Adding default value: %1", deflt);
+	if (!contains(ret, deflt)) ret = add(ret, deflt);
     }
 
     if (new_value != nil)
@@ -530,7 +532,6 @@ Create it and use powerteak?
 	if (!contains(ret, value)) ret = add(ret, value);
     }
 
-    string deflt = (string) (description["Default"]:nil);
 
     string type = description["Type"]:"";
 

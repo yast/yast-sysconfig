@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov 24 13:22:09 CET 2004 - lslezak@suse.cz
+
+- display default value or empty string instead of the current
+  value in aytoyast mode (#36874)
+- version 2.11.3
+
+-------------------------------------------------------------------
 Mon Nov 15 16:31:21 CET 2004 - lslezak@suse.cz
 
 - merged commandline mode fixes from 9.1 branch:
