@@ -48,7 +48,7 @@ global define symbol SysconfigSequence() ``{
 	]
     ];
 
-    string caption = _("Sysconfig configuration");
+    string caption = _("System configuration editor");
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();
@@ -67,7 +67,7 @@ global define symbol SysconfigSequence() ``{
  * @return sequence result
  */
 global define symbol SysconfigAutoSequence() ``{
-    string caption = _("Sysconfig configuration");
+    string caption = _("System configuration editor");
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();
@@ -86,42 +86,15 @@ global define symbol SysconfigAutoSequence() ``{
  */
 global define symbol MainSequence() ``{
 
-    /* FIXME: adapt to your needs */
     map aliases = $[
-	"summary"	:   ``( SummaryDialog() ),
-	"overview"	:   ``( OverviewDialog() ),
-	"configure"	: [ ``( AddSequence() ), true ],
-	"add"		: [ ``( AddSequence() ), true ],
-	"edit"		: [ ``( AddSequence() ), true ]
+	"main"	:   ``(MainDialog())
     ];
 
-    /* FIXME: adapt to your needs */
     map sequence = $[
-	"ws_start" : "summary",
-	"summary" : $[
+	"ws_start" : "main",
+	"main" : $[
 	    `abort	: `abort,
-	    `next	: `next,
-	    `overview	: "overview",
-	    `configure	: "configure",
-	    `other	: "configure",
-	],
-	"overview" : $[
-	    `abort	: `abort,
-	    `next	: `next,
-	    `add	: "add",
-	    `edit	: "edit",
-	],
-	"configure" : $[
-	    `abort	: `abort,
-	    `next	: "summary",
-	],
-	"add" : $[
-	    `abort	: `abort,
-	    `next	: "overview",
-	],
-	"edit" : $[
-	    `abort	: `abort,
-	    `next	: "overview",
+	    `next	: `next
 	]
     ];
 
@@ -130,33 +103,6 @@ global define symbol MainSequence() ``{
     return ret;
 }
 
-/**
- * Add a configuration of sysconfig
- * @return sequence result
- */
-global define symbol AddSequence() ``{
-
-    /* FIXME: adapt to your needs */
-    map aliases = $[
-	"config1"	: ``( Configure1Dialog() ),
-	"config2"	: ``( Configure2Dialog() )
-    ];
-
-    /* FIXME: adapt to your needs */
-    map sequence = $[
-	"ws_start" : "config1",
-	"config1" : $[
-	    `abort	: `abort,
-	    `next	: "config2"
-	],
-	"config2" : $[
-	    `abort	: `abort,
-	    `next	: `next
-	]
-    ];
-
-    return WizardSequencer( aliases, sequence );
-}
 
 /* EOF */
 }

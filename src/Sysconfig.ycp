@@ -29,14 +29,6 @@ include "network/ip.ycp";
  */
 global block AbortFunction = nil;
 
-/**
- * Data was modified?
- */
-global boolean modified = false;
-
-global boolean proposal_valid = false;
-global boolean write_only = false;
-
 // all read variables
 map variables = $[];
 
@@ -56,12 +48,10 @@ global list tree_content = [];
  * @return true if modified
  */
 global define boolean Modified() ``{
-    y2debug("modified=%1",modified);
-    return modified;
+    return (size(modified_variables) > 0);
 };
 
 global define list(string) search(map params, boolean show_progress) ``{
-
     list(string) found = [];
 
     // get all configuration files
@@ -137,7 +127,8 @@ global define list(string) search(map params, boolean show_progress) ``{
 
 		    if (search_description == true && already_found == false)
 		    {
-			string read_comment = SCR::Read(add(add(.syseditor.value_comment, file), var));
+			// read comment without metadata
+			string read_comment = get_only_comment(SCR::Read(add(add(.syseditor.value_comment, file), var)));
 
 			if (case_insensitive)
 			{
@@ -166,8 +157,7 @@ global define list(string) search(map params, boolean show_progress) ``{
 	UI::CloseDialog();
     }
 
-    y2warning("Found: %1", found);
-    y2warning("Params: %1", params);
+    y2debug("Found: %1", found);
 
     return found;
 }
@@ -326,8 +316,45 @@ global define map get_description(string varid) ``{
     {
 	y2warning("Comment for variable %1 is missing", varid);
 
-	// TODO read comment from previous values
 	list all_variables = SCR::Dir(add(.syseditor.value, fname));
+	list reversed = [];
+
+	integer i = 0;
+	boolean found = false;
+
+	while (i < size(all_variables) && found == false)
+	{
+	    string v = all_variables[i]:"";
+
+	    if (v == varname)
+	    {
+		found = true;
+	    }
+	    else
+	    {
+		reversed = prepend(reversed, v);
+	    }
+
+	    i = i + 1;
+	}
+
+	if (found == true)
+	{
+	    i = 0;
+	    comment = "";
+	    string v = "";
+
+	    y2debug("reversed: %1", reversed);
+	    while (i < size(reversed) && comment == "")
+	    {
+		v = reversed[i]:"";
+		comment = SCR::Read(add(add(.syseditor.value_comment, fname), v));
+
+		i = i + 1;
+	    }
+
+	    y2warning("Variable: %1 Using comment from variable: %2", varname, v);
+	}
 
     }
 
@@ -445,7 +472,7 @@ global define list(string) get_metadata(string input) ``{
     return (filter(string line, lines, ``(regexpmatch(line, "^##.*"))));
 }
 
-// only comment withou metadata
+// only comment without metadata
 global define string get_only_comment(string input) ``{
     if (input == nil || input == "")
     {
@@ -704,25 +731,6 @@ global define boolean Write() ``{
     // flush changes
     SCR::Write(.syseditor, nil);
 
-/*
-    // write settings
-    if(Abort()) return false;
-    Progress::NextStage();
-    if(false) Report::Error (_("Can not write settings!"));
-    sleep(sl);
-
-    // run SuSEconfig
-    if(Abort()) return false;
-    Progress::NextStage ();
-    if(false) Report::Error (_("SuSEconfig script failed!"));
-    sleep(sl);
-
-    if(Abort()) return false;
-    ProgressNextStage(_("Finished"));
-    sleep(sl);
-
-    if(Abort()) return false;
-*/
     return true;
 }
 

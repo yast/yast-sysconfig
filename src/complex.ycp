@@ -12,7 +12,6 @@
 textdomain "sysconfig";
 
 import "Wizard";
-
 import "Sysconfig";
 
 include "ui/common_popups.ycp";
@@ -21,10 +20,10 @@ include "ui/common_messages.ycp";
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
 
-
-
+/**
+ * current selected variable in the tree widget
+ */
 global string selected_variable = "";
-
 
 /**
  * Return a modification status
@@ -56,7 +55,18 @@ global define symbol ReadDialog() ``{
 global define symbol WriteDialog() ``{
     Wizard::RestoreHelp(HELPS["write"]:"");
     Sysconfig::AbortFunction = ``{ return PollAbort();};
-    boolean ret = Sysconfig::Write();
+
+    boolean ret = true;
+
+    if (Sysconfig::Modified() == true)
+    {
+	// write changes
+	ret = Sysconfig::Write();
+
+	// start suseconfig
+	WFM::CallFunction(`inst_suseconfig(false, false));
+    }
+
     return ret ? `next : `abort;
 }
 
@@ -124,9 +134,80 @@ global define list add_if_missing(list l, string v) ``{
 }
 
 
+global define string backslash_add(string input) ``{
+
+    // escape double quotes and back slashes
+    string escaped = "";
+    integer pos = 0;
+
+    while (pos < size(input))
+    {
+	string ch = substring(input, pos, 1);
+
+	if (ch == "\\")
+	{
+	    escaped = escaped + "\\\\";
+	}
+	else
+	{
+	    if (ch == "\"")
+	    {
+		escaped = escaped + "\\\"";
+	    }
+	    else
+	    {
+		escaped = escaped + ch;
+	    }
+	}
+
+	pos = pos + 1;
+    }
+
+    return escaped;
+}
+
+global define string backslash_remove(string input) ``{
+
+    if (input == nil)
+    {
+	return nil;
+    }
+
+    string  ret = "";
+    integer index = 0;
+    boolean backslash = false;
+
+    while (index < size(input))
+    {
+	string ch = substring(input, index, 1);
+
+	if (backslash == false)
+	{
+	    if (ch == "\\")
+	    {
+		backslash = true;
+	    }
+	    else
+	    {
+		ret = ret + ch;
+	    }
+	}
+	else
+	{
+	    ret = ret + ch;
+	    backslash = false;
+	}
+
+	index = index + 1;
+    }
+
+    return ret;
+}
+
+
 global define list combo_list(map description, boolean set_default) ``{
-    string new_value = description["new_value"]:nil;
-    string value = description["value"]:"";
+    string new_value = backslash_remove(description["new_value"]:nil);
+    string value = backslash_remove(description["value"]:"");
     list ret = [];
 
     if (set_default == true)
@@ -314,7 +395,7 @@ global define void check_set_current_value()
     // check current value
     if (selected_variable != "")
     {
-	string new_value = UI::QueryWidget(`id(`combo), `Value);
+	string new_value = backslash_add(UI::QueryWidget(`id(`combo), `Value));
 
 	if (Sysconfig::get_name_from_id(selected_variable) != "")
 	{
@@ -364,10 +445,10 @@ global define list create_table_content(list varids)
 }
 
 /**
- * Summary dialog
+ * Display main configuration dialog
  * @return dialog result
  */
-global define symbol SummaryDialog() ``{
+global define symbol MainDialog() ``{
 
     UI::OpenDialog(`opt(`defaultsize),
 	`VBox(`Left(`Image(`suseheader, "SuSE")),
@@ -465,7 +546,10 @@ global define symbol SummaryDialog() ``{
 	    {
 
 		y2milestone("Modified variables: %1", modified);
-		map result = display_variables_dialog(_("Modified variables"), _("Detailed list of modified variables"), create_table_content(modified), _("&Save"), UI::CancelButtonLabel());
+		map result = display_variables_dialog(_("Modified variables"), _("Here, see the values YaST2 will change.
+Choose \"OK\" for YaST2 to save these changes.
+Choose \"Cancel\" to edit the values again.
+"),			create_table_content(modified), UI::OKButtonLabel(), UI::CancelButtonLabel());
 
 		if (result["ui"]:`dummy == `cancel)
 		{
@@ -483,7 +567,7 @@ global define symbol SummaryDialog() ``{
 
 		if (size(found) > 0)
 		{
-		    map input = display_variables_dialog(_("Found"), _("Detailed list of found variables"), create_table_content(found), _("&Go to"), UI::CancelButtonLabel());
+		    map input = display_variables_dialog(_("Search sesult"), _("Here is displayed search results. If you see the item you want, select this item then click \"Go to\". Otherwise, click \"Cancel\" to close this dialog."), create_table_content(found), _("&Go to"), UI::CancelButtonLabel());
 
 		    if (input["ui"]:`dummy == `cancel)
 		    {
@@ -500,9 +584,47 @@ global define symbol SummaryDialog() ``{
 		}
 		else
 		{
-		    UI::MessagePopup("Nothing found.");
+		    UI::MessagePopup(_("No entries found"));
 		}
 	    }
+	}
+	else if (ret == `help)
+	{
+	    string helptext =
+		// helptext for popup - part 1/3
+		_("<p>After you save your changes, this editor changes the variables in the
+corresponding  sysconfig file. Then it runs
+SuSEconfig, which changes the underlying configuration files, stops and starts daemons,
+and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
+") +
+
+                // helptext for popup - part 2/3
+		_("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
+
+                // helptext for popup - part 3/3
+		_("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
+ you have manually changed any of them.  If you have changed a configuration file manually,
+ it will not touch it.</p>");
+
+
+            UI::OpenDialog( `opt(`decorated ),
+		`HBox( `VSpacing(16),
+		       `VBox(
+			   `HSpacing(60),
+			   // popup window header
+			   `Heading(_("Help")),
+			   `VSpacing(0.5),
+			   `RichText(helptext),
+			   `VSpacing(1.5),
+			    // push button label
+			   `PushButton(`id(`ok), `opt(`default), OKButtonLabel())
+			   )
+		    )
+            );
+
+            UI::SetFocus(`id(`ok));
+            UI::UserInput();
+            UI::CloseDialog();
 	}
 	else if (ret == `abort || ret == `cancel)
 	{
