@@ -209,6 +209,15 @@ global define string create_richtext_description(map description) ``{
 
     if (comment != "" && comment != nil)
     {
+	map display = UI::GetDisplayInfo();
+
+	if (display["TextMode"]:true == false)	// FIXME: workaround for bug #23721 (&lt; is not interpreted in ncurses)
+	{
+	    // convert '<' and '>' to '&lt;' '&gt;'
+	    comment = mergestring(splitstring(comment, "<"), "&lt;");
+	    comment = mergestring(splitstring(comment, ">"), "&gt;");
+	}
+
 	// rich text value
 	result = result + "<P><B>" + _("Description: ") + "</B><BR> " + comment + "</P>";
     }
