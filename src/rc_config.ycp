@@ -26,7 +26,7 @@
   // Menuentry for the YaST2 menu
   if (Args() == [ "get_menuentry" ]) 
     return [ "rc_config", $[
-			`menuentry    : UI(_("rc_config modul")),
+			`menuentry    : UI(_("RC-Config Editor")),
 			`arguments    : [ ],
 			`widget       : `RichText(
 				// 
