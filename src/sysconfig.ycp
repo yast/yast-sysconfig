@@ -36,7 +36,7 @@ include "commandline/commandline.ycp";
 	// help text header - sysconfig editor
 	 _("Editor for /etc/sysconfig files"),
 	"id"        : (Sysconfig::powertweak_mode == true) ? "powertweak" : "sysconfig",
-	"guihandler": ``(SysconfigSequence()),
+	"guihandler": SysconfigSequence,
 	"initialize": Sysconfig::Read,
 	// use write handler - disable progress bar
 	"finish"    : writeHandler,

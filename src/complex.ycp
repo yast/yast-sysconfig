@@ -169,7 +169,7 @@ global define string possible_values(map description, boolean richtext) ``{
     }
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
-	list spaces = [];
+	list<string> spaces = [];
 	list values = String::ParseOptions(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
@@ -181,7 +181,7 @@ global define string possible_values(map description, boolean richtext) ``{
     }
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
-	list spaces = [];
+	list<string> spaces = [];
 	list values = String::ParseOptions(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
@@ -323,21 +323,21 @@ global define string create_description(map<string, any> description, boolean ri
 	if (size(conf_modules) > 0)
 	{
 	    // parse string with options, then add them to the rich text
-	    list conf = String::ParseOptions(conf_modules, Sysconfig::parse_param);
+	    list<string> conf = String::ParseOptions(conf_modules, Sysconfig::parse_param);
 	    // header in the variable description text, SuSEconfig/ULconfig module names are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Configuration Script: ") + ((richtext) ?"</B> ":"") + mergestring(conf, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(reload) > 0)
 	{
-	    list services = String::ParseOptions(reload, Sysconfig::parse_param);
+	    list<string> services = String::ParseOptions(reload, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Reload: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(restart) > 0)
 	{
-	    list services = String::ParseOptions(restart, Sysconfig::parse_param);
+	    list<string> services = String::ParseOptions(restart, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Restart: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
@@ -779,7 +779,7 @@ global define symbol MainDialog() ``{
     );
 
 
-    symbol ret = nil;
+    symbol ret = `dummy;
 
     while(ret != `cancel && ret != `abort && ret != `next && ret != `back)
     {
