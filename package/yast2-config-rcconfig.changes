@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 19 17:46:15 CEST 2001 - mike@suse.de
+
+- added START_FW2 variable for firewall module.
+- change start, stop to restart2 for firewall2
+
+-------------------------------------------------------------------
 Tue Sep 18 18:03:27 CEST 2001 - mike@suse.de
 
 - firewall scripts started
