@@ -2,7 +2,7 @@
 
 #
 #  File:
-#    .pl
+#    parse_configs.pl
 #
 #  Module:
 #    Sysconfig editor
@@ -11,11 +11,19 @@
 #    Ladislav Slezak <lslezak@suse.cz>
 #
 #  Description:
+#    This script parses configuration files and generates YCP list
+#    with values:
+#        - list of items for tree widget
+#        - map with node descriptions
+#
+#    This script is used by YaST2 sysconfig editor to speedup
+#    module start.
 #
 # $Id$
 #
 
-# used modules
+# used modules:
+# module for wild card file name expansion
 use File::Glob ':glob';
 
 # convert list of variable identifications to list of items
@@ -59,7 +67,6 @@ sub ids_to_item($$)
 
 sub convert(@);
 
-
 # recursively create Tree widget content
 # paramter: list which contains pairs (location string, variables id string),
 # last item in the list is prefix of all variables
@@ -74,6 +81,7 @@ sub convert(@)
     my $index = 0;
     my $current_prefix = "";
 
+    # array used for recursive converting
     my @recurse = ();
 
     my $result = "";
@@ -83,7 +91,8 @@ sub convert(@)
     {
 	my $location = $list[$index++];
 	my $id = $list[$index++];
-	
+
+	# location is empty - stop recursion and return list of leaf-node items	
 	if ($location eq "")
 	{
 	    if ($first != 1)
@@ -99,6 +108,7 @@ sub convert(@)
 	}
 	else
 	{
+	    # get prefix of current location
 	    my $prefix = $location;
 	    my $postfix = "";
 
@@ -109,11 +119,13 @@ sub convert(@)
 		$postfix = $2;
 	    }
 
+	    # at start is current prefix empty
 	    if ($current_prefix eq "")
 	    {
 		$current_prefix = $prefix;
 	    }
 
+	    # if prefix is same as previous one just push remaining part of path and variable id to list
 	    if ($prefix eq $current_prefix)
 	    {
 		push(@recurse, $postfix);
@@ -121,6 +133,8 @@ sub convert(@)
 	    }
 	    else
 	    {
+		# if prefix is different we collected all variables with same prefix
+		# proces it recursively
 		my $new_node = ($node eq "") ? $current_prefix : $node.'/'.$current_prefix;
 
 		push(@recurse, $new_node);
@@ -138,6 +152,7 @@ sub convert(@)
 
 		$result .= "`item(`id(\"$new_node\"), \"$current_prefix\", false, [ $x ])";
 
+		# store new prefix and new id
 		$current_prefix = $prefix;
 		@recurse = ();
 		
@@ -147,6 +162,7 @@ sub convert(@)
 	}
     }
 
+    # recursively process remaining values
     if (@recurse > 0)
     {
 	my $new_node = ($node eq "") ? $current_prefix : $node.'/'.$current_prefix;
@@ -167,13 +183,14 @@ sub convert(@)
 }
 
 
-
+# convert perl hash to YCP map (in string form)
 sub hash_to_map(%)
 {
     my (%desc) = @_;
     my $first = 1;
     my $result = '$[ ';
 
+    # each hash pair convert to string
     for my $path (keys(%desc))
     {
 	if ($first != 1)
@@ -187,6 +204,7 @@ sub hash_to_map(%)
 
 	my $description = $desc{$path};
 
+	# escape double quote characters
 	$description =~ s/[^\\]"/\\"/g;
 	$path =~ s/[^\\]"/\\"/g;
 
@@ -214,7 +232,7 @@ for my $arg (@ARGV)
 # hash:  key = location, value = string containig variables identifications
 my %locations = ();
 
-# hash:  key = location, value = node desacription (string)
+# hash:  key = location, value = node description (string)
 my %descriptions = ();
 
 # collect pairs (location, variables definition) from all configuration files
@@ -238,6 +256,7 @@ for my $fname (@list)
 	{
 	    my $descr = $1;
 
+	    # read multiline descriptions
 	    while ($descr =~ /(.*)\\$/)
 	    {
 		# remove trailing backslash

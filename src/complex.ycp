@@ -21,6 +21,11 @@ include "ui/common_messages.ycp";
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
 
+
+
+global string selected_variable = "";
+
+
 /**
  * Return a modification status
  * @return true if data was modified
@@ -58,7 +63,7 @@ global define symbol WriteDialog() ``{
 global define string create_richtext_description(map description) ``{
     string varname = description["name"]:"";
     string file = description["file"]:"";
-    string default_value = description["Default"]:"";
+    string default_value = description["Default"]:nil;
     string comment = description["comment"]:"";
 
     string possible_vals = possible_values(description);
@@ -75,9 +80,27 @@ global define string create_richtext_description(map description) ``{
 	result = result + "<P><B>" + _("Possible values: ") + "</B> " + possible_vals + "</P>";
     }
 
-    if (default_value != "" && default_value != nil)
+    if (default_value != nil && size(file) > 0)
     {
+	// quote empty value
+	if (default_value == "")
+	{
+	    default_value = "\"\"";
+	}
 	result = result + "<P><B>" + _("Default value: ") + "</B> " + default_value + "</P>";
+    }
+
+    // if value was modified add original value
+    if (haskey(description, "new_value"))
+    {
+	string original = description["value"]:"";
+
+	// quote empty value
+	if (original == "")
+	{
+	    original = "\"\"";
+	}
+	result = result + "<P><B>" + _("Original value: ") + "</B> " + original + "</P>";
     }
 
     if (comment != "" && comment != nil)
@@ -100,157 +123,35 @@ global define list add_if_missing(list l, string v) ``{
     return (!contains(l, v)) ? add(l, v) : l;
 }
 
-global define remove_whitespaces(string input) ``{
-    string removed_whitespaces = regexpsub(input, "^[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
 
-    return (removed_whitespaces != nil) ? removed_whitespaces : input;
-}
-
-global define list parse_options(string options) ``{
-    list ret = [];
-
-    // parsing possible values is done by two alghorithms:
-    // first is much faster, but only usable if string
-    // doesn't contain any double qoute characters
-    // second is more general, but of course slower
-
-    if (options == nil)
-    {
-	return [];
-    }
-
-    if (findfirstof(options, "\"") == nil)
-    {
-	// easy case - no qouting, split string to values
-	list(string) values = splitstring(options, ",");
-
-	foreach (string v, values, ``{
-		v = remove_whitespaces(v);
-		if (!contains(ret, v)) ret = add(ret, v);
-	    }
-	);
-    }
-    else
-    {
-	// quoting is used, we cannot easily split input
-	// parsing each character is needed
-	symbol state = `out_of_string;
-	integer index = 0;
-	string str = "";
-
-	while(index < size(options))
-	{
-	    string character = substring(options, index, 1);
-
-	    y2debug("character: %1 state: %2 index: %3", character, state, index);
-
-	    if (character == "\\")
-	    {
-		if (index + 1 < size(options))
-		{
-		    string nextcharacter = substring(options, index + 1, 1);
-
-		    if (nextcharacter == "\"")
-		    {
-			character = "\\\"";
-			index = index + 1;
-		    }
-		}
-	    }
-
-	    if (state == `out_of_string)
-	    {
-		if (character == " " || character == "\t" || character == ",")
-		{
-		    index = index + 1;
-		    continue;
-		}
-		else if (character == "\"")
-		{
-		    state = `in_quoted_string;
-		}
-		else
-		{
-		    state = `in_string;
-
-		    if (character == "\\\"")
-		    {
-			str = "\"";
-		    }
-		    else
-		    {
-			str = character;
-		    }
-		}
-	    }
-	    else if (state == `in_quoted_string)
-	    {
-		if (character == "\"")
-		{
-		    state = `out_of_string;
-		    if (!contains(ret, str)) ret = add(ret, str);
-		    str = "";
-		}
-		else if (character == "\\\"")
-		{
-		    str = str + "\"";
-		}
-		else
-		{
-		    str = str + character;
-		}
-	    }
-	    else if (state == `in_string)
-	    {
-		if (character == ",")
-		{
-		    state = `out_of_string;
-		    str = remove_whitespaces(str);
-		    if (!contains(ret, str)) ret = add(ret, str);
-		    str = "";
-		}
-		else if (character == "\\\"")
-		{
-		    str = str + "\"";
-		}
-		else
-		{
-		    str = str + character;
-		}
-	    }
-
-	    index = index + 1;
-	}
-
-	if (state == `in_quoted_string)
-	{
-	    y2warning("Missing trainling double quote character(\") in input: '%1'", options);
-	    if (!contains(ret, str)) ret = add(ret, str);
-	}
-
-	if (state == `in_string)
-	{
-	    str = remove_whitespaces(str);
-	    if (!contains(ret, str)) ret = add(ret, str);
-	}
-    }
-
-    y2debug("Parsed values: %1", ret);
-
-    return ret;
-}
-
-
-global define list combo_list(map description) ``{
+global define list combo_list(map description, boolean set_default) ``{
+    string new_value = description["new_value"]:nil;
     string value = description["value"]:"";
     list ret = [];
 
-    if (value != nil)
+    if (set_default == true)
     {
-	ret = [ value ];
+	string def = description["Default"]:nil;
+
+	if (def != nil)
+	{
+	    if (!contains(ret, def)) ret = add(ret, def);
+	}
+    }
+
+    if (new_value != nil)
+    {
+	if (!contains(ret, new_value)) ret = add(ret, new_value);
+    }
+    else if (value != nil)
+    {
+	if (!contains(ret, value)) ret = add(ret, value);
     }
 
     string deflt = description["Default"]:"";
+    list parsed = Sysconfig::parse_options(deflt);
+    deflt = parsed[0]:deflt;
+
     string type = description["Type"]:"";
 
     if (type == "yesno")
@@ -266,16 +167,22 @@ global define list combo_list(map description) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-	ret = merge(ret, parse_options(values_string));
+	ret = merge(ret, Sysconfig::parse_options(values_string));
     }
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	ret = merge(ret, parse_options(values_string));
+	ret = merge(ret, Sysconfig::parse_options(values_string));
     }
 
     // add default value to the list
     if (!contains(ret, deflt)) ret = add(ret, deflt);
+
+    // add old value to the list if variable was modified
+    if (new_value != nil)
+    {
+	if (!contains(ret, value)) ret = add(ret, value);
+    }
 
     return ret;
 }
@@ -296,7 +203,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	list spaces = [];
-	list values = parse_options(regexpsub(type, "^list\\((.*)\\)", "\\1"));
+	list values = Sysconfig::parse_options(regexpsub(type, "^list\\((.*)\\)", "\\1"));
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -308,7 +215,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	list spaces = [];
-	list values = parse_options(regexpsub(type, "^string\\((.*)\\)", "\\1"));
+	list values = Sysconfig::parse_options(regexpsub(type, "^string\\((.*)\\)", "\\1"));
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -353,16 +260,17 @@ global define string possible_values(map description) ``{
     return ret;
 }
 
-global define void update_combo(map description) ``{
+global define void update_combo(map description, boolean set_default) ``{
     string varname = description["name"]:"";
+    string modif_flag = (haskey(description, "new_value")) ? "  " + _("(changed)") : "";
 
     if (combo_editable(description))
     {
-	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`editable, `hstretch), _("&Setting of: ") + varname, combo_list(description)));
+	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`editable, `hstretch), _("&Setting of: ") + varname + modif_flag, combo_list(description, set_default)));
     }
     else
     {
-	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`hstretch), _("&Setting of: ") + varname, combo_list(description)));
+	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`hstretch), _("&Setting of: ") + varname + modif_flag, combo_list(description, set_default)));
     }
 
     // disable combo for non-leaf nodes
@@ -447,7 +355,21 @@ global define symbol SummaryDialog() ``{
 
 	if (ret == `tree)
 	{
+	    // check current value
+	    if (selected_variable != "")
+	    {
+		string new_value = UI::QueryWidget(`id(`combo), `Value);
+
+		if (Sysconfig::get_name_from_id(selected_variable) != "")
+		{
+		    // variable was selected (not category)
+		    Sysconfig::set_value(selected_variable, new_value, false);
+		}
+	    }
+
+
 	    string selected = UI::QueryWidget(`id(`tree), `CurrentItem);
+	    selected_variable = selected;
 	    y2milestone("Selected: %1", selected);
 
 	    map description = Sysconfig::get_description(selected);
@@ -458,13 +380,47 @@ global define symbol SummaryDialog() ``{
 	    UI::ChangeWidget(`id(`rt), `Value, create_richtext_description(description));
 
 	    // update combo box
-	    update_combo(description);
+	    update_combo(description, false);
 
 	    // update "Default" button state (enable/disable)
 	    update_button_state(description);
 
 	    // update location in header
 	    update_location(description);
+	}
+	// "Default" button
+	else if (ret == `def)
+	{
+	    map description = Sysconfig::get_description(selected_variable);
+	    update_combo(description, true);
+	}
+	else if (ret == `next)
+	{
+	    list modified = Sysconfig::get_modified();
+	    list table_content = [];
+	    integer i = 0;
+
+	    foreach(string varid, modified,
+		``{
+		    map descr = Sysconfig::get_description(varid);
+		    string name = descr["name"]:"";
+		    string old = descr["value"]:"";
+		    string new = descr["new_value"]:"";
+
+		    // display only beginning of comment (to limit table space used)
+		    string comm = descr["comment"]:"";
+		    if (size(comm) > 70)
+		    {
+			comm = substring(comm, 0, 70);
+		    }
+
+		    table_content = add(table_content, `item(`id(i), name, old, new, comm));
+
+		    i = i + 1;
+		}
+	    );
+
+	    y2milestone("Modified variables: %1", modified);
 	}
 	else if (ret == `abort || ret == `cancel)
 	{
