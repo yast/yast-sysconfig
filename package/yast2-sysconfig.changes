@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  4 04:53:11 CET 2003 - nashif@suse.de
+
+- define variable files module wide (#24494)
+- renamed files to custom_files
+
+-------------------------------------------------------------------
 Thu Feb 27 15:26:39 CET 2003 - lslezak@suse.de
 
 - ignore header in config file (#23876)
