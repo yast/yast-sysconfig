@@ -1,0 +1,361 @@
+\documentclass[pdftex,titlepage,10pt]{article}
+
+\usepackage{a4wide}
+\usepackage{times}
+\usepackage{german}
+\usepackage[T1]{fontenc}
+\usepackage[ansinew]{inputenc}
+\usepackage{makeidx}
+\usepackage[final]{graphicx}
+%\usepackage[draft]{graphicx}
+
+\usepackage[colorlinks,bookmarks,pdfauthor={%
+  Michael Hager, Michael K\"ohrmann}%
+,pdfsubject={RC-Config-Editor}%
+,pdftitle={RC-Config-Editor}%
+,pdfkeywords={}]{hyperref}
+
+%\makeindex
+%%%
+\newcommand{\HRule}{\rule{\linewidth}{1mm}}
+\title{%
+  \HRule\\[0.7cm]
+  RC-Config-Editor\\[0.5em]
+  Anpassen der Metadaten bei Erscheinen einer neuen SuSE-Distribution\\[0.5cm]
+  \HRule\\\vfill}
+\author{Michael Hager, {\tt mike@suse.de}\\
+  Michael K\"ohrmann, {\tt curry@suse.de}\\
+  SuSE GmbH N\"urnberg}
+\date{\today}
+%%%
+\begin{document}
+\setlength{\parindent}{0pt}
+\pdfcompresslevel=9
+\DeclareGraphicsExtensions{.pdf,.jpg,.png}
+\pagestyle{headings}
+%%%%%
+\maketitle
+%\tableofcontents
+%\newpage
+%%%%%
+\section{Was leistet diese Anleitung}
+Dieses Dokument soll eine Arbeitsanleitung geben, um die Metadaten des
+{\em RC-Config-Editors} an eine neue {\em SuSE}-Distribution
+anzupassen, d.h. eine neue und vervollst\"andigte {\tt meta\_rc.config}
+zu erzeugen. Die Metadaten der {\tt rc.config}-Variablen sind
+zus\"atzliche beschreibende Daten, wie z.B. den Datentyp der Variablen
+({\tt boolean}, {\tt integer}, \ldots).\\
+
+\section{Allgemeine Einf\"uhrung}
+Zum {\em YaST2}-Modul des {\em RC-Config-Editors} geh\"ort eine
+Datenbank, in der Metadaten gespeichert sind. Die Metadaten speichern
+Informationen \"uber die Konfigurationsvariablen.
+Auf der Grundlage dieser Daten und der Inhalte der Dateien {\tt
+  /etc/rc.config}, {\tt /etc/rc.config.d/*.rc.config} und {\tt
+  /etc/rc.dialout} wird der Baum generiert, mit dem man im 
+{\em RC-Config-Editor} durch die Variablen und Variablengruppen
+navigieren kann. Die Datenbank speichert die Zuordnung der Variablen
+in die einzelnen Gruppen, sowie die Datentypen und Typdefinitionen der
+Variablen und Beschreibungen der Gruppenverzeichnisse.\\
+
+Die Zuordnung neuer Variablen in den Gruppenbaum kann nicht
+automatisch erfolgen.Einige Softwarepakete ben\"otigen bestimmte Variablen,
+die w\"ahrend der Installation dieser Pakete in den Konfigurationsdateien
+gespeichert werden. Bei Neuerscheinen einer {\em
+  SuSE}-Distribution k\"onnen also unter Umst\"anden neue Variablen in die
+Konfigurationsdateien eingetragen werden.\\
+
+Die Metadaten werden in der Datei {\tt /usr/lib/YaST2/meta\_rc.config}
+abgelegt.
+%%%
+\newpage
+\section{Erstellen einer neuen {\tt meta\_rc.config}}
+%%%
+\subsection*{1. Schritt: Zugriff auf die aktuelle Version des
+  {\em RC-Config-Editors} und seiner Quelldateien}
+\begin{description}
+\item[Erkl\"arung:] Zun\"achst mu\ss \ man sich Zugriff auf die
+  aktuelle {\em YaST2-Version} und alle zugeh\"origen Werkzeuge
+  verschaffen.
+\item[Todo:] {\tt cvs}-Zugriff verschaffen.
+\end{description}
+\begin{description}
+\item[Erkl\"arung:] Update der aktuellen {\tt y2c\_rc\_config}-Version
+  mit {\tt cvs}.
+\item[Todo:]
+{\footnotesize \begin{verbatim}
+# ~/ > cd /local/yast2/modules/y2c_rc_config/
+# /local/yast2/modules/y2c_rc_config > cvs up
+\end{verbatim}}
+\item[Ergebnis:] Die aktuellen Quelldateien des {\em
+    RC-Config-Editors}.
+\end{description}
+%%%
+\subsection*{2. Schritt: Erstellen eines neuen Verzeichnisbaumes}
+\begin{description}
+\item[Erkl\"arung:] Um neue Variablen einzuordnen, erzeugt
+  man sich einen neuen Verzeichnisbaum aus der aktuellen
+  {\tt meta\_rc.config}-Datei. Dazu kopiert man die Datei
+  {\tt meta\_rc.config} und das Perl-Skript
+  {\tt create\_dirtree\_from\_eddb.pl}. Das Ausf\"uhren des
+  Skripts auf Basis der neuen Meta-Datenbank erzeugt ein neues Verzeichnis
+  {\tt root/} mit allen Gruppen und bisherigen Variablen.
+\item[Todo:]
+{\footnotesize \begin{verbatim}
+# ~/ > cp /local/yast2/modules/y2c_rc_config/src/meta_rc.config .
+# ~/ > cp /local/yast2/modules/y2c_rc_config/src/create_dirtree_from_eddb.pl .
+# ~/ > ./create_dirtree_from_eddb.pl ./meta_rc.config
+Reading meta_rc.config...
+Processing directories and array...
+Reading meta_rc.config...
+Processing type, mtype, typedef and descr files...
+# ~/ > ls root/
+Base-Administration  Desktop   Hardware  Network           Security
+Base-Applications    Firewall  Mail      Network-Services  Start-Variables
+\end{verbatim}}
+\item[Ergebnis:] Man erh\"alt einen aktuellen Verzeichnisbaum in seinem
+  Heimatverzeichnis unter dem Pfad \verb+$HOME/root/+.
+\end{description}
+%%%$
+\subsection*{3. Schritt: Installieren aller Konfigurationsvariablen}
+\begin{description}
+\item[Erkl\"arung:] Durchf\"uhren einer Maximalinstallation der neuen
+  {\em SuSE}-Distribution. Durch die Installation aller verf\"ugbarer
+  Pakete werden (fast) alle m\"oglichen Konfigurationsvariablen in den
+  Dateien unter {\tt /etc/rc.config}, {\tt /etc/rc.dialout} und {\tt
+    /etc/rc.config.d/*.rc.config} angelegt.
+\item[Todo:] F\"ur jede der Installationsmedien (hier CD-Rom)f\"uhrt man
+die folgenden Schritte durch: {\footnotesize
+\begin{verbatim}
+# ~/ > mount /cdrom/
+# ~/ > cd /cdrom/suse/ 
+# /cdrom/suse > find -name "*.rpm" -exec rpm -hUv --nodeps --force {} \;
+# /cdrom/suse > cd # ~/ > umount /cdrom/
+\end{verbatim}}
+  \item[Hinweis:] Die Installation aller Pakete sollte auf einem
+    Testrechner durchgef\"uhrt werden, da das System danach evtl.
+    nicht mehr vollst\"andig lauff\"ahig ist.
+  \item[Ergebnis:] In den Konfigurationsdateien werden alle m\"oglichen
+    Variablen angelegt.
+\end{description}
+%%%
+\subsection*{4. Schritt: Finden der Variablen, \"uber die noch keine Metadaten
+  vorliegen}
+\begin{description}
+\item[Erkl\"arung:] Mit Hilfe eines Skriptes k\"onnen die Variablen
+  leicht herausgefunden werden, die noch nicht in der Datenbank der
+  Metadaten aufgenommen sind.
+\item[Todo:]
+{\footnotesize\begin{verbatim}
+# ~/ > /usr/lib/YaST2/bin/get_unknown_variables.sh
+creating /tmp/rc.config.all
+creating /tmp/rc.config.variables
+creating /tmp/meta_rc.config.variables
+creating /tmp/variables.diff
+creating /tmp/unknown_variables.txt
+\end{verbatim}}
+\item[Ergebnis:] Man erh\"alt die Datei {\tt
+    /tmp/unknown\_variables.txt}, in der alle Variablen enthalten
+  sind, die noch nicht in der Metadatenbank aufgenommen sind.
+\item[Hinweis:] Am Ende dieser Datei sind evtl. einige Eintr\"age
+  vorhanden, die jedoch keine g\"ultigen Variablen
+  darstellen, wie z.B.  {\tt test}, {\tt true} oder {\tt umask}.
+  Diese Eintr\"age sind in den folgenden Arbeitsschritten unwichtig
+  und k\"onnen entfernt werden.
+\end{description}
+%%%
+\subsection*{5. Schritt: Zuordnung der gefundenen Variablen}
+\begin{description}\label{SchrittAnfang}
+\item[Erkl\"arung:] Nun m\"ussen alle gefundenen Variablen aus der Datei
+  {\tt /tmp/unknown\_variables.txt} im Variablenbaum der richtigen
+  Gruppe zugeordnet werden. Bei dieser Zuordnung sollte man sich an der
+  bisherigen Ordnung des Baumes orientieren und m\"oglichst die
+  Variablen in Gruppen unterbringen, die bereits im Baum vorhanden sind.
+  Evtl. ist es aber sinnvoll, eine neue Gruppe anzulegen (siehe dazu
+  \ref{newgroup}). Um die richtige Zuordnung einer Variable herauszufinden,
+  kann man deren Beschreibung in den Konfigurationsdateien (z.B. in
+  {\tt /tmp/rc.config.all}) und {\tt man}- oder {\tt info}-Seiten heranziehen.
+\item[Todo:] Finden des Pfades der thematisch richtigen Gruppe zur 
+  jeweiligen Variable.
+\item[Beispiel:] Variable: {\tt I4L\_START}, zugeh\"orige Gruppe:
+  {\tt Start-Variables/Start-Network}
+{\footnotesize\begin{verbatim}
+# ~/ > cd rc_
+\end{verbatim}}
+\end{description}
+%%%
+\subsection*{6. Schritt: Erstellen einer neuen Gruppe im Verzeichnisbaum}\label{newgroup}
+\begin{description}
+\item[Erkl\"arung:] Kann man eine neue Variable keiner der bisherigen Gruppen
+  im Verzeichnisbaum zuordnen, so mu\ss \ man eine neue Gruppe anlegen. Eine
+  Gruppe umfa\ss t immer ein Verzeichnis mit dem jeweiligen Gruppennamen, einer
+  Datei {\tt descr}, die im Gruppenverzeichnis abgelegt ist und dieser Gruppe
+  zugeordnete Konfigurationsvariablen.
+\item[Todo:]
+{\footnotesize\begin{verbatim}
+# ~/rc_config_tree_copy/root > mdkir Start-Variables/Start-Network
+# ~/rc_config_tree_copy/root > cat > Start-Variables/Start-Network/descr
+<p></p>
+<p>Start variables for network service deamons like Apache and Samba</p>
+(Ctrl-D)
+# ~/rc_config_tree_copy/root >
+\end{verbatim}}
+\end{description}
+%%%
+\subsection*{7. Schritt: Ablegen der Variable im Verzeichnisbaum}
+\begin{description}
+\item[Erkl\"arung:] F\"ur jede Konfigurationsvariable mu\ss \ im Verzeichnisbaum
+  ein neues Unterverzeichnis mit dem Namen der jeweiligen Variable angelegt werden.
+\item[Todo:] Beispiel {\tt I4L\_START}:
+{\footnotesize\begin{verbatim}
+# ~/ > cd rc_config_tree_copy/root/
+# ~/rc_config_tree_copy/root > mdkir Start-Variables/Start-Network/I4L_START
+\end{verbatim}}
+\end{description}
+%%%
+\subsection*{8. Schritt: Herausfinden des Datentyps einer Variable}
+\begin{description}
+\item[Erkl\"arung:] Durch die Angabe des Datentyps einer Variable kann die korrekte
+  Zuweisung von Werten an die Variable vereinfacht werden. Der {\em RC-Config-Editor}
+  kennt vier verschiedene Datentypen von Konfigurationsvariablen:
+  \begin{enumerate}
+  \item {\tt boolean},
+  \item {\tt integer},
+  \item \verb+enum "..."+ und
+  \item {\tt string}.
+  \end{enumerate}
+\item[Todo:] Mit Hilfe der Beschreibungen der Variablen in den Konfigurationsdateien
+  {\tt /etc/rc.config} bzw. {\tt /etc/rc.config.d/*.rc.config} soll der Datentyp
+  der Variablen m\"oglichst streng eingegrenzt werden (siehe dazu auch die Tabelle
+  auf S. \pageref{tabelle}).
+\end{description}
+%%%
+\subsection*{9. Schritt: Zuordnung des Datentyps zu einer Variable}
+\begin{description}
+\item[Erkl\"arung:] Nun mu\ss \ die Information \"uber den Datentyp der Variable in
+  den Verzeichnisbaum eingetragen werden, um letztendlich in den Metadaten abgespeichert 
+  zu werden.
+\item[Todo:] Beispiel {\tt I4L\_START}:
+{\footnotesize\begin{verbatim}
+# ~/rc_config_tree_copy/root > cat > Start-Variables/Start-Network/I4L_START/type
+boolean
+(Ctrl-D)
+# ~/rc_config_tree_copy/root >
+\end{verbatim}}
+\end{description}
+%%%
+\subsection*{10. Schritt: Herausfinden der Typdefinition einer Variable}
+\begin{description}
+\item[Erkl\"arung:] Neben dem Datentyp einer Variablen kann man Angaben \"uber
+  die Typdefinition machen. Diese macht Aussagen \"uber die Notwendigkeit einer
+  strikten bzw. nicht strikten Einhaltung des Datentypen. Siehe dazu auch die
+  Tabelle auf S. \pageref{tabelle}.
+\item[Todo:] Mit Hilfe der Beschreibungen der Variablen in den Konfigurationsdateien
+  {\tt /etc/rc.config} bzw. {\tt /etc/rc.config.d/*.rc.config} soll der Datentyp
+  der Variablen m\"oglichst streng eingegrenzt werden.
+\end{description}
+%%%
+\subsection*{11. Schritt: Zuweisung der Typdefinition zu einer Konfigurationsvariable}
+\begin{description}\label{SchrittEnde}
+\item[Erkl\"arung:] Damit die Information \"ueber die Typdefinition in
+  die Datei {\tt meta\_rc.config} abgespeichert werden kann, mu\ss \ im 
+  Unterverzeichnis der jeweiligen Variable eine Datei {\tt typedef} angelegt
+  werden, in der entweder {\tt strict} f\"ur die strikte Einhaltung des Datentypen
+  eingetragen ist, oder {\tt not\_strict} f\"ur den umgekehrten Fall.
+\item[Todo:] Beispiel {\tt I4L\_START}:
+{\footnotesize\begin{verbatim}
+# ~/rc_config_tree_copy/root > cat > Start-Variables/Start-Network/I4L_START/typedef
+strict
+(Ctrl-D)
+# ~/rc_config_tree_copy/root >
+\end{verbatim}}
+\end{description}
+%%%
+\subsection*{12. Schritt: Erstellen der Metadatenbank {\tt EDDB}}
+\begin{description}
+\item[Erkl\"arung:] Nachdem man die Schritte \ref{SchrittAnfang} bis
+  \ref{SchrittEnde} f\"ur jede der neuen Variablen durchgef\"uhrt hat, mu\ss \ die
+  neue Metadatenbank erstellt werden. Dazu verwendet man das {\em Perl}-Skript
+  {\tt create\_eddb.pl}.
+\item[Todo:]
+{\footnotesize\begin{verbatim}
+# ~/rc_config_tree_copy/root > create_eddb.pl
+Creating EDDB.tmp...
+Sorting...
+The new database file ../EDDB was successfully created.
+# ~/rc_config_tree_copy/root > cd ../
+# ~/rc_config_tree_copy > ls -l EDDB
+-rw-r--r--    1 user    suse        29242 Jan 29 14:20 EDDB
+# ~/rc_config_tree_copy > 
+\end{verbatim}}
+\item[Ergebnis:] Man erh\"alt die vollst\"andige Metadatenbank {\tt EDDB}.
+\end{description}
+%%%
+\subsection*{13. Schritt: Kopieren der neuen Metadatenbank in das Quellenverzeichnis}
+\begin{description}
+\item[Erkl\"arung:] Die neu erstellte Metadatenbank {\tt EDDB} mu\ss \ noch
+  in den {\em CVS}-Baum eingebunden werden.
+\item[Todo:]
+\item[Ergebnis:]
+\end{description}
+%%%
+%\subsection{}
+%\begin{description}
+%\item[Erkl\"arung:]
+%\item[Todo:]
+%\item[Ergebnis:]
+%\end{description}
+
+\begin{table}
+\begin{center}\label{tabelle}
+  \begin{tabular}{|l|p{5.5cm}|p{5.5cm}|}
+    \hline
+    & {\tt strict} & {\tt not\_strict}\\
+    \hline
+    {\tt boolean} & Es k\"onnen nur die Werte {\tt yes} oder {\tt no}
+    angenommen werden. & Neben {\tt yes} oder {\tt no} kann auch ein
+    beliebiger anderer Wert angegeben werden. (Sinnvoller w\"are
+    vielleicht {\tt enum}).\\[.5em]
+    {\tt integer} & Es k\"onnen nur ganzzahlige Werte angenommen werden
+    (wird jedoch noch nicht vom Editor \"uberpr\"uft. & Neben ganzzahligen
+    Werten k\"onnen auch andere beliebige Werte angegeben werden, bspw.
+    Strings.\\[.5em]
+    {\tt enum }   & Es k\"onnen nur die Werte aus der angegebenen Liste
+    angenommen werden. & Neben den Werten aus der angegebenen Liste
+    k\"onnen auch noch zus\"atzliche angegeben werden.\\[.5em]
+    {\tt string}  & Es kann ein beliebiger String angegeben werden. &
+    Es kann ein beliebiger String angegeben werden, genauso wie bei
+    {\tt strict}.\\
+    \hline
+  \end{tabular}
+\caption{Kombinationen von Datentyp und Typdefinition bei Konfigurationsvariablen}
+\end{center}
+\end{table}
+%%%
+\section{Beispiele}
+{\footnotesize \begin{verbatim}
+CHECK_PERMISSIONS    path       /Base-Administration/SuSEConfig
+CHECK_PERMISSIONS    type       enum "set,warn,no"
+CHECK_PERMISSIONS    typedef    strict
+DHCRELAY_SERVERS     mtype      enum "127.0.0.1,127.0.0.2"
+DHCRELAY_SERVERS     path       /Network/Dhcp
+DHCRELAY_SERVERS     typedef    not_strict
+\end{verbatim}}
+
+{\footnotesize \begin{verbatim}
+# ~/rc_config_tree/root/Base-Administration/SuSEConfig/CHECK_PERMISSIONS > ls -l
+insgesamt 8
+-rwxrwxrwx    1 mike    suse           19 Jan 16 08:59 type
+-rwxrwxrwx    1 mike    suse            7 Jan 16 08:59 typedef
+# ~/rc_config_tree/root/Base-Administration/SuSEConfig/CHECK_PERMISSIONS > cat type
+enum "set,warn,no"
+# ~/rc_config_tree/root/Base-Administration/SuSEConfig/CHECK_PERMISSIONS > cat type
+strict
+\end{verbatim}}
+%%%
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "Todo"
+%%% End: 
