@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 23 15:13:47 CEST 2002 - lslezak@suse.cz
+
+- added new metadata
+- version 2.6.8
+
+-------------------------------------------------------------------
 Fri Aug 16 14:44:15 CEST 2002 - lslezak@suse.cz
 
 - escape double quotes in values, remove redundant beginning
