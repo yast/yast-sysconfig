@@ -19,7 +19,6 @@ import "Progress";
 import "Report";
 import "Summary";
 import "Directory";
-import "Product";
 import "Label";
 import "IP";
 import "String";
@@ -984,7 +983,7 @@ global define boolean Write() ``{
     boolean abort = false;
 
     // SuSEconfig script name
-    string SuSEconfigName = (Product::unitedlinux == true) ? "ULconfig" : "SuSEconfig";
+    string SuSEconfigName = "SuSEconfig";
 
     // start presave commands
     foreach (string vid, string new_val, modified_variables, ``{
@@ -1152,11 +1151,13 @@ global define boolean Write() ``{
     if (CompleteSuSEconfig == true)
     {
 	// action command is missing, start complete SuSEconfig (backward compatibility)
-	string start_command = sformat("/sbin/%1", SuSEconfigName);
-	// %1 is SuSEconfig/ULconfig - product dependent
-	string confirm = sformat(_("Complete %1 will be started"), SuSEconfigName);
-	string label = sformat(_("Starting %1..."), SuSEconfigName);
-	string error = sformat(_("Script %1 failed"), SuSEconfigName);
+	string start_command = "/sbin/SuSEconfig";
+	// message
+	string confirm = _("All configuration scripts will be started.");
+	// progeress bar label
+	string label = _("Starting Configuration Scripts...");
+	// Error message
+	string error = _("Configuration script failed.");
 
 	Progress::NextStep();
 
@@ -1173,12 +1174,12 @@ global define boolean Write() ``{
 	    if (abort) return;
 
 	    // action command is missing, start complete SuSEconfig (backward compatibility)
-	    string start_command = sformat("/sbin/%1 --module %2", SuSEconfigName, modulename);
-	    string confirm = sformat(_("%1 module %2 will be started"), SuSEconfigName, modulename);
-	    // progress bar label - %1 is SuSEconfig or ULconfig string, %2 is module name
-	    string label = sformat(_("Starting %1 module %2..."), SuSEconfigName, modulename);
-	    // error message (config module failed) - %1 is SuSEconfig or ULconfig string, %2 is module name
-	    string error = sformat(_("%1 module %2 failed"), SuSEconfigName, modulename);
+	    string start_command = sformat("/sbin/SuSEconfig --module %1", modulename);
+	    string confirm = sformat(_("Configuration module %1 will be started."), modulename);
+	    // progress bar label - %1 is module name
+	    string label = sformat(_("Starting configuration module %1..."), modulename);
+	    // error message (config module failed) - %1 is module name
+	    string error = sformat(_("Configuration module %1 failed."), modulename);
 
 	    Progress::NextStep();
 
