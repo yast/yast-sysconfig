@@ -8,7 +8,6 @@ menudir    = $(YAST2DIR)/menuentries
  
 
 include_HEADERS = \
-		rc_process_db.ycp       \
 		rc_dialogs.ycp
 
 modules_DATA = rc_config_step1.ycp	\
