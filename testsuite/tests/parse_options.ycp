@@ -1,6 +1,6 @@
 // Sysconfig module - testsuite
 //
-// parse_options tests
+// ParseString tests
 //
 // $Id$
 //
@@ -11,15 +11,52 @@ include "testsuite.ycp";
 
 import "Sysconfig";
 
-TEST( ``(Sysconfig::parse_options(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options("") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options("    ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options(" abc , 123, var") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options(" abc,123  ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options("v,  a  ,  r") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options("0,\"1, 2, 3\", 4, 5 ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options(" ,,  ,") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_options("1, \"\\\"\", 2") ), [ $[], $[], $[] ], nil );
+map param = $[ "separator" : ",",
+    "unique" : true,
+    "remove_whitespace" : true
+];
 
+// Basic functionality
+TEST( ``(Sysconfig::ParseString(nil, param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("    ", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString(" abc , 123, var", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString(" abc,123  ", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("x,  y  ,  z", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("0,\"1, 2, 3\", 4, 5 ", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString(" ,,  ,", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("1, \"\\\" \", 2", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString(" \" \\\" \", 2", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString(" \\\" , 2", param) ), [ $[], $[], $[] ], nil );
+
+// multi separator
+param["separator"] = ",;.";
+TEST( ``(Sysconfig::ParseString("ab.sdf;  fwre  sdf", param) ), [ $[], $[], $[] ], nil );
+
+// uniqe / multile test
+TEST( ``(Sysconfig::ParseString(" 1,2,1,1,5 ,", param) ), [ $[], $[], $[] ], nil );
+param["unique"] = false;
+TEST( ``(Sysconfig::ParseString(" 1,2,1,1,5 ,", param) ), [ $[], $[], $[] ], nil );
+
+// use space as separator
+param["separator"] = " ";
+TEST( ``(Sysconfig::ParseString(" \"\\\"\", 2", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("   a   b zx ,, ,", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("   123\"56\"78  bzx ", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString("   a \\\\ b ", param) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::ParseString(" \n \\\"  ", param) ), [ $[], $[], $[] ], nil );
+
+// don't remove white space
+param["remove_whitespace"] = false;
+TEST( ``(Sysconfig::ParseString("   a   b zx ,, ,", param) ), [ $[], $[], $[] ], nil );
+
+// comma as separator
+param["separator"] = ",";
+TEST( ``(Sysconfig::ParseString(" ,,  ,", param) ), [ $[], $[], $[] ], nil );
+param["remove_whitespace"] = true;
+TEST( ``(Sysconfig::ParseString(" ,,  ,", param) ), [ $[], $[], $[] ], nil );
+// don't remove empty strings
+param["remove_empty_strings"] = false;
+TEST( ``(Sysconfig::ParseString(" ,,  ,", param) ), [ $[], $[], $[] ], nil );
 }
 

@@ -23,12 +23,6 @@ import "Directory";
 include "sysconfig/routines.ycp";
 include "network/ip.ycp";
 
-/**
- * Abort function
- * return boolean return true if abort
- */
-global block AbortFunction = nil;
-
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
     "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions"];
@@ -47,6 +41,12 @@ map node_comments = $[];
 
 // location for each variable
 map variable_locations = $[];
+
+global map parse_param = $[
+    "separator" : ",",
+    "unique" : true,
+    "remove_whitespace" : true
+];
 
 global list tree_content = [];
 
@@ -195,40 +195,74 @@ global define string remove_whitespaces(string input) ``{
 }
 
 /**
- * Parse string of possible values
+ * Parse string of values - split string to values, quoting and backslash sequences are supported
  * @param options Input string
+ * @param parameters Parmeter used at parsing - map with keys:
+ *	"separator":<string> - value separator (default: " \t"),
+ *	"unique":<boolean> - result will not contain any duplicates, first occurance of the string is stored into output (default: false),
+ *	"interpret_backslash":<boolean> - convert backslash sequence into one character (e.g. "\\n" => "\n") (default: true)
+ *	"remove_whitespace":<boolean> - remove white spaces around values (default: false),
+ *	"remove_empty_strings":<boolean> - remove empty strings from result (default: true)
  * @return list List of strings
+ * @see ParseString.txt documenation
  */
-global define list parse_options(string options) ``{
+global define list ParseString(string options, map parameters) ``{
     list ret = [];
 
-    // parsing possible values is done by two alghorithms:
-    // first is much faster, but only usable if string
-    // doesn't contain any double qoute characters
-    // second is more general, but of course slower
+    // parsing options
+    string separator = parameters["separator"]:" \t";
+    boolean unique = parameters["unique"]:false;
+    boolean interpret_backslash = parameters["interpret_backslash"]:true;
+    boolean remove_whitespace = parameters["remove_whitespace"]:false;
+    boolean remove_empty_strings = parameters["remove_empty_strings"]:true;
+
+    y2debug("Input: string: '%1', parameters: %2", options, parameters);
+    y2debug("Used values: separator: '%1', unique: %2, remove_empty_strings: %3, remove_whitespace: %4", separator, unique, remove_empty_strings, remove_whitespace);
 
     if (options == nil)
     {
 	return [];
     }
 
-    if (findfirstof(options, "\"") == nil)
+    // two alghorithms are used:
+    // first is much faster, but only usable if string
+    // doesn't contain any double qoute characters
+    // and backslash sequences are not interpreted
+    // second is more general, but of course slower
+
+    if (findfirstof(options, "\"") == nil && interpret_backslash == false)
     {
-	// easy case - no qouting, split string to values
-	list(string) values = splitstring(options, ",");
+	// easy case - no qouting, don't interpres backslash sequences => use splitstring
+	list(string) values = splitstring(options, separator);
 
 	foreach (string v, values, ``{
-		v = remove_whitespaces(v);
-		if (!contains(ret, v)) ret = add(ret, v);
+		if (remove_whitespace == true)
+		{
+		    v = remove_whitespaces(v);
+		}
+
+		if (unique == true)
+		{
+		    if (!contains(ret, v)) ret = add(ret, v);
+		}
+		else
+		{
+		    ret = add(ret, v);
+		}
 	    }
 	);
     }
     else
     {
-	// quoting is used, we cannot easily split input
-	// parsing each character is needed
+	// quoting is used or backslash interpretation is enabled
+	// so it' not possible to split input
+	// parsing each character is needed - use finite automaton
+
+	// state
 	symbol state = `out_of_string;
+	// position in the input string
 	integer index = 0;
+	// parsed value
 	string str = "";
 
 	while(index < size(options))
@@ -237,23 +271,57 @@ global define list parse_options(string options) ``{
 
 	    y2debug("character: %1 state: %2 index: %3", character, state, index);
 
-	    if (character == "\\")
+	    // interpret backslash sequence
+	    if (character == "\\" && interpret_backslash == true)
 	    {
 		if (index + 1 < size(options))
 		{
 		    string nextcharacter = substring(options, index + 1, 1);
+		    index = index + 1;
 
-		    if (nextcharacter == "\"")
+		    // backslah sequences
+		    map backslash_seq = $[
+			"a"	: "\a",	// alert
+			"b"	: "\b", // backspace
+			"e"	: "\e", // escape
+			"f"	: "\f", // FF
+			"n"	: "\n", // NL
+			"r"	: "\r", // CR
+			"t"	: "\t", // tab
+			"v"	: "\v", // vertical tab
+			"\\"	: "\\", // backslash
+		    ];
+
+		    if (haskey(backslash_seq, nextcharacter) == true)
 		    {
-			character = "\\\"";
-			index = index + 1;
+			character = backslash_seq[nextcharacter]:"DUMMY";
 		    }
+		    else
+		    {
+			if (nextcharacter != "\"")
+			{
+			    // ignore backslash in invalid backslash sequence
+			    character = nextcharacter;
+			}
+			else
+			{
+			    // backslash will be removed later,
+			    // double quote and escaped double quote have to different yet
+			    character = "\\\"";
+			}
+		    }
+
+		    y2debug("backslash sequnce: '%1'", character);
+		}
+		else
+		{
+		    y2warning("Missing character after backslash (\\) at the end of string");
 		}
 	    }
 
 	    if (state == `out_of_string)
 	    {
-		if (character == " " || character == "\t" || character == ",")
+		if (issubstring(separator, character) == true)
 		{
 		    index = index + 1;
 		    continue;
@@ -281,7 +349,17 @@ global define list parse_options(string options) ``{
 		if (character == "\"")
 		{
 		    state = `out_of_string;
-		    if (!contains(ret, str)) ret = add(ret, str);
+		    state = `in_string;
+
+		    if (unique == true)
+		    {
+			if (!contains(ret, str)) ret = add(ret, str);
+		    }
+		    else
+		    {
+			ret = add(ret, str);
+		    }
+
 		    str = "";
 		}
 		else if (character == "\\\"")
@@ -295,11 +373,24 @@ global define list parse_options(string options) ``{
 	    }
 	    else if (state == `in_string)
 	    {
-		if (character == ",")
+		if (issubstring(separator, character) == true)
 		{
 		    state = `out_of_string;
-		    str = remove_whitespaces(str);
-		    if (!contains(ret, str)) ret = add(ret, str);
+
+		    if (remove_whitespace == true)
+		    {
+			str = remove_whitespaces(str);
+		    }
+
+		    if (unique == true)
+		    {
+			if (!contains(ret, str)) ret = add(ret, str);
+		    }
+		    else
+		    {
+			ret = add(ret, str);
+		    }
+
 		    str = "";
 		}
 		else if (character == "\\\"")
@@ -318,14 +409,38 @@ global define list parse_options(string options) ``{
 	if (state == `in_quoted_string)
 	{
 	    y2warning("Missing trainling double quote character(\") in input: '%1'", options);
-	    if (!contains(ret, str)) ret = add(ret, str);
+
+	    if (unique == true)
+	    {
+		if (!contains(ret, str)) ret = add(ret, str);
+	    }
+	    else
+	    {
+		ret = add(ret, str);
+	    }
 	}
 
 	if (state == `in_string)
 	{
-	    str = remove_whitespaces(str);
-	    if (!contains(ret, str)) ret = add(ret, str);
+	    if (remove_whitespace)
+	    {
+		str = remove_whitespaces(str);
+	    }
+
+	    if (unique == true)
+	    {
+		if (!contains(ret, str)) ret = add(ret, str);
+	    }
+	    else
+	    {
+		ret = add(ret, str);
+	    }
 	}
+    }
+
+    if (remove_empty_strings == true)
+    {
+	ret = filter(string val, ret, ``(val != "" && val != nil));
     }
 
     y2debug("Parsed values: %1", ret);
@@ -476,7 +591,7 @@ global define map get_description(string varid) ``{
 
     if (deflt != nil)
     {
-	list parsed = parse_options(deflt);
+	list parsed = parse_options(deflt, parse_param);
 	meta["Default"] = parsed[0]:deflt;
     }
 
@@ -780,7 +895,7 @@ global define symbol set_value(string variable, string new_value, boolean force,
 		else if (regexpmatch(type, "^list\\(.*\\)$"))
 		{
 		    string listopt = regexpsub(type, "^list\\((.*)\\)$", "\\1");
-		    list parsed_opts = parse_options(listopt);
+		    list parsed_opts = parse_options(listopt, parse_param);
 
 		    valid = contains(parsed_opts, new_value);
 		}
@@ -950,10 +1065,9 @@ global define boolean Read(list(string) files) ``{
 
 /**
  * Write all sysconfig settings
- * @return true on success
+ * @return boolean true on success
  */
 global define boolean Write() ``{
-
     // write dialog caption
     string caption = (powertweak_mode == true) ? _("Saving Powertweak Configuration") : _("Saving sysconfig Configuration");
 
@@ -963,15 +1077,17 @@ global define boolean Write() ``{
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
 	// progress bar item
-	    _("Write the settings"),
+	    _("Write and activate the settings"),
 	], [
 	// progress bar item
-	    _("Writing the settings..."),
+	    _("Writing and activating the settings..."),
 	// progress bar item
 	    _("Finished")
 	],
 	""
     );
+
+    boolean ret = true;
 
     // save each changed variable
     foreach (string vid, string new_val, modified_variables,
@@ -980,15 +1096,60 @@ global define boolean Write() ``{
 	    string name = get_name_from_id(vid);
 	    path value_path = add(add(.syseditor.value, file), name);
 
-	    SCR::Write(value_path, new_val);
+	    boolean written = SCR::Write(value_path, new_val);
+	    if (written == true)
+	    {
+		// activate changes in normal mode, (in powertweak mode activate all changes at the end of function)
+		if (powertweak_mode == false)
+		{
+		    // flush changes
+		    SCR::Write(.syseditor, nil);
+
+		    // activate changes
+		    map descr = get_description(vid);
+		    string ifchanged = descr["Ifchanged"]:"";
+		    if (ifchanged != "" && ifchanged != nil)
+		    {
+			map output = SCR::Execute(.target.bash_output, ifchanged);
+			integer exit = output["exit"]:0;
+
+			y2milestone("Command: '%1', result: %2, stdout: %3, stderr: %4", ifchanged,
+			    exit, output["stdout"]:"", output["stderr"]:""
+			);
+
+			if (exit != 0)
+			{
+			    // error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
+			    Report::Error(sformat(_("Activation script for variable %1\n (file %2) failed"), name, file ));
+			    ret = false;
+			}
+		    }
+		}
+	    }
+	    else
+	    {
+		// error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
+		Report::Error(sformat(_("Saving variable %1 to the file %2 failed"), name, file));
+		ret = false;
+	    }
+
 	    Progress::NextStep();
 	}
     );
 
-    // flush changes
-    SCR::Write(.syseditor, nil);
+    if (powertweak_mode == true)
+    {
+	// flush changes
+	SCR::Write(.syseditor, nil);
 
-    return true;
+	y2milestone("Activating powertweak configuration");
+	SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
+
+	// activate powertweak at startup
+	Runlevel::ServiceAdjust("powertweakd", "enable");
+    }
+
+    return ret;
 }
 
 /**
