@@ -106,7 +106,7 @@
 	map<string, any> description = Sysconfig::get_description(varid);
 
 	// display a new value for modified variables
-	string value = ((description["new_value"]:nil != nil) ? (_("New value: ") + description["new_value"]:"") : (_("Value: ") + description["value"]:"")) + "\n";
+	string value = ((description["new_value"]:nil != nil) ? (_("New Value: ") + description["new_value"]:"") : (_("Value: ") + description["value"]:"")) + "\n";
 
 	// convert description into plain text
 	string plaintext = value + create_description(description, false);
@@ -143,7 +143,7 @@
 		else
 		{
 		    // command line output
-		    CommandLine::Print(sformat(_("Variable %1 was not found"), variable));
+		    CommandLine::Print(sformat(_("Variable %1 was not found."), variable));
 		}
 	    }
 	    else if (size(vids) == 1)
@@ -162,7 +162,10 @@
 		);
 
 		// variable name conflict - full name (with file name) is required
-		CommandLine::Print(sformat(_("\nPlease use full variable name in form <VARIABLE_NAME>$<FILE_NAME>\n(e.g. %1$%2)"), variable, Sysconfig::get_file_from_id(vids[0]:"/etc/sysconfig/unknown")));
+		CommandLine::Print(sformat(_("
+Use a full variable name in the form <VARIABLE_NAME>$<FILE_NAME>
+(e.g., %1$%2).
+"), variable, Sysconfig::get_file_from_id(vids[0]:"/etc/sysconfig/unknown")));
 	    }
 	}
 

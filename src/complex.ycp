@@ -170,7 +170,7 @@ Create it and use powerteak?
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	list<string> spaces = [];
-	list values = String::ParseOptions(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+	list<string> values = String::ParseOptions(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -182,7 +182,7 @@ Create it and use powerteak?
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	list<string> spaces = [];
-	list values = String::ParseOptions(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+	list<string> values = String::ParseOptions(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -614,7 +614,9 @@ Create it and use powerteak?
 	{
 	    // current value has more than one line - it is displayed incorrectly
 	    // because combobox widget has single line entry (lines are merged)
-	    Popup::Warning(_("Currently selected value has more than one line.\nThere are displayed joined lines in the combo box."));
+	    Popup::Warning(_("The currently selected value has more than one line.
+Joined lines are displayed in the combo box.
+"));
 	}
     }
 }
@@ -690,7 +692,7 @@ Really set this value?
  * @param varids Variables which will be contained in the table
  * @return list Table content
  */
- define list create_table_content(list varids)
+ define list create_table_content(list<string> varids)
 ``{
     list table_content = [];
 
@@ -755,7 +757,7 @@ Really set this value?
 				),
 				`VSpacing(1),
 				// help rich text displayed after module start (1/2)
-				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("<P><B>Powertweak Configuration</B></P><P>In this configuratin module you can tune some kernel and hardware options.</P><P><B>Warning:</B> This configuration module is for experts only!</P>") :
+				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("<P><B>Powertweak Configuration</B></P><P>In this configuration module, you can tune some kernel and hardware options.</P><P><B>Warning:</B> This configuration module is for experts only!</P>") :
 				    _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")),
@@ -802,7 +804,7 @@ Really set this value?
 	    // check if current value was modified
 	    check_set_current_value(false);
 
-	    list modified = Sysconfig::get_modified();
+	    list<string> modified = Sysconfig::get_modified();
 
 	    // show table with modified variables
 	    if (size(modified) > 0)
@@ -833,7 +835,7 @@ Choose \"Cancel\" to edit the values again.
 
 	    if (search_parameters != $[])
 	    {
-		list found = Sysconfig::search(search_parameters, true);
+		list<string> found = Sysconfig::search(search_parameters, true);
 
 		if (size(found) > 0)
 		{
@@ -874,7 +876,7 @@ Choose \"Cancel\" to edit the values again.
 
 		// help text (powertweak mode)
 		_("<p>After you save your changes, this editor changes the variables in the
-/etc/powertweak/tweaks file. Then it restarts powertweak daemon which activates changes.</p>
+/etc/powertweak/tweaks file. Then it restarts the powertweak daemon, which activates changes.</p>
 ")
 
 	    :
@@ -886,12 +888,13 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 ") +
 
                 // helptext for popup - part 2/3
-		_("<p><b>Important:</b> You still can edit each individual configuration file manually. Name of file is displayed in variable description.</p>") +
+		_("<p><b>Important:</b> You still can edit each individual configuration file manually. The name of file is displayed in the variable description.</p>") +
 
                 // helptext for popup - part 3/3
-		_("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
+		_("<p> SuSEconfig saves a checksum of each configuration file, so it can detect if
  you have manually changed any of them. If you have changed a configuration file manually,
- it will not touch it.</p>")
+ it will not touch it.</p>
+")
 	    );
 
 

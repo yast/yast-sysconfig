@@ -47,7 +47,7 @@ map<string, string> modified_variables = $[];
 map node_comments = $[];
 
 // location for each variable
-map variable_locations = $[];
+map<string,string> variable_locations = $[];
 
 global map parse_param = $[
     "separator" : ",",
@@ -196,7 +196,7 @@ global define list<string> search(map params, boolean show_progress) ``{
     foreach(string file, files, ``{
 	    // get all variables in file
 	    path var_path = add(.syseditor.value, file);
-	    list variables = SCR::Dir(var_path);
+	    list<string> variables = (list<string>)SCR::Dir(var_path);
 
 	    y2debug("Searching in file %1", file);
 
@@ -311,12 +311,12 @@ global define list<string> get_metadata(string input) ``{
  * @param comment Input comment
  * @return map parsed metadata
  */
-global define map<string, any> parse_metadata(string comment) ``{
-    map<string, any> ret = $[];
+global define map<string, string> parse_metadata(string comment) ``{
+    map<string, string> ret = $[];
 
     // get metadata part of comment
-    list metalines = get_metadata(comment);
-    list joined_multilines = [];
+    list<string> metalines = get_metadata(comment);
+    list<string> joined_multilines = [];
     string multiline = "";
 
     y2debug("metadata: %1", metalines);
@@ -401,7 +401,7 @@ global define map<string, any> parse_metadata(string comment) ``{
 	    // add tag and value to map if they are present in comment
 	    if (tag != "")
 	    {
-		ret = (map<string, any>) add(ret, tag, val);
+		ret = (map<string, string>) add(ret, tag, val);
 	    }
 	    else
 	    {
@@ -532,7 +532,7 @@ global define map<string, any> get_description(string varid) ``{
 	}
     }
 
-    map<string, any> meta = parse_metadata(comment);
+    map<string, string> meta = parse_metadata(comment);
 
     string template_only_comment = "";
 
@@ -540,7 +540,7 @@ global define map<string, any> get_description(string varid) ``{
     if (regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
 	string template_comment = (string) SCR::Read(add(add(.sysconfig.network.template, "value_comment"), varname));
-	map template_meta = parse_metadata(template_comment);
+	map<string,string> template_meta = parse_metadata(template_comment);
 
 	if (size(template_meta) > 0)
 	{
@@ -759,10 +759,10 @@ global define boolean modified(string varid) ``{
  * Get list of modified variables
  * @return list List of modified variables
  */
-global define list get_modified()
+global define list<string> get_modified()
 ``{
 
-    list ret = [];
+    list<string> ret = [];
 
     foreach(string varid, string new_value, modified_variables,
 	``{
@@ -973,10 +973,10 @@ define symbol StartCommand(string start_command, string label, string error, str
 global define boolean Write() ``{
 
     // remember all actions - start each action only once
-    map Configmodules = $[];
-    map Restarted = $[];
-    map Reloaded = $[];
-    map Commands = $[];
+    map<string,boolean> Configmodules = $[];
+    map<string,boolean> Restarted = $[];
+    map<string,boolean> Reloaded = $[];
+    map<string,boolean> Commands = $[];
     // will be complete SuSEconfig started?
     boolean CompleteSuSEconfig = false;
 
@@ -1046,7 +1046,7 @@ global define boolean Write() ``{
 	{
 	    if (restart_service != nil && size(restart_service) > 0)
 	    {
-		list parsed = String::ParseOptions(restart_service, parse_param);
+		list<string> parsed = String::ParseOptions(restart_service, parse_param);
 		foreach(string s, parsed,
 		    ``{
 			Restarted[s] = true;
@@ -1056,7 +1056,7 @@ global define boolean Write() ``{
 
 	    if (reload_service != nil && size(reload_service) > 0)
 	    {
-		list parsed = String::ParseOptions(reload_service, parse_param);
+		list<string> parsed = String::ParseOptions(reload_service, parse_param);
 		foreach(string s, parsed,
 		    ``{
 			Reloaded[s] = true;
@@ -1066,7 +1066,7 @@ global define boolean Write() ``{
 
 	    if (config_module != nil && size(config_module) > 0)
 	    {
-		list parsed = String::ParseOptions(config_module, parse_param);
+		list<string> parsed = String::ParseOptions(config_module, parse_param);
 		foreach(string s, parsed,
 		    ``{
 			Configmodules[s] = true;
@@ -1293,7 +1293,7 @@ global define boolean Write() ``{
  * (For use by autoinstallation.)
  * @param settings The YCP structure to be set.
  */
-global define void Set(list settings) ``{
+global define void Set(list<map> settings) ``{
     if (settings != nil)
     {
 	modified_variables = $[];
@@ -1333,8 +1333,9 @@ global define void Set(list settings) ``{
  * @return boolean True on success
  */
 global define boolean Import (list settings) ``{
+    list<map> settings_maps = (list<map>) settings;
     // set values in the list
-    Set(settings);
+    Set(settings_maps);
 
     // register agent for user defined files, read values
     return Sysconfig::Read();
