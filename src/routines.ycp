@@ -15,31 +15,12 @@ import "Sysconfig";
 import "Popup";
 
 /**
- * Check for pending Abort press
- * @return true if pending abort
- */
-global define boolean PollAbort() ``{
-    return UI::PollInput() == `abort;
-}
-
-/**
  * If modified, ask for confirmation
  * @return true if abort is confirmed
  */
 global define boolean ReallyAbort() ``{
     return !Sysconfig::Modified() || Popup::ReallyAbort(true);
 }
-
-
-/**
- * Convert file name to the path name (convert '/' => '.')
- * @param file File name
- * @return path Result path
- */
-global define path file_to_path(string file) ``{
-    return topath(mergestring(splitstring(file, "/"), "."));
-}
-
 
 /* EOF */
 }

@@ -23,8 +23,8 @@ import "Product";
 import "Label";
 import "IP";
 import "String";
+import "Runlevel";
 
-include "sysconfig/routines.ycp";
 
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
     "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
@@ -71,16 +71,101 @@ global define boolean Modified() ``{
 };
 
 /**
+ * Get variable name from variable identification or empty string if input is invalid
+ * @param id Variable identification
+ * @return string Variable name
+ * @example get_name_from_id("var$file") -> "var"
+ */
+global define string get_name_from_id(string id) ``{
+
+    if (id == nil)
+    {
+	return "";
+    }
+
+    integer pos = findfirstof(id, "$");
+
+    if (pos >= 0)
+    {
+	return substring(id, 0, findfirstof(id, "$"));
+    }
+    else
+    {
+	return "";
+    }
+}
+
+
+/**
+ * Get file name where is variable located from variable identification
+ * @param id Variable identification
+ * @return string File name
+ */
+global define string get_file_from_id(string id) ``{
+    if (id == nil)
+    {
+	return "";
+    }
+
+    integer pos = findfirstof(id, "$");
+
+    if (pos >= 0)
+    {
+	return substring(id, pos + 1);
+    }
+    else
+    {
+	return "";
+    }
+}
+
+/**
+ * Get comment without metadata
+ * @param input Input string
+ * @return string Comment used as variable description
+ */
+global define string get_only_comment(string input) ``{
+    if (input == nil || input == "")
+    {
+	return "";
+    }
+
+    list<string> lines = splitstring(input, "\n");
+
+    string ret = "";
+
+    foreach(string line, lines, ``{
+	    string com_line = regexpsub(line, "^#([^#].*)", "\\1");
+
+	    if (com_line == nil)
+	    {
+		// add empty lines
+		if (regexpmatch(line, "^#[ \t]*$") == true)
+		{
+		    ret = ret + "\n";
+		}
+	    }
+	    else
+	    {
+		ret = ret + com_line + "\n";
+	    }
+	}
+    );
+
+    return ret;
+}
+
+/**
  * Search in syscnfig files for value
  * @param params search parameters
  * @param show_progress if true progress bar will be displayed
- * @return list(string) List of found variables (IDs)
+ * @return list<string> List of found variables (IDs)
  */
-global define list(string) search(map params, boolean show_progress) ``{
-    list(string) found = [];
+global define list<string> search(map params, boolean show_progress) ``{
+    list<string> found = [];
 
     // get all configuration files
-    list(string) files = SCR::Dir(.syseditor.section);
+    list<string> files = (list<string>) SCR::Dir(.syseditor.section);
 
     if (show_progress == true)
     {
@@ -137,7 +222,7 @@ global define list(string) search(map params, boolean show_progress) ``{
 		    // search in variable value if it is requested and previous check was unsuccessful
 		    if (search_value == true && already_found == false)
 		    {
-			string read_value = SCR::Read(add(add(.syseditor.value, file), var));
+			string read_value = (string) SCR::Read(add(add(.syseditor.value, file), var));
 
 			if (case_insensitive)
 			{
@@ -154,7 +239,7 @@ global define list(string) search(map params, boolean show_progress) ``{
 		    if (search_description == true && already_found == false)
 		    {
 			// read comment without metadata
-			string read_comment = get_only_comment(SCR::Read(add(add(.syseditor.value_comment, file), var)));
+			string read_comment = get_only_comment((string) SCR::Read(add(add(.syseditor.value_comment, file), var)));
 
 			if (case_insensitive)
 			{
@@ -205,175 +290,18 @@ global define string remove_whitespaces(string input) ``{
 }
 
 /**
- * Get description of selected variable
- * @param varid Variable identification
- * @return map Description map
+ * Get metadata lines from input string
+ * @param input Input string
+ * @return list<string> Metadata lines in list
  */
-
-global define map get_description(string varid) ``{
-    string varname = get_name_from_id(varid);
-    string fname = get_file_from_id(varid);
-
-    path comment_path = add(add(.syseditor.value_comment, fname), varname);
-    path value_path = add(add(.syseditor.value, fname), varname);
-    string comment = SCR::Read(comment_path);
-    list all_variables = SCR::Dir(add(.syseditor.value, fname));
-    string used_comment = varname;
-
-    // no comment present
-    if (size(comment) == 0 && !regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
+global define list<string> get_metadata(string input) ``{
+    if (input == nil || input == "")
     {
-	y2warning("Comment for variable %1 is missing", varid);
-
-	list reversed = [];
-
-	integer i = 0;
-	boolean found = false;
-
-	while (i < size(all_variables) && found == false)
-	{
-	    string v = all_variables[i]:"";
-
-	    if (v == varname)
-	    {
-		found = true;
-	    }
-	    else
-	    {
-		reversed = prepend(reversed, v);
-	    }
-
-	    i = i + 1;
-	}
-
-	if (found == true)
-	{
-	    i = 0;
-	    comment = "";
-	    string v = "";
-
-	    y2debug("reversed: %1", reversed);
-	    while (i < size(reversed) && comment == "")
-	    {
-		v = reversed[i]:"";
-		used_comment = v;
-		comment = SCR::Read(add(add(.syseditor.value_comment, fname), v));
-
-		i = i + 1;
-	    }
-
-	    y2warning("Variable: %1 Using comment from variable: %2", varname, v);
-	}
-
+	return [];
     }
 
-    // remove config file header at the beginning of the file
-    // header is comment from beginning of the file to the empty line
-    if (used_comment == all_variables[0]:"" && comment != nil)
-    {
-	y2debug("Reading first variable from the file");
-	// comment is read from the first variable
-	// remove header if it's present
-	y2debug("Whole comment: %1", comment);
-	list(string) lines = splitstring(comment, "\n");
-	list filtered = [];
-
-	// remove last empty string from list (caused by last new line char)
-	if (lines[size(lines) - 1]:nil == "")
-	{
-	    lines = remove(lines, size(lines) - 1);
-	}
-
-	if (contains(lines, "") == true)
-	{
-	    y2milestone("Header comment detected");
-	    boolean adding = false;
-
-	    // filter out variables before empty line
-	    filtered = filter(string line, lines, ``{
-
-		    if (line == "")
-		    {
-			adding = true;
-		    }
-		    else if (adding == true)
-		    {
-			return true;
-		    }
-
-		    return false;
-		}
-	    );
-
-	    // merge strings
-	    comment = mergestring(filtered, "\n");
-	}
-    }
-
-    map meta = parse_metadata(comment);
-
-    string template_only_comment = "";
-
-    // for network configuration file read comments from configuration template
-    if (regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
-    {
-	string template_comment = SCR::Read(add(add(.sysconfig.network.template, "value_comment"), varname));
-	map template_meta = parse_metadata(template_comment);
-
-	if (size(template_meta) > 0)
-	{
-	    // add missing metadata values from template
-	    foreach(string key, string value, template_meta, ``{
-		    if (!haskey(meta, key))
-		    {
-			meta[key] = value;
-		    }
-		}
-	    );
-	}
-
-	template_only_comment = get_only_comment(template_comment);
-
-	if (size(template_only_comment) > 0)
-	{
-	    template_only_comment = template_only_comment + "\n";
-	}
-
-	y2milestone("Comment read from template: %1", template_only_comment);
-	y2milestone("Meta read from template: %1", template_meta);
-    }
-
-    string deflt = meta["Default"]:nil;
-
-    if (deflt != nil)
-    {
-	list parsed = String::ParseOptions(deflt, parse_param);
-	meta["Default"] = parsed[0]:"";
-
-	y2debug("Read default value: %1", parsed[0]:"");
-    }
-
-    string new_value = modified_variables[varid]:nil;
-
-    // check if value was changed
-    if (new_value != nil)
-    {
-	meta["new_value"] = new_value;
-    }
-
-    meta["name"] = varname;
-    meta["file"] = get_file_from_id(varid);
-    meta["location"] = (varname != "") ? get_location_from_id(varid) : varid;
-    meta["comment"] = (varname != "") ? template_only_comment + get_only_comment(comment) : (node_comments[varid]:"");
-    meta["value"] = SCR::Read(value_path);
-
-    // add action commands
-    if (size(actions[varid]:$[]) > 0)
-    {
-	meta["actions"] = actions[varid]:$[];
-    }
-
-    return meta;
+    list<string> lines = splitstring(input, "\n");
+    return (filter(string line, lines, ``(regexpmatch(line, "^##.*"))));
 }
 
 /**
@@ -487,81 +415,6 @@ global define map parse_metadata(string comment) ``{
     return ret;
 }
 
-/**
- * Get metadata lines from input string
- * @param input Input string
- * @return list(string) Metadata lines in list
- */
-global define list(string) get_metadata(string input) ``{
-    if (input == nil || input == "")
-    {
-	return [];
-    }
-
-    list(string) lines = splitstring(input, "\n");
-    return (filter(string line, lines, ``(regexpmatch(line, "^##.*"))));
-}
-
-/**
- * Get comment without metadata
- * @param input Input string
- * @return string Comment used as variable description
- */
-global define string get_only_comment(string input) ``{
-    if (input == nil || input == "")
-    {
-	return "";
-    }
-
-    list(string) lines = splitstring(input, "\n");
-
-    string ret = "";
-
-    foreach(string line, lines, ``{
-	    string com_line = regexpsub(line, "^#([^#].*)", "\\1");
-
-	    if (com_line == nil)
-	    {
-		// add empty lines
-		if (regexpmatch(line, "^#[ \t]*$") == true)
-		{
-		    ret = ret + "\n";
-		}
-	    }
-	    else
-	    {
-		ret = ret + com_line + "\n";
-	    }
-	}
-    );
-
-    return ret;
-}
-
-/**
- * Get variable name from variable identification or empty string if input is invalid
- * @param id Variable identification
- * @return string Variable name
- * @example get_name_from_id("var$file") -> "var"
- */
-global define string get_name_from_id(string id) ``{
-
-    if (id == nil)
-    {
-	return "";
-    }
-
-    integer pos = findfirstof(id, "$");
-
-    if (pos >= 0)
-    {
-	return substring(id, 0, findfirstof(id, "$"));
-    }
-    else
-    {
-	return "";
-    }
-}
 
 /**
  * Get variable location in tree widget from variable identification
@@ -573,26 +426,174 @@ global define string get_location_from_id(string id) ``{
 }
 
 /**
- * Get file name where is variable located from variable identification
- * @param id Variable identification
- * @return string File name
+ * Get description of selected variable
+ * @param varid Variable identification
+ * @return map Description map
  */
-global define string get_file_from_id(string id) ``{
-    if (id == nil)
+global define map get_description(string varid) ``{
+    string varname = get_name_from_id(varid);
+    string fname = get_file_from_id(varid);
+
+    path comment_path = add(add(.syseditor.value_comment, fname), varname);
+    path value_path = add(add(.syseditor.value, fname), varname);
+    string comment = (string)SCR::Read(comment_path);
+    list<string> all_variables = (list<string>)SCR::Dir(add(.syseditor.value, fname));
+    string used_comment = varname;
+
+    // no comment present
+    if (size(comment) == 0 && !regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
-	return "";
+	y2warning("Comment for variable %1 is missing", varid);
+
+	list<string> reversed = [];
+
+	integer i = 0;
+	boolean found = false;
+
+	while (i < size(all_variables) && found == false)
+	{
+	    string v = all_variables[i]:"";
+
+	    if (v == varname)
+	    {
+		found = true;
+	    }
+	    else
+	    {
+		reversed = prepend(reversed, v);
+	    }
+
+	    i = i + 1;
+	}
+
+	if (found == true)
+	{
+	    i = 0;
+	    comment = "";
+	    string v = "";
+
+	    y2debug("reversed: %1", reversed);
+	    while (i < size(reversed) && comment == "")
+	    {
+		v = reversed[i]:"";
+		used_comment = v;
+		comment = (string) SCR::Read(add(add(.syseditor.value_comment, fname), v));
+
+		i = i + 1;
+	    }
+
+	    y2warning("Variable: %1 Using comment from variable: %2", varname, v);
+	}
+
     }
 
-    integer pos = findfirstof(id, "$");
+    // remove config file header at the beginning of the file
+    // header is comment from beginning of the file to the empty line
+    if (used_comment == all_variables[0]:"" && comment != nil)
+    {
+	y2debug("Reading first variable from the file");
+	// comment is read from the first variable
+	// remove header if it's present
+	y2debug("Whole comment: %1", comment);
+	list<string> lines = splitstring(comment, "\n");
+	list filtered = [];
 
-    if (pos >= 0)
-    {
-	return substring(id, pos + 1);
+	// remove last empty string from list (caused by last new line char)
+	if (lines[size(lines) - 1]:nil == "")
+	{
+	    lines = remove(lines, size(lines) - 1);
+	}
+
+	if (contains(lines, "") == true)
+	{
+	    y2milestone("Header comment detected");
+	    boolean adding = false;
+
+	    // filter out variables before empty line
+	    filtered = filter(string line, lines, ``{
+
+		    if (line == "")
+		    {
+			adding = true;
+		    }
+		    else if (adding == true)
+		    {
+			return true;
+		    }
+
+		    return false;
+		}
+	    );
+
+	    // merge strings
+	    comment = mergestring(filtered, "\n");
+	}
     }
-    else
+
+    map meta = parse_metadata(comment);
+
+    string template_only_comment = "";
+
+    // for network configuration file read comments from configuration template
+    if (regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
-	return "";
+	string template_comment = (string) SCR::Read(add(add(.sysconfig.network.template, "value_comment"), varname));
+	map template_meta = parse_metadata(template_comment);
+
+	if (size(template_meta) > 0)
+	{
+	    // add missing metadata values from template
+	    foreach(string key, string value, template_meta, ``{
+		    if (!haskey(meta, key))
+		    {
+			meta[key] = value;
+		    }
+		}
+	    );
+	}
+
+	template_only_comment = get_only_comment(template_comment);
+
+	if (size(template_only_comment) > 0)
+	{
+	    template_only_comment = template_only_comment + "\n";
+	}
+
+	y2milestone("Comment read from template: %1", template_only_comment);
+	y2milestone("Meta read from template: %1", template_meta);
     }
+
+    string deflt = meta["Default"]:nil;
+
+    if (deflt != nil)
+    {
+	list parsed = String::ParseOptions(deflt, parse_param);
+	meta["Default"] = parsed[0]:"";
+
+	y2debug("Read default value: %1", parsed[0]:"");
+    }
+
+    string new_value = modified_variables[varid]:nil;
+
+    // check if value was changed
+    if (new_value != nil)
+    {
+	meta["new_value"] = new_value;
+    }
+
+    meta["name"] = varname;
+    meta["file"] = get_file_from_id(varid);
+    meta["location"] = (varname != "") ? get_location_from_id(varid) : varid;
+    meta["comment"] = (varname != "") ? template_only_comment + get_only_comment(comment) : (node_comments[varid]:"");
+    meta["value"] = SCR::Read(value_path);
+
+    // add action commands
+    if (size(actions[varid]:$[]) > 0)
+    {
+	meta["actions"] = actions[varid]:$[];
+    }
+
+    return meta;
 }
 
 /**
@@ -821,9 +822,9 @@ global define boolean Read() ``{
 
     // TODO: solve custom_files parameter problem (used in Import)
     // read only powerteak config or all sysconfig files
-    list(string) files = (Sysconfig::powertweak_mode == true) ? [powertweakconfig] : configfiles;
+    list<string> files = (Sysconfig::powertweak_mode == true) ? [powertweakconfig] : configfiles;
 
-    string tmpdir = SCR::Read(.target.tmpdir);
+    string tmpdir = (string) SCR::Read(.target.tmpdir);
     if (tmpdir == nil || tmpdir == "")
     {
 	y2security("Using /tmp directory !");
@@ -831,7 +832,7 @@ global define boolean Read() ``{
     }
 
     // register configuration files in SCR using INI-agent
-    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
+    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + (string)SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
     string tmp = tmpdir + "/sysconfig-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -839,7 +840,7 @@ global define boolean Read() ``{
 
 
     // register agent for reading network template
-    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(`IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(`IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + (string) SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
     tmp = tmpdir + "/sysconfig-template-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -857,7 +858,7 @@ global define boolean Read() ``{
     SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + (powertweak_mode ? "--powertweak " : "") + param + "> " + tmpdir + "/treedef.ycp");
 
     // read list
-    list parsed_output = SCR::Read(.target.ycp, tmpdir + "/treedef.ycp");
+    list parsed_output = (list) SCR::Read(.target.ycp, tmpdir + "/treedef.ycp");
     tree_content = parsed_output[0]:[];
 
     node_comments = parsed_output[1]:$[];
@@ -876,6 +877,92 @@ global define boolean Read() ``{
 
     return true;
 }
+
+/**
+ * Display confirmation dialog
+ * @param message Confirmation message
+ * @param command Command to confirm
+ * @return symbol `cont - start command, `skip - skip this command, `abort - skip all remaining commands
+ */
+define symbol ConfirmationDialog(string message, string command) ``{
+    UI::OpenDialog(
+	`opt(`decorated),
+	`VBox(
+	    `Label(message),
+	    (size(command) > 0) ? `Label(_("Command: ") + command) : `Empty(),
+	    `VSpacing(0.5),
+	    `HBox(
+		`PushButton(`id(`cont), Label::ContinueButton()),
+		// button label
+		`PushButton(`id(`skip), _("S&kip")),
+		`PushButton(`id(`abort), Label::AbortButton())
+	    )
+	)
+    );
+
+    symbol ret = nil;
+
+    while (ret != `cont && ret != `skip && ret != `abort)
+    {
+	ret = (symbol) UI::UserInput();
+
+	if (ret == `close)
+	{
+	    ret = `abort;
+	}
+    }
+
+    UI::CloseDialog();
+
+    return ret;
+}
+
+/**
+ * Start activation command, ask user to confirm it when it is required.
+ * Display specified error message when the command fails.
+ * @param start_command Command to start
+ * @param label Progress bar label
+ * @param error Error message displayed when command failes
+ * @param confirm Confirmation messge
+ * @param confirmaction Display confirmation dialog
+ * @return symbol `success - command was started, `failed - command failed (non-zero exit value),
+ * `skip - command was skipped, `abort - command starting was aborted
+ */
+define symbol StartCommand(string start_command, string label, string error, string confirm, boolean confirmaction) ``{
+    if (size(start_command) == 0)
+    {
+	return `success;
+    }
+
+    // set progress bar label
+    Progress::Title(label);
+
+    if (confirmaction == true)
+    {
+	// show confirmation dialog
+	symbol input = ConfirmationDialog(confirm, start_command);
+
+	if (input != `cont)
+	{
+	    return input;
+	}
+    }
+
+    y2milestone("Starting: %1", start_command);
+
+    map output = (map) SCR::Execute(.target.bash_output, start_command);
+    integer exit = output["exit"]:0;
+    y2milestone("Result: %1", exit);
+
+    if (exit != 0)
+    {
+	Report::Error(error);
+	return `failed;
+    }
+
+    return `success;
+}
+
 
 /**
  * Write all sysconfig settings
@@ -1111,7 +1198,7 @@ global define boolean Write() ``{
 	    if (abort) return;
 	    // check whether service is running
 	    string check_command = sformat("/etc/init.d/%1 status", servicename);
-	    integer result = SCR::Execute(.target.bash, check_command);
+	    integer result = (integer)SCR::Execute(.target.bash, check_command);
 	    y2milestone("%1 service status: %2", servicename, result);
 
 	    if (result == 0)
@@ -1142,7 +1229,7 @@ global define boolean Write() ``{
 	``{
 	    // check whether service is running
 	    string check_command = sformat("/etc/init.d/%1 status", servicename);
-	    integer result = SCR::Execute(.target.bash, check_command);
+	    integer result = (integer)SCR::Execute(.target.bash, check_command);
 	    y2milestone("%1 service status: %2", servicename, result);
 
 	    Progress::NextStep();
@@ -1200,20 +1287,6 @@ global define boolean Write() ``{
 }
 
 /**
- * Set all sysconfig settings from the list and read information from files
- * (For use by autoinstallation.)
- * @param settings The YCP structure to be imported.
- * @return boolean True on success
- */
-global define boolean Import (list settings) ``{
-    // set values in the list
-    Set(settings);
-
-    // register agent for user defined files, read values
-    return Sysconfig::Read(custom_files);
-}
-
-/**
  * Set all sysconfig settings from the list
  * (For use by autoinstallation.)
  * @param settings The YCP structure to be set.
@@ -1252,6 +1325,20 @@ global define void Set(list settings) ``{
 }
 
 /**
+ * Set all sysconfig settings from the list and read information from files
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+global define boolean Import (list settings) ``{
+    // set values in the list
+    Set(settings);
+
+    // register agent for user defined files, read values
+    return Sysconfig::Read();
+}
+
+/**
  * Dump the sysconfig settings to a single map
  * (For use by autoinstallation.)
  * @return list Dumped settings (later acceptable by Import ())
@@ -1286,7 +1373,7 @@ global define list Export () ``{
  * Create a textual summary
  * @return summary of the current configuration
  */
-global define list Summary() ``{
+global define string Summary() ``{
     // configuration summary headline
     string summary = Summary::AddHeader("", _("Configuration Summary"));
 
@@ -1309,91 +1396,6 @@ global define list Summary() ``{
     }
 
     return summary;
-}
-
-/**
- * Display confirmation dialog
- * @param message Confirmation message
- * @param command Command to confirm
- * @return symbol `cont - start command, `skip - skip this command, `abort - skip all remaining commands
- */
-define symbol ConfirmationDialog(string message, string command) ``{
-    UI::OpenDialog(
-	`opt(`decorated),
-	`VBox(
-	    `Label(message),
-	    (size(command) > 0) ? `Label(_("Command: ") + command) : `Empty(),
-	    `VSpacing(0.5),
-	    `HBox(
-		`PushButton(`id(`cont), Label::ContinueButton()),
-		// button label
-		`PushButton(`id(`skip), _("S&kip")),
-		`PushButton(`id(`abort), Label::AbortButton())
-	    )
-	)
-    );
-
-    symbol ret = nil;
-
-    while (ret != `cont && ret != `skip && ret != `abort)
-    {
-	ret = UI::UserInput();
-
-	if (ret == `close)
-	{
-	    ret = `abort;
-	}
-    }
-
-    UI::CloseDialog();
-
-    return ret;
-}
-
-/**
- * Start activation command, ask user to confirm it when it is required.
- * Display specified error message when the command fails.
- * @param start_command Command to start
- * @param label Progress bar label
- * @param error Error message displayed when command failes
- * @param confirm Confirmation messge
- * @param confirmaction Display confirmation dialog
- * @return symbol `success - command was started, `failed - command failed (non-zero exit value),
- * `skip - command was skipped, `abort - command starting was aborted
- */
-define symbol StartCommand(string start_command, string label, string error, string confirm, boolean confirmaction) ``{
-    if (size(start_command) == 0)
-    {
-	return `success;
-    }
-
-    // set progress bar label
-    Progress::Title(label);
-
-    if (confirmaction == true)
-    {
-	// show confirmation dialog
-	symbol input = ConfirmationDialog(confirm, start_command);
-
-	if (input != `cont)
-	{
-	    return input;
-	}
-    }
-
-    y2milestone("Starting: %1", start_command);
-
-    map output = SCR::Execute(.target.bash_output, start_command);
-    integer exit = output["exit"]:0;
-    y2milestone("Result: %1", exit);
-
-    if (exit != 0)
-    {
-	Report::Error(error);
-	return `failed;
-    }
-
-    return `success;
 }
 
 /* EOF */
