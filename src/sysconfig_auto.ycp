@@ -59,7 +59,7 @@ else if (func == "Change")
 {
     ret = SysconfigAutoSequence();
 }
-else if (func == "Result")
+else if (func == "Export")
 {
     ret = Sysconfig::Export();
 }
