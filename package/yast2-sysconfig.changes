@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Feb 07 23:52:17 CET 2004 - arvin@suse.de
+
+- removed config files (*.y2cc)
+
+-------------------------------------------------------------------
 Wed Feb  4 14:17:45 CET 2004 - lslezak@suse.cz
 
 - testsuite update
@@ -130,7 +135,7 @@ Wed Mar  5 08:33:05 CET 2003 - lslezak@suse.de
 - wrap lines in node description text
 - don't display multiple instances of variable in one file
 - version 2.7.10
- 
+
 -------------------------------------------------------------------
 Tue Mar  4 04:53:11 CET 2003 - nashif@suse.de
 

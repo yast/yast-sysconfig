@@ -41,7 +41,6 @@ Summary:	Powertweak configuration
 @clientdir@/sysconfig_*.ycp
 @moduledir@/Sysconfig.ycp
 @moduledir@/Sysconfig.ybc
-@configdir@/sysconfig.y2cc
 @desktopdir@/sysconfig.desktop
 @ybindir@/parse_configs.pl
 @ydatadir@/sysedit.agent
@@ -50,7 +49,6 @@ Summary:	Powertweak configuration
 
 %files -n yast2-powertweak
 %defattr(-,root,root)
-@configdir@/powertweak.y2cc
 @desktopdir@/powertweak.desktop
 @clientdir@/powertweak.ycp
 @ydatadir@/powertweak.agent
