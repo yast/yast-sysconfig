@@ -938,6 +938,12 @@ global define boolean Read(list(string) files) ``{
 
     variable_locations = parsed_output[2]:$[];
 
+    map redefined_vars = parsed_output[3]:$[];
+    if (size(redefined_vars) > 0)
+    {
+	y2warning("Redefined variables: %1", redefined_vars);
+    }
+
     return true;
 }
 

@@ -117,7 +117,7 @@ sub convert(@)
 	    my $postfix = "";
 
 	    # split location to prefix and remaining part
-	    if ($prefix =~ /(.*?)\/(.*)/)
+	    if ($prefix =~ /(.*?[^\\])\/(.*)/)
 	    {
 		$prefix = $1;
 		$postfix = $2;
@@ -238,6 +238,30 @@ sub hash_to_map(%)
     return $result;
 }
 
+# remove variable identification from string
+sub remove_variable($$)
+{
+    my ($string, $var) = @_;
+    my $result = "";
+
+    my @list = split(/,/, $string);
+
+    for my $v (@list)
+    {
+	if ($v ne $var)
+	{
+	    if (length($result) > 0)
+	    {
+		$result .= ",";
+	    }
+
+	    $result .= $v;
+	}
+    }
+
+    return $result;
+}
+
 # list of files to process
 my @list = ();
 
@@ -264,6 +288,9 @@ my %locations = ();
 # hash:  key = location, value = node description (string)
 my %descriptions = ();
 
+# report redefined variables
+my %redefined_vars = ();
+
 # collect pairs (location, variables definition) from all configuration files
 for my $fname (@list)
 {
@@ -284,6 +311,10 @@ for my $fname (@list)
 	$location = "Hardware/Network/$1";
 	$descriptions{$location} = "Configuration of network device $1";
     }
+
+    # remember all variables from config file
+    # used for redefinition check
+    my %found_vars = ();
 
     while(my $line = <CONFIGFILE>)
     {
@@ -319,6 +350,28 @@ for my $fname (@list)
 	# variable definition
 	elsif ($line =~ /^\s*([-\w\/:]*)\s*=.*/)
 	{
+	    if (defined($found_vars{$1}))
+	    {
+		# add to redefined vars
+		$redefined_vars{$1.'$'.$fname} = 1;
+		
+		# variable was already found
+		# remove it from previous location
+		my $prev_location = $found_vars{$1};
+		my $new_val = remove_variable($locations{$prev_location}, $1.'$'.$fname);
+
+		if ($new_val eq "")
+		{
+		    # remove location if it is empty
+		    delete($locations{$prev_location});
+		}
+		else
+		{
+		    # update location
+		    $locations{$prev_location} = $new_val;
+		}
+	    }
+
 	    my $existing_vars = $locations{$location};
 
 	    if (defined($existing_vars))
@@ -329,6 +382,9 @@ for my $fname (@list)
 	    $existing_vars .= $1.'$'.$fname;
 
 	    $locations{$location} = $existing_vars;
+
+	    # remember location of variable
+	    $found_vars{$1} = $location;
 	}
     }
 
@@ -352,6 +408,7 @@ push (@rec, "");
 print "[\n";
 print '['.convert(@rec)."],\n";
 print hash_to_map(%descriptions).",\n";
-print hash_to_map(flip_hash(%locations))."\n";
+print hash_to_map(flip_hash(%locations)).",\n";
+print hash_to_map(%redefined_vars)."\n";
 print "]\n";
 

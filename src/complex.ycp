@@ -218,8 +218,13 @@ global define string create_richtext_description(map description) ``{
 	// keep comment formatting:
 	// convert '\n' => '<BR>'
 	comment = mergestring(splitstring(comment, "\n"), "<BR>");
-	// convert ' ' => '&nbsp;'
-	comment = mergestring(splitstring(comment, " "), "&nbsp;");
+
+	// do not change node descriptions
+	if (file != "")
+	{
+	    // convert ' ' => '&nbsp;'
+	    comment = mergestring(splitstring(comment, " "), "&nbsp;");
+	}
 
 	y2debug("formatted comment: %1", comment);
 
@@ -642,6 +647,9 @@ global define list create_table_content(list varids)
 
 	    // display only beginning of comment (to limit table space used)
 	    string comm = descr["comment"]:"";
+	    // remove newlines
+	    comm = Sysconfig::remove_whitespaces(mergestring(splitstring(comm, "\n"), " "));
+
 	    if (size(comm) > 90)
 	    {
 		comm = substring(comm, 0, 90);

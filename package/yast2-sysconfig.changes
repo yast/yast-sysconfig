@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Mar  5 08:33:05 CET 2003 - lslezak@suse.de
+
+- ignore escaped slash in Path tag (#24571)
+- remove new line characters from description in search
+  result dialog
+- wrap lines in node description text
+- don't display multiple instances of variable in one file
+- version 2.7.10
+ 
+-------------------------------------------------------------------
 Tue Mar  4 04:53:11 CET 2003 - nashif@suse.de
 
 - define variable files module wide (#24494)
