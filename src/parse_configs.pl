@@ -226,11 +226,16 @@ sub hash_to_map(%)
 
 	my $description = $desc{$path};
 
+	if (defined($description))
+	{
+	    $description =~ s/[^\\]"/\\"/g;
+	}
+
 	# escape double quote characters
-	$description =~ s/[^\\]"/\\"/g;
 	$path =~ s/[^\\]"/\\"/g;
 
-	$result .= "\"$path\" : \"$description\"";
+	# output nil if value is undefined
+	$result .= (defined($description)) ? "\"$path\" : \"$description\"" : "\"$path\" : nil";
     }
 
     $result .= ' ]';
@@ -291,6 +296,10 @@ my %descriptions = ();
 # report redefined variables
 my %redefined_vars = ();
 
+# actions started when variable is changed: key = variableID,
+# value = hash 'Config','ServiceRestart', 'ServiceReload','Command' => 
+my %actions = ();
+
 # collect pairs (location, variables definition) from all configuration files
 for my $fname (@list)
 {
@@ -304,6 +313,12 @@ for my $fname (@list)
 
     my $location = "Other".$fname;
     my $description = "";
+
+    my $Config = undef;
+    my $ServiceRestart = undef;
+    my $ServiceReload = undef;
+    my $Command = undef;
+    my $Meta_found = 0;
 
     # hack for /etc/sysconfig/network/ifcfg-* files
     if ($fname =~ '^/etc/sysconfig/network/ifcfg-(.*)')
@@ -385,7 +400,80 @@ for my $fname (@list)
 
 	    # remember location of variable
 	    $found_vars{$1} = $location;
+
+	    # reset metadata flag for the next variable
+	    $Meta_found = 0;
+
+	    # add action commands to the variable if they are defined
+	    my %tmp = ();
+	    if (defined($Config))
+	    {
+		$tmp{'Cfg'} = $Config;
+	    }
+	    if (defined($ServiceReload))
+	    {
+		$tmp{'Reld'} = $ServiceReload;
+	    }
+	    if (defined($ServiceRestart))
+	    {
+		$tmp{'Rest'} = $ServiceRestart;
+	    }
+	    if (defined($Command))
+	    {
+		$tmp{'Cmd'} = $Command;
+	    }
+	    
+	    $actions{$1.'$'.$fname} = \%tmp;
 	}
+	# SuSEconfig script specification
+	elsif ($line =~ /^##\s*Config\s*:\s*((\s*\s*\S+)*)\s*$/)
+	{
+	    if ($Meta_found == 0)
+	    {
+		# reset all other action tag values
+		$ServiceReload = $ServiceRestart = $Command = undef;
+	    }
+
+	    $Config = $1;
+	    $Meta_found = 1;
+	}
+	# services to restart
+	elsif ($line =~ /^##\s*ServiceRestart\s*:\s*((\s*\s*\S+)*)\s*$/)
+	{
+	    if ($Meta_found == 0)
+	    {
+		# reset all other action tag values
+		$ServiceReload = $Config = $Command = undef;
+	    }
+
+	    $ServiceRestart = $1;
+	    $Meta_found = 1;
+	}
+	# services to reload 
+	elsif ($line =~ /^##\s*ServiceReload\s*:\s*((\s*\s*\S+)*)\s*$/)
+	{
+	    if ($Meta_found == 0)
+	    {
+		# reset all other action tag values
+		$ServiceRestart = $Config = $Command = undef;
+	    }
+
+	    $ServiceReload = $1;
+	    $Meta_found = 1;
+	}
+	# generic command
+	elsif ($line =~ /^##\s*Command\s*:\s*((\s*\s*\S+)*)\s*$/)
+	{
+	    if ($Meta_found == 0)
+	    {
+		# reset all other action tag values
+		$ServiceRestart = $Config = $Command = undef;
+	    }
+
+	    $Command = $1;
+	    $Meta_found = 1;
+	}
+	# other lines (comments, empty lines) are ignored 
     }
 
     close(CONFIGFILE);
@@ -409,6 +497,16 @@ print "[\n";
 print '['.convert(@rec)."],\n";
 print hash_to_map(%descriptions).",\n";
 print hash_to_map(flip_hash(%locations)).",\n";
-print hash_to_map(%redefined_vars)."\n";
+print hash_to_map(%redefined_vars).",\n";
+
+# print action commands for each variable
+print "\$[\n";
+my @keys = keys(%actions);
+for my $var (@keys)
+{
+    print "\"$var\" : ".hash_to_map(%{$actions{$var}}).",\n";
+}
+print "]\n";
+
 print "]\n";
 
