@@ -71,6 +71,7 @@ else if (func == "Write")
 {
     import "Progress";
     Progress::off();
+	Sysconfig::write_only = true;
     ret = Sysconfig::Write();
     Progress::on();
 }
