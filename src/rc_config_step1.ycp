@@ -87,6 +87,8 @@
 */
 
 {
+    textdomain "rc_config";
+     
     UI(`ChangeWidget(`id(`package),   `Value, 20));
     include "rc_dialogs.ycp";
   
@@ -105,13 +107,17 @@
     //////////////////////////////////////////////////////////////////////////////////////////////////
     /////                                    D E F I N E S                                       /////
     //////////////////////////////////////////////////////////////////////////////////////////////////
-
+    
     define getDirDescr( string key )
     ``{
 	  string|void descr = getDescr( key );
 
-	  if ( descr == nil || descr == "" ) descr = sformat(UI(_("<p></p><p><b>Subdialog for %1</b></p>
-                       <p>The configurations in this section are not yet organized.</p>")), key);
+	  if ( descr == nil || descr == "" )
+	      {
+		  descr = UI(_("<p></p>"))+
+		      sformat(UI(_("<p><b>Subdialog for %1</b></p>")),key) +
+		      UI(_("<p>The configurations in this section are not yet organized.</p>"));
+	      }
 
 	  return( descr );
       };
@@ -175,7 +181,7 @@
 the central configuration file of your SuSE Linux</p>")) + UI(_("<p>Please note, that many of these variables are
 set by specialized YaST2 configuration modules like the \"Network configuration\"</p>")));
      
-     UI( `ChangeWidget(  `id(`next), `Label,  _("&Save") ) );
+     UI( `ChangeWidget(  `id(`next), `Label,  _("S&ave") ) );
      UI( `ChangeWidget(  `id(`key),  `Tree,  tree_data));
      UI( `ReplaceWidget( `id(`rp),   curr_dialog ));
 
@@ -188,7 +194,7 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
      boolean descr_read       = true;
      boolean value_read       = true;
      
-     y2debug("12");
+     y2debug("12");     
      repeat
      {
         ret= UI(`UserInput());

@@ -1,3 +1,20 @@
+/**
+ * File:
+ *   menuentry_rc_config.ycp
+ *
+ * Module:
+ *   rc_config 
+ *
+ * Summary:
+ *   rc_config menuentry
+ *
+ * Authors:
+ *   Michael Mager <mike@suse.de>
+ *
+ * $Id$
+ *
+ *
+ */
 {
   ////////////////////////////////////////////////////////////////////////////////////////
   // set the textdomain, (generally the name of the module for example "lan" for y2c_lan

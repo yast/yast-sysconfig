@@ -25,7 +25,7 @@
  */
 
 {
-
+  textdomain "rc_config";
   //////////////////////////////////////////////////////////////////////////////////////
   //                     Utility- D I A L O G   D E F I N E S                         //
   //////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/ *. Then it
 SuSEconfig, which changes the underlying configuration files, resp. stops/starts deamons,
 runs  low level configuration tools, so that your configuration in rc.config take affect.</p>") +
  
-	     _("<p><b>Important:</b> You still can edit each individual configuration file manually.") +
+	     _("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
 
 	     _("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
  you have manually changed any of them.  If you have changed a configuration file manually,
@@ -672,7 +672,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	``{
 	return(
 	    // Main dialog edit rc_config 
-	    `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("Config options"), tree_data )),
+	    `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("&Config options"), tree_data )),
 		  `HSpacing(1),
 		  `HWeight( 65, `VBox(`VSpacing(0.2), 
 				      `ReplacePoint(`id(`rp),
@@ -707,10 +707,10 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 					`VSpacing(1),
 					`TextEntry(`id(`search_entry), _("&Search for:")),
 					`VSpacing(1),
-					`Left(`CheckBox(`id(`ignore), _("abg matches AbG"),    true)),
-					`Left(`CheckBox(`id(`nkey),   _("Search keyname"),     true)),
-					`Left(`CheckBox(`id(`ndescr), _("Search description"), true)),
-					`Left(`CheckBox(`id(`nvalue), _("Search value"),       false)),
+					`Left(`CheckBox(`id(`ignore), _("abg &matches AbG"),    true)),
+					`Left(`CheckBox(`id(`nkey),   _("Search &keyname"),     true)),
+					`Left(`CheckBox(`id(`ndescr), _("Search &description"), true)),
+					`Left(`CheckBox(`id(`nvalue), _("Search &value"),       false)),
 					`VSpacing(1)
 					),
 				    `HSpacing(2)
