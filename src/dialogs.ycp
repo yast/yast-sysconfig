@@ -39,7 +39,7 @@ global define map display_search_dialog()
 				`TextEntry(`id(`search_entry), _("&Search for:")),
 				`VSpacing(1),
 				// check box label
-				`Left(`CheckBox(`id(`ignore), _("Case insensitive search"), true)),
+				`Left(`CheckBox(`id(`ignore), _("&Case insensitive search"), true)),
 				// check box label
 				`Left(`CheckBox(`id(`nkey), _("Search &variable name"), true)),
 				// check box label
@@ -126,11 +126,11 @@ global define map powertweak_install_dialog() ``{
 	    `Label(helptext),
 	    `VSpacing(1),
 	    // check box label text
-	    `Left(`CheckBox(`id(`extra), _("Install powertweak-extra package"), true)),
+	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra package"), true)),
 	    `VSpacing(1),
 	    `HBox(
-		`PushButton(`id(`ok), _("Install")),
-		`PushButton(`id(`cancel), UI::CancelButtonLabel())
+		`PushButton(`id(`ok), InstallButtonLabel()),
+		`PushButton(`id(`cancel), CancelButtonLabel())
 	    )
 	)
     );

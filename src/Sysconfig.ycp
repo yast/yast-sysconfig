@@ -314,7 +314,7 @@ global define map get_description(string varid) ``{
     string comment = SCR::Read(comment_path);
 
     // no comment present
-    if (size(comment) == 0 && regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
+    if (size(comment) == 0 && !regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
 	y2warning("Comment for variable %1 is missing", varid);
 
@@ -382,6 +382,11 @@ global define map get_description(string varid) ``{
 	    );
 
 	    template_only_comment = get_only_comment(template_comment);
+
+	    if (size(template_only_comment) > 0)
+	    {
+		template_only_comment = template_only_comment + "<BR><BR>";
+	    }
 	}
 
 	y2milestone("Meta read from template: %1", template_meta);
@@ -406,7 +411,7 @@ global define map get_description(string varid) ``{
     meta["name"] = varname;
     meta["file"] = get_file_from_id(varid);
     meta["location"] = (varname != "") ? get_location_from_id(varid) : varid;
-    meta["comment"] = (varname != "") ? template_only_comment + "<BR><BR>" + get_only_comment(comment) : (node_comments[varid]:"");
+    meta["comment"] = (varname != "") ? template_only_comment + get_only_comment(comment) : (node_comments[varid]:"");
     meta["value"] = SCR::Read(value_path);
 
     return meta;
@@ -638,7 +643,17 @@ global define symbol set_value(string variable, string new_value, boolean force)
 		else if (type == "ip")
 		{
 		    // check IP adress using function from network/ip.ycp include
+		    valid = check_ip(new_value);
+		}
+		else if (type == "ip4")
+		{
+		    // check IP adress using function from network/ip.ycp include
 		    valid = check_ip4(new_value);
+		}
+		else if (type == "ip6")
+		{
+		    // check IP adress using function from network/ip.ycp include
+		    valid = check_ip6(new_value);
 		}
 		else
 		{

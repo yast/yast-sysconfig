@@ -14,6 +14,7 @@ textdomain "sysconfig";
 import "Wizard";
 import "Sysconfig";
 import "Runlevel";
+import "Directory";
 
 include "ui/common_popups.ycp";
 include "ui/common_messages.ycp";
@@ -115,7 +116,7 @@ Create it and use powerteak?
 
 
 // FIXME:    boolean ret = Sysconfig::Read(["/etc/sysconfig/*"]);
-    boolean ret = (Sysconfig::powertweak_mode) ? Sysconfig::Read([powertweakconfig]) : Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*", "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp"]);	// TODO: add metadata file with predefined paths and descriptions
+    boolean ret = (Sysconfig::powertweak_mode) ? Sysconfig::Read([powertweakconfig]) : Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*", "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp", "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions"]);	// TODO: add metadata file with predefined paths and descriptions
 
     return ret ? `next : `abort;
 }
@@ -495,7 +496,7 @@ global define void check_set_current_value()
 		string t = d["Type"]:"string";
 
 		// variable value does not match defined type - ask user to set value
-		if (UI::AnyQuestionPopup(_("Warning"), sformat(_("Value '%1'\ndoes not match type '%2'\n\nDo you really want to set this value?"), new_value, t), UI::YesButtonLabel(), UI::NoButtonLabel(), `focus_no) == true)
+		if (UI::AnyQuestionPopup(WarningMsg(), sformat(_("Value '%1'\ndoes not match type '%2'\n\nDo you really want to set this value?"), new_value, t), UI::YesButtonLabel(), UI::NoButtonLabel(), `focus_no) == true)
 		{
 		    // force setting of value
 		    Sysconfig::set_value(selected_variable, new_value, true);
@@ -549,7 +550,7 @@ global define symbol MainDialog() ``{
 			`HSpacing(1),
 			`HWeight(65,
 			    `VBox(`HSpacing(60),
-				`Left(`Heading(`id(`heading), `opt(`hstretch), "Current selection: ")),
+				`Left(`Heading(`id(`heading), `opt(`hstretch), _("Current selection: "))),
 				`VSpacing(0.5),
 				`HBox(
 				    `ReplacePoint(`id(`replace),
@@ -561,8 +562,8 @@ global define symbol MainDialog() ``{
 				    )
 				),
 				`VSpacing(1),
-				`RichText(`id(`rt), _("<P><B>System configuration editor</B></P><P>With system configuration editor you can...</P>") +
-				    _("<P><B>Note:</B> Descriptions are not translated</P>")
+				`RichText(`id(`rt), _("<P><B>System configuration editor</B></P><P>With system configuration editor you can change some system settings. You can use Yast2 to configure most of hardware and system settings.</P>") +
+				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")
 				)
 			    )
 			)
