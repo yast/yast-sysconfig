@@ -500,6 +500,10 @@ global define map parse_metadata(string comment) ``{
 
     // parse each metadata line
     foreach(string metaline, joined_multilines, ``{
+
+	    /* Ignore lines with ### -- general comments */
+	    // FIXME if(regexpmatch(metaline, "^###")) return;
+
 	    string tag = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
 	    string val = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\2");
 

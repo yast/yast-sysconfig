@@ -1,6 +1,6 @@
 /**
  * File:	clients/sysconfig.ycp
- * Package:	Configuration of sysconfig
+ * Package:	Sysconfig editor
  * Summary:	Main file
  * Authors:	Ladislav Slezak <lslezak@suse.cz>
  *
@@ -15,14 +15,13 @@
  * <h3>Configuration of the sysconfig</h3>
  */
 
-import "Sysconfig";
-
 textdomain "sysconfig";
 
 /* The main () */
 y2milestone ("----------------------------------------");
 y2milestone ("Sysconfig module started");
 
+import "Sysconfig";
 include "sysconfig/wizards.ycp";
 
 /* is this proposal or not? */
