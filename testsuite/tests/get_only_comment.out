@@ -1,7 +1,37 @@
-Return	
-Return	
-Return	sdfa   
-Return	
-Return	dsfds 
-Return	adsf  sdfwer 
-Return	134 34763 
+Dump	Input: nil
+Dump	Output:
+Dump	---
+Dump	Input: 
+Dump	Output:
+Dump	---
+Dump	Input: # sdfa  
+Dump	Output:
+Dump	 sdfa  
+Dump	
+Dump	---
+Dump	Input: ### gfh 
+Dump	Output:
+Dump	---
+Dump	Input: # dsfds
+Dump	Output:
+Dump	 dsfds
+Dump	
+Dump	---
+Dump	Input: # adsf 
+Dump	# sdfwer
+Dump	
+Dump	Output:
+Dump	 adsf 
+Dump	 sdfwer
+Dump	
+Dump	---
+Dump	Input: 
+Dump	
+Dump	#134
+Dump	   
+Dump	#34763
+Dump	  ##Path
+Dump	Output:
+Dump	134
+Dump	34763
+Dump	
