@@ -1,0 +1,58 @@
+[Desktop Entry]
+Type=Application
+Categories=Qt;X-SuSE-YaST-System;
+
+X-KDE-ModuleType=Library
+X-KDE-RootOnly=true
+X-KDE-HasReadOnlyMode=true
+X-KDE-Library=yast2
+X-KDE-FactoryName=powertweak
+
+X-SuSE-YaST-Group=System
+X-SuSE-YaST-Argument=
+X-SuSE-YaST-RootOnly=true
+X-SuSE-YaST-AutoInst=
+X-SuSE-YaST-Geometry=
+X-SuSE-YaST-SortKey=
+X-SuSE-YaST-AutoinstResource=
+
+Icon=powertweak
+Exec=/sbin/yast2 powertweak 
+
+Name=Powertweak Configuration
+GenericName=Configure powertweak settings -- only for experts!
+Name[cs]=Konfigurace Powertweak
+GenericName[cs]=Nastavení powertweak -- pouze pro experty!
+Name[de]=Powertweak-Konfigu­ration
+GenericName[de]=Powertweak-Einstellungen konfigurieren -- nur für Experten!
+Name[es]=Configuración de powertweak
+GenericName[es]=Configurar las opciones de powertweak: ¡sólo para expertos!
+Name[hu]=Powertweak beállítások
+GenericName[hu]=Powertweak opciók beállítása -- csak szakértőknek!
+Name[it]=Configurazione di Powertweak 
+GenericName[it]=Configura le impostazioni di powertweak -- solo per esperti!
+Name[ko]=Powertweak 설정
+GenericName[ko]=Powertweak 설정들을 구성합니다. -- 전문가만을 위하여!
+Name[nl]=Powertweak configuratie
+GenericName[nl]=Configureer powertweak instellingen -- alleen voor experts!
+Name[pt]=Configuração do Powertweak
+GenericName[pt]=Configure dados do powertweak -- só para especialistas!
+Name[sk]=Nastavenie powertweak
+GenericName[sk]=Konfigurácia powertweak - iba pre expertov!
+Name[sv]=Ställ in Powertweak
+GenericName[sv]=Ställ in Powertweak - Endast för experter!
+GenericName[da]=Konfigurer powertweak indstillinger -- kun for eksperter!
+Name[el]=Ρύθμιση Powertweak
+GenericName[el]=Ρύθμιση ρυθμίσεων powertweak -- μόνο για ειδικούς!
+Name[fr]=Configuration de Powertweak
+GenericName[fr]=Configurer les paramètres powertweak -- réservé aux experts !
+Name[ja]=Powertweak の設定
+GenericName[ja]=Powertweak の設定 -- エキスパート用のみ！
+Name[lt]=Powertweak konfigūracija
+GenericName[lt]=Konfigūruoti powertweak nuostatas -- tik ekspertams!
+Name[ru]=Настройка Powertweak
+GenericName[ru]=Настройка параметров powertweak -- только для специалистов!
+Name[sl]=Nastavitev Powertweaka
+GenericName[sl]=Prilagodi nastavitve Powertweaka -- samo za strokovnjake!
+Name[tr]=Powertweak yapılandırması
+GenericName[tr]=Powertweak ayarlarını yapılandır -- Sadece uzmanlar için!
