@@ -116,7 +116,7 @@
 	      {
 		  descr = UI(_("<p></p>"))+
 		      sformat(UI(_("<p><b>Subdialog for %1</b></p>")),key) +
-		      UI(_("<p>The configurations in this section are not yet organized.</p>"));
+		      UI(_("<p>The configuration in this section is not yet organized.</p>"));
 	      }
 
 	  return( descr );
@@ -220,8 +220,11 @@ requires the linux kernel 2.4 to run.</p>")));
      else
      {
 	 curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
-the central configuration file of your SuSE Linux</p>")) + UI(_("<p>Please note, that many of these variables are
-set by specialized YaST2 configuration modules like the \"Network configuration\"</p>")));
+the central configuration file of your SuSE Linux system.</p>
+")) + UI(_("<p>
+Please note, many of these variables are set by specialized YaST2
+configuration modules like the \"Network configuration\".</p>
+")));
      }
      
      
@@ -293,7 +296,7 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 
 		if ( size(entry_list) == 0)
 		{
-		    UI(`DisplayMessage(_("No entrys found")));
+		    UI(`DisplayMessage(_("No entries found")));
 		}
 		else
 		{

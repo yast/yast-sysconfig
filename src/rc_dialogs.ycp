@@ -38,7 +38,8 @@
   UI(``{  global define HelpMsgStart()``{
       return( // helptext for popup 
 	     _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
-the central configuration file</b> of your SuSE Linux</p>"));
+the central configuration file</b> of your SuSE Linux system.</p>
+"));
   }});
     
 
@@ -50,9 +51,10 @@ the central configuration file</b> of your SuSE Linux</p>"));
   UI(``{ global define HelpMsgBody() ``{
       return(  // helptext for popup 
 	     _("<p>After you save your changes, this editor changes the variables in the
-corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/ *. Then it runs
-SuSEconfig, which changes the underlying configuration files, resp. stops/starts deamons,
-runs  low level configuration tools, so that your configuration in rc.config take affect.</p>") +
+corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/*. Then it runs
+SuSEconfig, which changes the underlying configuration files, stops and starts daemons,
+and runs low-level configuration tools so your configuration in rc.config takes effect.</p>
+") +
  
 	     _("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
 
@@ -60,12 +62,13 @@ runs  low level configuration tools, so that your configuration in rc.config tak
  you have manually changed any of them.  If you have changed a configuration file manually,
  it will not touch it.</p>") +
  
-	     _("<p> This concept was choosen, because:
+	     _("<p> This concept was chosen, because:
 <ul><li>now you have your basic configuration in \"one\" central file, which is easy to read
  and to edit.</li>
-<li>you can easily copy the rc.config to another computer, run SuSEconfig and this system is
+<li>you can easily copy the rc.config to another computer, run SuSEconfig, and this system is
  nearly ready to work, without having to edit up to twenty individual configuration files
- manually.</li></ul></p>"));
+ manually.</li></ul></p>
+"));
   }});
 
 
@@ -76,8 +79,10 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 
   UI(``{ global define HelpMsgNotice()``{
       return( // helptext for popup 
-	     _("<p>Please note, that many of these variables are set by specialized YaST2
- configuration modules like the \"Network configuration</p>"));
+	     _("<p>
+Please note, many of these variables are set by specialized YaST2
+configuration modules like the \"Network configuration\".</p>
+"));
   }});
 
   
@@ -255,9 +260,11 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 		    `HSpacing(1),
 		    `VBox(
 			`VSpacing(0.2),
-			`Heading( _("Error" )),
+			`Heading( _("Error")),
 			`VSpacing(0.2),
-			`Label(_("An error occured, during execution SuSEconfig\nProbably \"/sbin/SuSEconfig\" is missing or the module has no root permission")),
+			`Label(_("An error occured during execution of SuSEconfig.
+Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
+")),
 			`PushButton(`opt(`default), _("&OK and Exit")),
 			`VSpacing(0.2)
 			),
@@ -283,7 +290,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 
 	    OpenDialog(`opt ( `decorated ),
 		       `VBox (`HSpacing(75),
-			      `Heading( _("Logging" )),
+			      `Heading( _("Logging")),
 			      text,	// e.g. `Richtext()
 			      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
 			   )
@@ -308,11 +315,13 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	global define AskShowLog( ) ``{
 
 	    OpenDialog(`opt(`decorated), 
-		       `VBox( `Heading( _("SuSEConfig Logging" )) ,
-			      `VBox( `Label( _("Your changes are set, and SuSEconfig was run.\nWould now you like to see the logging of SuSEConfig?" )),
+		       `VBox( `Heading( _("SuSEConfig Logging")) ,
+			      `VBox( `Label( _("Your changes are set and SuSEconfig has run.
+Would you like to see the logging of SuSEConfig?
+")),
 				     `HBox( 
-					 `PushButton( `id(`log),  _("Show Logfile") ),
-					 `PushButton( `id(`no_log), `opt(`default), _("Don't show logfile and exit") )
+					 `PushButton( `id(`log),  _("Show Log File") ),
+					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file.") )
 					 )
 				  )
 			   )
@@ -329,11 +338,13 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	global define AskFwShowLog( ) ``{
 
 	    OpenDialog(`opt(`decorated), 
-		       `VBox( `Heading( _("Logging" )) ,
-			      `VBox( `Label( _("Your changes are set, and the firewalls are (re)started. \nWould now you like to see the logging?" )),
+		       `VBox( `Heading( _("Logging")) ,
+			      `VBox( `Label( _("Your changes are set and the firewalls are (re)started. 
+Would now you like to see the logging?
+")),
 				     `HBox( 
-					 `PushButton( `id(`log),  _("Show Logfile") ),
-					 `PushButton( `id(`no_log), `opt(`default), _("Don't show logfile and exit") )
+					 `PushButton( `id(`log),  _("Show Log File") ),
+					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file.") )
 					 )
 				  )
 			   )
@@ -354,8 +365,8 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     UI( ``{
 	global define WaitSuSEconfig( ) ``{
 	    OpenDialog(`opt(`decorated), 
-		       `VBox( `Heading( _("SuSEConfig is running ..." )) ,
-			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time." ))
+		       `VBox( `Heading( _("SuSEConfig is running ...")) ,
+			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time."))
 			   )
 		);
 	};
@@ -368,8 +379,8 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     UI( ``{
 	global define WaitRestartFirewall( ) ``{
 	    OpenDialog(`opt(`decorated), 
-		       `VBox( `Heading( _("(Re)Start firewall ..." )) ,
-			      `Label( _("\nThis procedure can take some time." ))
+		       `VBox( `Heading( _("(Re)Start firewall ...")) ,
+			      `Label( _("\nThis procedure can take some time."))
 			   )
 		);
 	};
@@ -744,7 +755,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	global define SearchDlg()
 	    ``{
 	    // helptext for popup search
-	    string helptextCR = _("Type the word related to the information you are looking for"); 
+	    string helptextCR = _("Type the word related to the information you need."); 
 
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(60),
@@ -863,9 +874,10 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	global define SaveDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
-	    string helptextCR = _("Here you see the values, YaST2 will change.
+	    string helptextCR = _("Here you see the values YaST2 will change.
 Choose \"OK\" and YaST2 will save these changes.
-Choose \"Cancel\" to edit the values again"); 
+Choose \"Cancel\" to edit the values again.
+"); 
 
 	    list table_list = maplist( `entry, entry_list,
 				       ``{
@@ -942,7 +954,7 @@ Choose \"Cancel\" to edit the values again");
 	global define GotoDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
-	    string helptextCR = _("Here you see the results of your search. If you see your item you have searched for, click at this item and then click \"OK\", else click \"Cancel\" to quit the search."); 
+	    string helptextCR = _("Here you see the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search."); 
 
 	    list table_list = maplist( `entry, entry_list,
 				       ``{

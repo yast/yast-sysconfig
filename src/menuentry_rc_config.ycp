@@ -45,7 +45,7 @@
 			       // helptext for menuentry 
 			       UI(_("Launch this module to configure rc_config."))
 			       +
-			       UI(_("<p>You need to be logged in as <i>root</i> in order to do this.</p>"))),
+			       UI(_("<p>You need to be logged in as <i>root</i> to do this.</p>"))),
      
       ////////////////////////////////////////////////////////////////////////////////
       // explanation in YaST2 Control Center                                         //

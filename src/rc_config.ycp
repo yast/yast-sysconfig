@@ -177,7 +177,7 @@
 
   y2debug( "Initializing ...");
   // message on top of the progress bar
-  UI(`ChangeWidget(`id(`package),   `Label, _("Read /etc/rc.config and additional describing data ...")));
+  UI(`ChangeWidget(`id(`package),   `Label, _("Reading /etc/rc.config and additional describing data ...")));
   UI(`ChangeWidget(`id(`package),   `Value, 10));
  
   integer arg_n = size(Args()) - 1;
