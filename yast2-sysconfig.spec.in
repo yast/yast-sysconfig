@@ -7,8 +7,8 @@ Requires:	yast2
 
 Provides:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
 Obsoletes:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
-Provides:	yast2-trans-sysconfig
-Obsoletes:	yast2-trans-sysconfig
+Provides:	yast2-trans-sysconfig yast2-trans-rcconfig
+Obsoletes:	yast2-trans-sysconfig yast2-trans-rcconfig
 
 Summary:	Editor for /etc/sysconfig
 
