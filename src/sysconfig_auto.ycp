@@ -70,6 +70,7 @@ else if (func == "Export")
 else if (func == "Write")
 {
     import "Progress";
+    Sysconfig::write_only = true;
     Progress::off();
     ret = Sysconfig::Write();
     Progress::on();

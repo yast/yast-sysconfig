@@ -54,6 +54,8 @@ global map parse_param = $[
     "remove_whitespace" : true
 ];
 
+global boolean write_only = false;
+
 global list tree_content = [];
 
 global boolean powertweak_mode = false;
@@ -1036,7 +1038,7 @@ global define boolean Write() ``{
 	string config_module = (string) (activate["Cfg"]:nil);
 	string bash_command = (string) (activate["Cmd"]:nil);
 
-	if (config_module == nil && reload_service == nil && restart_service == nil && bash_command == nil && CompleteSuSEconfig == false)
+	if (config_module == nil && reload_service == nil && restart_service == nil && bash_command == nil && CompleteSuSEconfig == false && !write_only)
 	{
 	    // start complete SuSEconfig (backward compatibility)
 	    CompleteSuSEconfig = true;
