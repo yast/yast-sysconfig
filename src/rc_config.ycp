@@ -17,6 +17,8 @@
 
 {
 
+  textdomain "rc_config";
+
   // definition of map user_settings  
   map user_settings = $[];
   
