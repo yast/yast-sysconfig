@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Feb  4 14:17:45 CET 2004 - lslezak@suse.cz
+
+- testsuite update
+- packages gcc and yast2-network are not required
+  or needed for build
+- version 2.9.4
+
+-------------------------------------------------------------------
 Fri Jan 30 10:07:26 CET 2004 - lslezak@suse.cz
 
 - fixes for the new interpreter (nil checking,
