@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Tue Jan 13 11:18:08 CET 2004 - lslezak@suse.cz
+
+- fixes for the new interpreter
+- version 2.9.2
+
+-------------------------------------------------------------------
+Thu Dec 18 13:54:59 CET 2003 - lslezak@suse.cz
+
+- use Service:: module instead of Runlevel::
+- removed unused imports
+
+-------------------------------------------------------------------
 Wed Nov 26 13:26:55 CET 2003 - lslezak@suse.cz
 
 - fixes for the new interpreter

@@ -98,7 +98,7 @@ global define map display_search_dialog()
  * @param checkboxvalue Check box value
  * @return map Selected variable, checkbox value (nil if it wasn't used), user input values
  */
-global define map display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label, string checkboxlabel, boolean checkboxvalue) ``{
+global define map<string, any> display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label, string checkboxlabel, boolean checkboxvalue) ``{
 
     UI::OpenDialog(`opt(`decorated),
 	`HBox(

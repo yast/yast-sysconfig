@@ -39,7 +39,7 @@ list custom_files = [];
 map variables = $[];
 
 // modified variables
-map modified_variables = $[];
+map<string, string> modified_variables = $[];
 
 // comment for non-variable nodes
 map node_comments = $[];
@@ -58,7 +58,7 @@ global list tree_content = [];
 global boolean powertweak_mode = false;
 
 // map of actions to start when variable is modified
-map actions = $[];
+map<string, any> actions = $[];
 
 global boolean ConfirmActions = false;
 
@@ -309,8 +309,8 @@ global define list<string> get_metadata(string input) ``{
  * @param comment Input comment
  * @return map parsed metadata
  */
-global define map parse_metadata(string comment) ``{
-    map ret = $[];
+global define map<string, any> parse_metadata(string comment) ``{
+    map<string, any> ret = $[];
 
     // get metadata part of comment
     list metalines = get_metadata(comment);
@@ -399,7 +399,7 @@ global define map parse_metadata(string comment) ``{
 	    // add tag and value to map if they are present in comment
 	    if (tag != "")
 	    {
-		ret = add(ret, tag, val);
+		ret = (map<string, any>) add(ret, tag, val);
 	    }
 	    else
 	    {
@@ -430,7 +430,7 @@ global define string get_location_from_id(string id) ``{
  * @param varid Variable identification
  * @return map Description map
  */
-global define map get_description(string varid) ``{
+global define map<string, any> get_description(string varid) ``{
     string varname = get_name_from_id(varid);
     string fname = get_file_from_id(varid);
 
@@ -530,7 +530,7 @@ global define map get_description(string varid) ``{
 	}
     }
 
-    map meta = parse_metadata(comment);
+    map<string, any> meta = parse_metadata(comment);
 
     string template_only_comment = "";
 
@@ -563,7 +563,7 @@ global define map get_description(string varid) ``{
 	y2milestone("Meta read from template: %1", template_meta);
     }
 
-    string deflt = meta["Default"]:nil;
+    string deflt = (string) (meta["Default"]:nil);
 
     if (deflt != nil)
     {
@@ -628,7 +628,7 @@ global define symbol set_value(string variable, string new_value, boolean force,
 	{
 	    // variable was reset to the original value, remove it from map of modified
 	    y2debug("Variable %1 was reset to the original value", variable);
-	    modified_variables = remove(modified_variables, variable);
+	    modified_variables = (map<string, string>) remove(modified_variables, variable);
 	}
 	else
 	{
@@ -792,9 +792,9 @@ global define list get_all()
  * Get map of all variables
  * @return map Map of variable names, key is variable name, value is a list of variable identifications
  */
-global define map get_all_names()
+global define map<string, list<string> > get_all_names()
 ``{
-    map ret = $[];
+    map<string, list<string> > ret = $[];
 
     foreach(string varid, string new_value, variable_locations,
 	``{
@@ -802,11 +802,11 @@ global define map get_all_names()
 
 	    if (haskey(ret, name) == true)
 	    {
-		ret = add(ret, name, add(ret[name]:[], varid));
+		ret = (map<string, list<string> >) add(ret, name, add(ret[name]:[], varid));
 	    }
 	    else
 	    {
-		ret = add(ret, name, [varid]);
+		ret = (map<string, list<string> >) add(ret, name, [varid]);
 	    }
 	}
     );
@@ -992,7 +992,7 @@ global define boolean Write() ``{
 	    }
 
 	    // get activation map for variable
-	    string presave = actions[vid, "Pre"]:nil;
+	    string presave = (string) (actions[vid, "Pre"]:nil);
 
 	    if (size(presave) > 0)
 	    {
@@ -1028,12 +1028,12 @@ global define boolean Write() ``{
 
     foreach (string vid, string new_val, modified_variables, ``{
 	// get activation map for variable
-	map activate = actions[vid]:$[];
+	map<string, any> activate = actions[vid]:$[];
 
-	string restart_service = activate["Rest"]:nil;
-	string reload_service = activate["Reld"]:nil;
-	string config_module = activate["Cfg"]:nil;
-	string bash_command = activate["Cmd"]:nil;
+	string restart_service = (string) (activate["Rest"]:nil);
+	string reload_service = (string) (activate["Reld"]:nil);
+	string config_module = (string) (activate["Cfg"]:nil);
+	string bash_command = (string) (activate["Cmd"]:nil);
 
 	if (config_module == nil && reload_service == nil && restart_service == nil && bash_command == nil && CompleteSuSEconfig == false)
 	{
@@ -1312,7 +1312,7 @@ global define void Set(list settings) ``{
 
 		string key = sformat("%1$%2", n, f);
 
-		modified_variables = add(modified_variables, key, v);
+		modified_variables = (map<string, string>) add(modified_variables, key, v);
 
 		// add configuration file if it isn't already specified
 		if (!contains(custom_files, f))
