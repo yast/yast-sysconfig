@@ -12,7 +12,7 @@ Introduction
 
   Yast2 sysconfig editor can edit /etc/sysconfig files. In this editor users
 can change values in easy way using GUI. Yast2 sysconfig editor needs more
-data (metadata) to display and edit sysconfig variables - metadata were originaly stored
+data (metadata) to display and edit sysconfig variables - metadata was originaly stored
 in meta_sys.config file in yast2-sysconfig package. This file contained
 information about position in tree widget, allowed values, etc.
 
