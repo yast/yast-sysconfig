@@ -52,7 +52,7 @@
       `helptext     : UI(_("Change settings in /etc/rc.config, the main SuSE Linux configuration file")),
    
       ////////////////////////////////////////////////////////////////////////////////
-      // leaf nil, experts only ;-)
+      // leave nil, experts only ;-)
       `codefragment : nil 
    
    ]
