@@ -496,7 +496,7 @@ global define map<string, any> get_description(string varid) ``{
 	// remove header if it's present
 	y2debug("Whole comment: %1", comment);
 	list<string> lines = splitstring(comment, "\n");
-	list filtered = [];
+	list<string> filtered = [];
 
 	// remove last empty string from list (caused by last new line char)
 	if (lines[size(lines) - 1]:nil == "")
@@ -775,9 +775,9 @@ global define list get_modified()
  * Get list of all variables
  * @return list List of variable identifications
  */
-global define list get_all()
+global define list<string> get_all()
 ``{
-    list ret = [];
+    list<string> ret = [];
 
     foreach(string varid, string new_value, variable_locations,
 	``{

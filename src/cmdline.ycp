@@ -126,8 +126,8 @@
     global define string variable2id(string variable) ``{
 	if (variable != nil)
 	{
-	    map all_names = Sysconfig::get_all_names();
-	    list vids = all_names[variable]:nil;
+	    map<string, list<string> > all_names = Sysconfig::get_all_names();
+	    list<string> vids = all_names[variable]:nil;
 
 	    if (vids == nil)
 	    {
