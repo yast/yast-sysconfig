@@ -80,6 +80,7 @@
 
     include "sysconfig/sys_dialogs.ycp";
     include "ui/common_messages.ycp";
+    include "ui/common_popups.ycp";
 
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
@@ -222,7 +223,7 @@
 	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") > 0)
 	{
 	    // popup dialog question
-	    if (UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.\nDo you want to create it and use powerteak?"), YesButtonLabel(), OKButtonLabel(), `focus_no) == true)
+	    if (UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.\nDo you want to create it and use powerteak?"), YesButtonLabel(), NoButtonLabel(), `focus_no) == true)
 	    {
 		// create powertweak config
 		integer exit = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");

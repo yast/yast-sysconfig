@@ -378,6 +378,7 @@ int main(int argc, char* argv[])
   const char* globpattern[] = {
     "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config",
+    "/etc/sysconfig/network/wireless",
     "/etc/sysconfig/network/ifcfg-lo",
     "/etc/sysconfig/network/ifcfg-eth0",
     "/etc/sysconfig/3ddiag",

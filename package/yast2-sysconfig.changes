@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Aug  8 08:51:27 CEST 2002 - lslezak@suse.de
+
+- added new meta data
+- added support for /etc/sysconfig/network/wireless file
+- fixed powertweak question dialog
+- version 2.6.4
+
+-------------------------------------------------------------------
 Thu Aug  1 11:10:08 CEST 2002 - lslezak@suse.cz
 
 - added powertweak support
