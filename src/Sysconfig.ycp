@@ -20,6 +20,7 @@ import "Report";
 import "Summary";
 import "Directory";
 import "Product";
+import "Label";
 
 include "sysconfig/routines.ycp";
 include "network/ip.ycp";
@@ -615,6 +616,12 @@ global define map get_description(string varid) ``{
     meta["comment"] = (varname != "") ? template_only_comment + get_only_comment(comment) : (node_comments[varid]:"");
     meta["value"] = SCR::Read(value_path);
 
+    // add action commands
+    if (size(actions[varid]:$[]) > 0)
+    {
+	meta["actions"] = actions[varid]:$[];
+    }
+
     return meta;
 }
 
@@ -747,7 +754,7 @@ global define list(string) get_metadata(string input) ``{
 /**
  * Get comment without metadata
  * @param input Input string
- * @return string Comment used as variable descriprion
+ * @return string Comment used as variable description
  */
 global define string get_only_comment(string input) ``{
     if (input == nil || input == "")
@@ -1060,13 +1067,14 @@ global define boolean Read(list(string) files) ``{
 
     variable_locations = parsed_output[2]:$[];
 
+    // redefined variables (variables which are defined in more files)
     map redefined_vars = parsed_output[3]:$[];
     if (size(redefined_vars) > 0)
     {
 	y2warning("Redefined variables: %1", redefined_vars);
     }
 
-    // read map of actions
+    // read map with activation commands
     actions = parsed_output[4]:$[];
 
     return true;
@@ -1077,60 +1085,6 @@ global define boolean Read(list(string) files) ``{
  * @return boolean true on success
  */
 global define boolean Write() ``{
-    // write dialog caption
-    string caption = (powertweak_mode == true) ? _("Saving Powertweak Configuration") : _("Saving sysconfig Configuration");
-
-    // set the right number of stages
-    integer steps = size(modified_variables);
-
-    // We do not set help text here, because it was set outside
-    Progress::New(caption, " ", steps, [
-	// progress bar item
-	    _("Write the new settings"),
-	    _("Activate the changes"),
-	], [
-	// progress bar item
-	    _("Writing the new settings..."),
-	    _("Activating the changes..."),
-	// progress bar item
-	    _("Finished")
-	],
-	""
-    );
-
-    boolean ret = true;
-
-    // save each changed variable
-    foreach (string vid, string new_val, modified_variables,
-	``{
-	    string file = get_file_from_id(vid);
-	    string name = get_name_from_id(vid);
-	    path value_path = add(add(.syseditor.value, file), name);
-
-	    boolean written = SCR::Write(value_path, new_val);
-	    if (written == false)
-	    {
-		// error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
-		Report::Error(sformat(_("Saving variable %1 to the file %2 failed"), name, file));
-		ret = false;
-	    }
-
-	    Progress::NextStep();
-	}
-    );
-
-    // flush changes
-    SCR::Write(.syseditor, nil);
-
-/*    TODO: remove this, update powertweak file generator? No, problem at update...
-    if (powertweak_mode == true)
-    {
-	y2milestone("Activating powertweak configuration");
-	SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
-
-	// activate powertweak at startup
-	Runlevel::ServiceAdjust("powertweakd", "enable");
-    }*/
 
     // remember all actions - start each action only once
     map Configmodules = $[];
@@ -1147,7 +1101,6 @@ global define boolean Write() ``{
 	// get activation map for variable
 	map activate = actions[vid]:$[];
 
-	// TODO parse options (it's a list)
 	string restart_service = activate["Rest"]:nil;
 	string reload_service = activate["Reld"]:nil;
 	string config_module = activate["Cfg"]:nil;
@@ -1197,8 +1150,71 @@ global define boolean Write() ``{
 	}
     });
 
+    // write dialog caption
+    string caption = (powertweak_mode == true) ? _("Saving Powertweak Configuration") : _("Saving sysconfig Configuration");
+
+    // set the right number of stages
+    integer steps = (powertweak_mode == false) ? size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + ((CompleteSuSEconfig) ? 1 : size(Configmodules)) + 1 /* flush*/ + 3 /* 3 stages */ : size(modified_variables) + 2 /* 2 stages */;
+
+    // We do not set help text here, because it was set outside
+    Progress::New(caption, " ", steps, [
+	// progress bar item
+	    _("Write the new settings"),
+	    _("Activate the changes")
+	],
+	nil,
+	""
+    );
+
+    Progress::NextStage();
+
+    boolean ret = true;
+
+    // save each changed variable
+    foreach (string vid, string new_val, modified_variables,
+	``{
+	    string file = get_file_from_id(vid);
+	    string name = get_name_from_id(vid);
+	    path value_path = add(add(.syseditor.value, file), name);
+
+	    boolean written = SCR::Write(value_path, new_val);
+	    if (written == false)
+	    {
+		// error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
+		Report::Error(sformat(_("Saving variable %1 to the file %2 failed"), name, file));
+		ret = false;
+	    }
+
+	    // progress bar label, %1 is variable name (e.g. DISPLAYMANAGER)
+	    Progress::Title(sformat(_("Saving variable %1..."), name));
+	    Progress::NextStep();
+	}
+    );
+
+    Progress::Title(_("Saving changes to the files..."));
+    // flush changes
+    SCR::Write(.syseditor, nil);
+    Progress::NextStep();
+
+    // activate powertweak configuration
+    if (powertweak_mode == true)
+    {
+	y2milestone("Activating powertweak configuration");
+	ret = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
+
+	if (ret == false)
+	{
+	    return ret;
+	}
+
+	// activate powertweak at startup
+	ret = Runlevel::ServiceAdjust("powertweakd", "enable");
+	return ret;
+    }
+
     // now start required activation commands
     boolean abort = false;
+    Progress::NextStage();
 
     // start SuSEconfig
     if (CompleteSuSEconfig == true)
@@ -1208,6 +1224,8 @@ global define boolean Write() ``{
 	string confirm = sformat("Complete %1 will be started", SuSEconfigName);
 	string label = sformat(_("Starting %1 ..."), SuSEconfigName);
 	string error = sformat(_("Script %1 failed"), SuSEconfigName);
+
+	Progress::NextStep();
 
 	if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
 	{
@@ -1226,6 +1244,8 @@ global define boolean Write() ``{
 	    string confirm = sformat("%1 module %2 will be started", SuSEconfigName, modulename);
 	    string label = sformat(_("Starting %1 module %2..."), SuSEconfigName, modulename);
 	    string error = sformat(_("%1 module %2 failed"), SuSEconfigName, modulename);
+
+	    Progress::NextStep();
 
 	    if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
 	    {
@@ -1256,6 +1276,8 @@ global define boolean Write() ``{
 		string label = sformat(_("Reloading service %1..."), servicename);
 		string error = sformat(_("Reload of the service %1 failed"), servicename);
 
+		Progress::NextStep();
+
 		if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
 		{
 		    abort = true;
@@ -1276,6 +1298,8 @@ global define boolean Write() ``{
 	    string check_command = sformat("/etc/init.d/%1 status", servicename);
 	    integer result = SCR::Execute(.target.bash, check_command);
 	    y2milestone("%1 service status: %2", servicename, result);
+
+	    Progress::NextStep();
 
 	    if (result == 0)
 	    {
@@ -1299,6 +1323,9 @@ global define boolean Write() ``{
 	// start generic commands
 	foreach(string cmd, boolean dummy, Commands,
 	``{
+	    y2milestone("Command: %1", cmd);
+	    Progress::NextStep();
+
 	    if (size(cmd) > 0)
 	    {
 		string confirm = _("A command will be executed");
@@ -1318,6 +1345,10 @@ global define boolean Write() ``{
 
     // set 100% in progress bar
     Progress::NextStep();
+    Progress::Title(_("Finished"));
+
+    // set "finished" mark for the last stage
+    Progress::NextStage();
 
     return ret;
 }
@@ -1442,10 +1473,10 @@ define symbol ConfirmationDialog(string message, string command) ``{
 	    (size(command) > 0) ? `Label(_("Command: ") + command) : `Empty(),
 	    `VSpacing(0.5),
 	    `HBox(
-		`PushButton(`id(`cont), UI::ContinueButtonLabel()),
+		`PushButton(`id(`cont), Label::ContinueButton()),
 		// button label
 		`PushButton(`id(`skip), _("S&kip")),
-		`PushButton(`id(`abort), UI::AbortButtonLabel())
+		`PushButton(`id(`abort), Label::AbortButton())
 	    )
 	)
     );

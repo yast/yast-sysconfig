@@ -13,8 +13,8 @@ textdomain "sysconfig";
 
 import "Sysconfig";
 
-include "ui/common_popups.ycp";
-include "ui/common_messages.ycp";
+import "Popup";
+import "Label";
 
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
@@ -56,9 +56,9 @@ global define map display_search_dialog()
 		      `VSpacing(0.5),
 		      `HBox(
 			  // push button label
-			  `PushButton(`id(`ok), `opt(`default, `key_F10), OKButtonLabel()),
+			  `PushButton(`id(`ok), `opt(`default, `key_F10), Label::OKButton()),
 			  // push button label
-			  `PushButton(`id(`cancel), `opt(`key_F9), CancelButtonLabel())
+			  `PushButton(`id(`cancel), `opt(`key_F9), Label::CancelButton())
 			  )
 		    )
 	);
@@ -154,8 +154,8 @@ The package \"powertweak-extra\" extends configuration options of powertweak.
 	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra Package"), true)),
 	    `VSpacing(1),
 	    `HBox(
-		`PushButton(`id(`ok), `opt(`key_F10), InstallButtonLabel()),
-		`PushButton(`id(`cancel), `opt(`key_F9), CancelButtonLabel())
+		`PushButton(`id(`ok), `opt(`key_F10), Label::InstallButton()),
+		`PushButton(`id(`cancel), `opt(`key_F9), Label::CancelButton())
 	    )
 	)
     );
@@ -192,8 +192,8 @@ global define map add_new_variable()
 	    ),
 	    `VSpacing(1),
 	    `HBox(
-		`PushButton(`id(`ok), `opt(`key_F10), OKButtonLabel()),
-		`PushButton(`id(`cancel), `opt(`key_F9), CancelButtonLabel())
+		`PushButton(`id(`ok), `opt(`key_F10), Label::OKButton()),
+		`PushButton(`id(`cancel), `opt(`key_F9), Label::CancelButton())
 	    )
 	)
     );
@@ -215,19 +215,19 @@ global define map add_new_variable()
 	    if (name == "")
 	    {
 		// warning popup message - variable name is empty
-		UI::WarningPopup(_("Missing variable name value."));
+		Popup::Warning(_("Missing variable name value."));
 		ui = nil;
 	    }
 	    else if (size(file) <= 1)
 	    {
 		// warning popup message - file name is empty
-		UI::WarningPopup(_("Missing file name value."));
+		Popup::Warning(_("Missing file name value."));
 		ui = nil;
 	    }
 	    else if (substring(file, 0, 1) != "/")
 	    {
 		// warning popup message - file name is required with absolute path
-		UI::WarningPopup(_("Missing absolute path in file name."));
+		Popup::Warning(_("Missing absolute path in file name."));
 		ui = nil;
 	    }
 	}

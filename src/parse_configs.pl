@@ -228,7 +228,7 @@ sub hash_to_map(%)
 
 	if (defined($description))
 	{
-	    $description =~ s/[^\\]"/\\"/g;
+	    $description =~ s/([^\\])"/$1\\"/g;
 	}
 
 	# escape double quote characters
@@ -265,6 +265,36 @@ sub remove_variable($$)
     }
 
     return $result;
+}
+
+# read multiline tag from sysconfig file
+sub ReadMulti()
+{
+    my $ret = "\\";
+    
+    while ($ret =~ /(.*)\\$/)
+    {
+	# remove trailing backslash
+	$ret = $1;
+
+	my $line = <CONFIGFILE>;
+
+	# break cycle when EOF is reached
+	if (!defined($line))
+	{
+	    last;
+	}
+
+	if ($line =~ /^##(.*)/)
+	{
+	    $line = $1;
+	}
+	chomp($line);
+
+	$ret .= $line;
+    }
+
+    return $ret;
 }
 
 # list of files to process
@@ -336,28 +366,26 @@ for my $fname (@list)
 	chomp($line);
 
 	# path metadata definition
-	if ($line =~ /^##\s*Path\s*:\s*((\s*\s*\S+)*)\s*$/)
+	if ($line =~ /^##\s*Path\s*:\s*((\s*\S+)*)\s*$/)
 	{
 	    $location = $1;
+
+	    # read multiline metadata
+	    if ($location =~ /(.*)\\$/)
+	    {
+		# Read multiline metadata value
+		$location .= ReadMulti();
+	    }
 	}
-	elsif ($line =~ /^##\s*Description\s*:\s*((\s*\s*\S+)*)\s*$/)
+	elsif ($line =~ /^##\s*Description\s*:\s*((\s*\S+)*)\s*$/)
 	{
 	    my $descr = $1;
 
-	    # read multiline descriptions
-	    while ($descr =~ /(.*)\\$/)
+	    # read multiline metadata
+	    if ($descr =~ /(.*)\\$/)
 	    {
-		# remove trailing backslash
-		$descr = $1;
-
-		# read next line
-		$line = <CONFIGFILE>;
-		chomp($line);
-
-		if ($line =~ /^##(.*)/)
-		{
-		    $descr .= $1;
-		}
+		# Read multiline metadata value
+		$descr .= ReadMulti();
 	    }
 
 	    $descriptions{$location} = $descr;
@@ -426,7 +454,7 @@ for my $fname (@list)
 	    $actions{$1.'$'.$fname} = \%tmp;
 	}
 	# SuSEconfig script specification
-	elsif ($line =~ /^##\s*Config\s*:\s*((\s*\s*\S+)*)\s*$/)
+	elsif ($line =~ /^##\s*Config\s*:\s*((\s*\S+)*)\s*$/)
 	{
 	    if ($Meta_found == 0)
 	    {
@@ -435,10 +463,18 @@ for my $fname (@list)
 	    }
 
 	    $Config = $1;
+
+	    # read multiline metadata
+	    if ($Config =~ /(.*)\\$/)
+	    {
+		# Read multiline metadata value
+		$Config .= ReadMulti();
+	    }
+
 	    $Meta_found = 1;
 	}
 	# services to restart
-	elsif ($line =~ /^##\s*ServiceRestart\s*:\s*((\s*\s*\S+)*)\s*$/)
+	elsif ($line =~ /^##\s*ServiceRestart\s*:\s*((\s*\S+)*)\s*$/)
 	{
 	    if ($Meta_found == 0)
 	    {
@@ -447,10 +483,18 @@ for my $fname (@list)
 	    }
 
 	    $ServiceRestart = $1;
+
+	    # read multiline metadata
+	    if ($ServiceRestart =~ /(.*)\\$/)
+	    {
+		# Read multiline metadata value
+		$ServiceRestart .= ReadMulti();
+	    }
+
 	    $Meta_found = 1;
 	}
 	# services to reload 
-	elsif ($line =~ /^##\s*ServiceReload\s*:\s*((\s*\s*\S+)*)\s*$/)
+	elsif ($line =~ /^##\s*ServiceReload\s*:\s*((\s*\S+)*)\s*$/)
 	{
 	    if ($Meta_found == 0)
 	    {
@@ -459,10 +503,18 @@ for my $fname (@list)
 	    }
 
 	    $ServiceReload = $1;
+
+	    # read multiline metadata
+	    if ($ServiceReload =~ /(.*)\\$/)
+	    {
+		# Read multiline metadata value
+		$ServiceReload .= ReadMulti();
+	    }
+
 	    $Meta_found = 1;
 	}
 	# generic command
-	elsif ($line =~ /^##\s*Command\s*:\s*((\s*\s*\S+)*)\s*$/)
+	elsif ($line =~ /^##\s*Command\s*:\s*((\s*\S+)*)\s*$/)
 	{
 	    if ($Meta_found == 0)
 	    {
@@ -471,6 +523,14 @@ for my $fname (@list)
 	    }
 
 	    $Command = $1;
+
+	    # read multiline metadata
+	    if ($Command =~ /(.*)\\$/)
+	    {
+		# Read multiline metadata value
+		$Command .= ReadMulti();
+	    }
+
 	    $Meta_found = 1;
 	}
 	# other lines (comments, empty lines) are ignored 
