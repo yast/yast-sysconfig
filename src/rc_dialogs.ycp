@@ -777,7 +777,16 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     UI(``{
 	global define HelpDlg()
 	    ``{
-	    string helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
+
+	    string helptextCR = "";
+	    if ( WFM::firewall_mode )
+	    {
+	       helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
+	    }
+	    else
+	    {
+	       helptextCR = HelpMsgBody();
+	    }
 
 	    OpenDialog( `opt(`decorated ),
 			`HBox( `VSpacing(16),

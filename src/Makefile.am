@@ -13,9 +13,11 @@ include_HEADERS = \
 modules_DATA = rc_config_step1.ycp	\
 		  rc_config.ycp
 
-menu_DATA = menuentry_rc_config.ycp
+menu_DATA = menuentry_rc_config.ycp	\
+		menuentry_firewall.ycp
 
-info_DATA = meta_rc.config 
+info_DATA = meta_rc.config 		\
+		meta_fw.config
 
 
 EXTRA_DIST = $(modules_DATA) $(menu_DATA) $(info_DATA) 

@@ -18,6 +18,20 @@
 {
 
   textdomain "rc_config";
+  global boolean firewall_mode   = false;
+
+  integer arg_n = size(Args()) - 1;
+
+  while (arg_n >= 0)
+  {
+      if (Args(arg_n) == .firewall)
+      {
+	  firewall_mode = true;
+      }
+     arg_n = arg_n - 1;
+  }
+
+  y2milestone( "STARTING rc-config editor ... %1", firewall_mode);
 
   // definition of map user_settings  
   map user_settings = $[];

@@ -129,9 +129,27 @@
 
     // show processing steps ...
     UI(`ChangeWidget(`id(`package),   `Value, 50));
- 
+
+    string rc_create_command = "";
+    string rc_config_file    = "";
+    string tree_data_file    = "";
+    
+    if ( firewall_mode )
+    {
+       rc_create_command = "/usr/lib/YaST2/bin/rc_create_data -f";
+       rc_config_file    = "fw_config_keys" ;
+       tree_data_file    = "fw_tree_data";
+    }
+    else
+    {
+       rc_create_command = "/usr/lib/YaST2/bin/rc_create_data";
+       rc_config_file    = "rc_config_keys" ;
+       tree_data_file    = "tree_data";
+    }
+
+    
     // Execute the binary to create all neccesary data for the editor.
-    SCR (`Execute(.target.bash, "/usr/lib/YaST2/bin/rc_create_data", $[]));
+    SCR (`Execute(.target.bash, rc_create_command, $[]));
 
     // show processing steps ...
     UI(`ChangeWidget(`id(`package),   `Value, 70));
@@ -139,7 +157,7 @@
     // One output of the binary is the rc_config_keys map,
     map  rc_config_keys = $[];
     //rc_config_keys = ReadY2("rc_config_keys");
-    rc_config_keys = SCR(`Read(.target.yast2, "rc_config_keys" ));
+    rc_config_keys = SCR(`Read(.target.yast2, rc_config_file ));
     //    SCR(`Write (.dumpto.tmp.rc_config_keys_1, rc_config_keys ));
 
     // show processing steps ...
@@ -147,7 +165,7 @@
 
     // the other output is the tree_data list.
     //list tree_data =  ReadY2("tree_data");
-    list tree_data = SCR(`Read(.target.yast2, "tree_data"));
+    list tree_data = SCR(`Read(.target.yast2, tree_data_file));
     //    SCR(`Write (.dumpto.tmp.tree_data, tree_data ));
 
     // show processing steps ...
@@ -174,14 +192,39 @@
      term main_window = getMainWindowTerm( tree_data );
     
      // translator: Main window header
-     y2debug("10");
-     UI(`SetContents(_("Edit rc_config"), main_window, help_text, true, true ));
-     y2debug("11");
+     if ( firewall_mode )
+     {
+        UI(`SetContents(_("Edit firewall configuration"), main_window, help_text, true, true ));
+     }
+     else
+     {
+	 UI(`SetContents(_("Edit rc_config"), main_window, help_text, true, true ));
+     }
 
      // Initial Settings:
-     term curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
+     term curr_dialog = `dummy();
+     
+     if ( firewall_mode )
+     {
+        curr_dialog = getDirDialog( UI(_("<p><b>SuSEfirewall2</b> and <b>SuSEpersonal-firewall</b> are two independent packet filter
+concepts and implementations for SuSE Linux systems. Select the package
+that best suits your needs:</p> 
+<p><b>SuSEpersonal-firewall</b><br> for a home-solution, easy and simple
+to set up</p>
+<p><b>SuSEfirewall2</b><br> for a flexible, but more complex configuration.</p>
+<br>
+<p><b>Warning:</b><br>Incorrect configuration of packet filters may cause a false sense
+of security. If unsure, use the SuSEpersonal-firewall. The SuSEfirewall2
+requires the linux kernel 2.4 to run.</p>")));
+     }
+     else
+     {
+	 curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
 the central configuration file of your SuSE Linux</p>")) + UI(_("<p>Please note, that many of these variables are
 set by specialized YaST2 configuration modules like the \"Network configuration\"</p>")));
+     }
+     
+     
      
      UI( `ChangeWidget(  `id(`next), `Label,  _("S&ave") ) );
      UI( `ChangeWidget(  `id(`key),  `Tree,  tree_data));

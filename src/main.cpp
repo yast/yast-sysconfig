@@ -40,6 +40,7 @@
 
 #include <ctype.h>
 #include <iostream.h>
+#include <stdio.h>
 #include <fstream.h>
 #include <string>
 #include <map>
@@ -349,7 +350,7 @@ contains -> find
   Third: now the algorithms take the command and generate all data
   neccesary for the RC-Config-Editor.
  */
-int main()
+int main(int argc, char* argv[])
 {
   // some constants
   const int FILENAME_LENGTH   =   255;
@@ -358,9 +359,13 @@ int main()
   const int MAX_DIR_DEPTH     =    20;
 
   // variables for the file names
-  const char meta_rc_config[FILENAME_LENGTH] = "/usr/lib/YaST2/meta_rc.config";
-  const char rc_config_keys[FILENAME_LENGTH] = "/usr/lib/YaST2/rc_config_keys";
-  const char tree_data[FILENAME_LENGTH]      = "/usr/lib/YaST2/tree_data";
+  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/meta_rc.config";
+  char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/rc_config_keys";
+  char  tree_data_arr[FILENAME_LENGTH]       = "/usr/lib/YaST2/tree_data";
+  char *meta_rc_config                       = meta_rc_config_arr;
+  char *rc_config_keys                       = rc_config_keys_arr; 
+  char *tree_data                            = tree_data_arr;
+  
   //  const char rc_config_keys[FILENAME_LENGTH] = "rc_config_keys";
   //  const char tree_data[FILENAME_LENGTH]      = "tree_data";
   //  const char y2log[FILENAME_LENGTH]          = "var/log/y2log";
@@ -399,20 +404,45 @@ int main()
   string descr;
   string rest;
   string property;
+  bool   firewall_mode = false;
+
+  if ((argc == 2) && ( strcmp(argv[1], "-f" ) == 0 ))
+  {
+     firewall_mode  = true;
+     meta_rc_config = "/usr/lib/YaST2/meta_fw.config";
+     rc_config_keys = "/usr/lib/YaST2/fw_config_keys";
+     tree_data      = "/usr/lib/YaST2/fw_tree_data";
+  }
+  else if  (argc == 1)
+  {
+     // normal mode
+  }
+  else
+  {
+     printf( "\n\n\nERROR wrong usage:  rc_create_date [-f]\n\n");
+     exit( 1 );
+  }
 
   // initially push directory /etc in the directory map
-  dirptr->setName("etc");
-  dirptr->setBranch("/");
-  dirptr->setDialogtype("dir");
-  RCDirectories["etc"] = *dirptr;
+  if ( !firewall_mode )
+  {
+     dirptr->setName("etc");
+     dirptr->setBranch("/");
+     dirptr->setDialogtype("dir");
+     RCDirectories["etc"] = *dirptr;
+  }
   dirptr = NULL;
 
   // add the directories "/" and "/etc" to the directory set
   *dirPath = (string)"/";
   DirectorySet.insert(*dirPath);
-  *dirPath = (string)"/etc";
-  DirectorySet.insert(*dirPath);
 
+  if (!firewall_mode )
+  {   
+     *dirPath = (string)"/etc";
+     DirectorySet.insert(*dirPath);
+  }
+  
   ///////////////////////////////////////////////////////////////////
   //
   // Get input from configuration files in /etc/rc.config and
@@ -426,118 +456,118 @@ int main()
   for (unsigned short j = 0;
        j < sizeof(globpattern)/sizeof(globpattern[0]);
        ++j)
-    {
-      glob(globpattern[j], 0, NULL, &globbuffer);
-      for (int i = 0; i < (signed int)globbuffer.gl_pathc ; ++i)
+  {
+     glob(globpattern[j], 0, NULL, &globbuffer);
+     for (int i = 0; i < (signed int)globbuffer.gl_pathc ; ++i)
 	rcFileList.push_back((string)globbuffer.gl_pathv[i]);
-    }
+  }
 
   // Open every existing rc.config file in the array and save the
   // variables in the RCVariables map.
   for (StringList::const_iterator filenameit = rcFileList.begin();
        filenameit != rcFileList.end();
        ++filenameit)
-    {
-      //filename = globbuffer.gl_pathv[i];
-      filename = *filenameit;
-      ifstream fin_filename(filename.c_str());
-      if(!fin_filename)
+  {
+     //filename = globbuffer.gl_pathv[i];
+     filename = *filenameit;
+     ifstream fin_filename(filename.c_str());
+     if(!fin_filename)
+     {
+	// must be written to the y2log file
+	cout << "Unable to open file \'"
+	     << filename
+	     << " \' for reading.\n";
+	continue;
+     }
+     // clear description after reading in new configuration file
+     descr = "";
+
+     while (fin_filename.getline(line,INPUT_LINE_LENGTH))
+     {
+	stringLine = (string)line;
+
+	// filters all comments
+	if ( stringLine.find('#') != string::npos )
 	{
-	  // must be written to the y2log file
-	  cout << "Unable to open file \'"
-	       << filename
-	       << " \' for reading.\n";
-	  continue;
+	   descr = descr + stringLine.substr(stringLine.find('#')+1);
+	   rest  = stringLine.substr(0,stringLine.find('#'));
+	   rest=trim(rest);
+
+	   // if there is nothing left before the comment
+	   // sign go on to the next input line
+	   if (rest.empty())
+	      continue;
 	}
-      // clear description after reading in new configuration file
-      descr = "";
 
-      while (fin_filename.getline(line,INPUT_LINE_LENGTH))
+	// a valid rc.config variable defintion must contain a "="
+	if (stringLine.find('=') == string::npos)
+	   continue;
+
+	// get the names of rc.config variables
+	varname = stringLine.substr(0,stringLine.find('='));
+
+	// delete some special entries in the rc.config files
+	if (varname.find("test") != string::npos)
+	   continue;
+
+	// filters empty strings
+	varname=trim(varname);
+	if (!varname.empty())
 	{
-	  stringLine = (string)line;
+	   // test if RCVariable "varname" exists in RCVariableMap
+	   RCVariableMap::iterator it = RCVariables.find(varname);
 
-	  // filters all comments
-	  if ( stringLine.find('#') != string::npos )
-	    {
-	      descr = descr + stringLine.substr(stringLine.find('#')+1);
-	      rest  = stringLine.substr(0,stringLine.find('#'));
-	      rest=trim(rest);
-
-	      // if there is nothing left before the comment
-	      // sign go on to the next input line
-	      if (rest.empty())
-		continue;
-	    }
-
-	  // a valid rc.config variable defintion must contain a "="
-	  if (stringLine.find('=') == string::npos)
-	    continue;
-
-	  // get the names of rc.config variables
-	  varname = stringLine.substr(0,stringLine.find('='));
-
-	  // delete some special entries in the rc.config files
-	  if (varname.find("test") != string::npos)
-	    continue;
-
-	  // filters empty strings
-	  varname=trim(varname);
-	  if (!varname.empty())
-	    {
-	      // test if RCVariable "varname" exists in RCVariableMap
-	      RCVariableMap::iterator it = RCVariables.find(varname);
-
-	      if (it != RCVariables.end())
-		{
-		  // found: set values of found entry
-		  varptr = &it->second;
-		}
+	   if (it != RCVariables.end())
+	   {
+	      // found: set values of found entry
+	      varptr = &it->second;
+	   }
+	   else
+	   {
+	      // not found: create new entry in RCVariableMap and
+	      // set branch, parent, path, ...
+	      varptr = new RCVariable;
+	      varptr->setName(varname);
+	      varptr->setBranch("/etc/" + downcase(varname));
+	      varptr->setParent(downcase(varname));
+	      if (filename == "/etc/rc.config")
+	      {
+		 varptr->setPath(".rc.system." + varname);
+	      }
+	      //not ending with .rc.config
+	      else if (filename.find(".rc.config") == string::npos)
+	      {
+		 string base = after(filename,"/etc/rc.");
+		 varptr->setPath(".rc." + base + "." + varname);
+	      }
 	      else
-		{
-		  // not found: create new entry in RCVariableMap and
-		  // set branch, parent, path, ...
-		  varptr = new RCVariable;
-		  varptr->setName(varname);
-		  varptr->setBranch("/etc/" + downcase(varname));
-		  varptr->setParent(downcase(varname));
-		  if (filename == "/etc/rc.config")
-		    {
-		      varptr->setPath(".rc.system." + varname);
-		    }
-		  //not ending with .rc.config
-		  else if (filename.find(".rc.config") == string::npos)
-		    {
-		      string base = after(filename,"/etc/rc.");
-		      varptr->setPath(".rc." + base + "." + varname);
-		    }
-		  else
-		    {
-		      string base = after(filename,"/etc/rc.config.d/");
-		      base        = base.substr(0,base.find(".rc.config"));
-		      varptr->setPath(".rc." + base + "." + varname);
-		    }
+	      {
+		 string base = after(filename,"/etc/rc.config.d/");
+		 base        = base.substr(0,base.find(".rc.config"));
+		 varptr->setPath(".rc." + base + "." + varname);
+	      }
 
-		  // add descr to RCVariable and afterwards set descr
-		  // to "", filter comments
-		  substitute(descr,"\"", "\\\"");
-		  substitute(descr,"#", "");
-		  while (descr.find("  ") != string::npos)
-		    substitute(descr,"  ", " ");
-		  varptr->setDescr(descr);
-		  descr = "";
-		  RCVariables[varname] = *varptr;
-		}
-	      value = stringLine.substr(stringLine.find("=")+1);
-	      if (value.find("#") != string::npos)
-		value = value.substr(0,value.find("#"));
-	      if (value.find("\"") == string::npos)
-		value = "\"" + value + "\"";
-	      varptr->setValue(value);
-	      varptr = NULL;
-	    }
+	      // add descr to RCVariable and afterwards set descr
+	      // to "", filter comments
+	      substitute(descr,"\"", "\\\"");
+	      substitute(descr,"#", "");
+	      while (descr.find("  ") != string::npos)
+		 substitute(descr,"  ", " ");
+	      varptr->setDescr(descr);
+	      descr = "";
+	      RCVariables[varname] = *varptr;
+	   }
+	   value = stringLine.substr(stringLine.find("=")+1);
+	   if (value.find("#") != string::npos)
+	      value = value.substr(0,value.find("#"));
+	   if (value.find("\"") == string::npos)
+	      value = "\"" + value + "\"";
+	   varptr->setValue(value);
+	   varptr = NULL;
 	}
-      fin_filename.close();
-    }
+     }
+     fin_filename.close();
+  }
 
   ///////////////////////////////////////////////////////////////////
   //
@@ -547,162 +577,165 @@ int main()
 
   ifstream fin(meta_rc_config);
   if(!fin)
-    {
-      // must be written to y2log file
-      cout << "Unable to open file \'"
-	   << meta_rc_config
-	   << " \' for reading.\n";
-    }
+  {
+     // must be written to y2log file
+     cout << "Unable to open file \'"
+	  << meta_rc_config
+	  << " \' for reading.\n";
+  }
   while (fin.getline(line,INPUT_LINE_LENGTH))
-    {
-      // todo: better filter for comments
-      stringLine = (string)line;
+  {
+     // todo: better filter for comments
+     stringLine = (string)line;
 
-      if ( stringLine.find('#') != string::npos )
+     if ( stringLine.find('#') != string::npos )
 	stringLine = stringLine.substr(0,stringLine.find('#'));
 
-      if (stringLine.empty())
+     if (stringLine.empty())
 	continue;
 
       // get the variable name
-      varname = stringLine.substr(0,stringLine.find(' '));
+     varname = stringLine.substr(0,stringLine.find(' '));
 
-      // test if RCVariable "varname" exists in RCVariableMap
-      RCVariableMap::iterator it = RCVariables.find(varname);
+     // test if RCVariable "varname" exists in RCVariableMap
+     RCVariableMap::iterator it = RCVariables.find(varname);
 
-      if (it != RCVariables.end())
-	{
-	  // found: set values of found entry
-	  varptr = &it->second;
+     if (it != RCVariables.end())
+     {
+	// found: set values of found entry
+	varptr = &it->second;
 
 	  // get property and value
-	  rest     = after_any(stringLine," \t");
-	  property = rest.substr(0,rest.find(' '));
-	  value    = after_any(rest," \t");
+	rest     = after_any(stringLine," \t");
+	property = rest.substr(0,rest.find(' '));
+	value    = after_any(rest," \t");
 
-	  // set branch of the RCVariable
-	  if (property == "path")
-	    {
-	      varptr->setBranch(value + "/" + downcase(varname));
-
-	      string rest_dir = value;
-	      string dirname = "";
-	      string lowleveldir = value.substr(value.rfind('/')+1);
-
-	      while (rest_dir.find('/') != string::npos)
-		{
-		  dirname  = rest_dir.substr(rest_dir.find('/')+1);
-		  rest_dir = dirname;
-		  if (dirname.find('/')!=string::npos)
-		    dirname = dirname.substr(0,dirname.find('/'));
-
-		  // find dirname in RCDirectories
-		  if (dirname != "")
-		    {
-		      RCDirectoryMap::iterator dir_it = RCDirectories.find(dirname);
-
-		      if (dir_it == RCDirectories.end())
-			{
-			  // not found: create new entry in map
-			  // RCDirectories
-			  dirptr = new RCDirectory;
-			  dirptr->setName(dirname);
-
-			  if (value.substr(0,value.find((string)"/" + dirname)).empty())
-			    {
-			      dirptr->setBranch("/");
-			    }
-			  else
-			    {
-			      dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
-			      *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
-			      //if (*dirPath != "")
-			      //DirectorySet.insert(*dirPath);
-			    }
-			  RCDirectories[dirname] = *dirptr;
-			  dirptr = NULL;
-			}
-		      else
-			{
-			  // found: set values of found entry
-			  dirptr = &dir_it->second;
-			  dirptr = NULL;
-			}
-		    }
-		}
-	      RCDirectoryMap::iterator dir_it = RCDirectories.find(lowleveldir);
-
-	      if (dir_it != RCDirectories.end())
-		{
-		  // found: add variable name to current lowlevel
-		  // directory
-		  dirptr = &dir_it->second;
-		  dirptr->addVariable(varname);
-		  dirptr = NULL;
-		}
-	    }
-	  // set datatype of the RCVariable
-	  else if (property == "type")
-	    {
-	      // enum
-	      if (value.find("enum") == 0)
-		{
-		  varptr->setDatatype("enum");
-		  string options = after(value,"enum ");
-		  substitute(options,",", "\",\n      \"");
-		  varptr->setOptions(options + "\n      ");
-		}
-	      // boolean
-	      else if (value.find("boolean") == 0)
-		{
-		  varptr->setDatatype("boolean");
-		  varptr->setOptions("\"yes\",\n      \"no\"\n      ");
-		}
-	      // default
-	      else
-		varptr->setDatatype(value);
-	    }
-	  // set the typedef of the RCVariable
-	  // ("strict" or "not_strict")
-	  else if (property == "typedef")
-	    varptr->setTypedef(value);
-	}
-      else
+	// set branch of the RCVariable
+	if (property == "path")
 	{
-	  // variable name not found in map RCVariables: so it
-	  // could be a directory descr.
-	  rest     = after_any(stringLine," \t");
-	  property = rest.substr(0,rest.find(' '));
-	  value    = after_any(rest," \t");
+	   varptr->setBranch(value + "/" + downcase(varname));
 
-	  // save all(!) descriptions of directories in a StringMap
-	  if (property == "descr")
-	    DirectoryDescriptions[varname] = value;
+	   string rest_dir = value;
+	   string dirname = "";
+	   string lowleveldir = value.substr(value.rfind('/')+1);
+
+	   while (rest_dir.find('/') != string::npos)
+	   {
+	      dirname  = rest_dir.substr(rest_dir.find('/')+1);
+	      rest_dir = dirname;
+	      if (dirname.find('/')!=string::npos)
+		 dirname = dirname.substr(0,dirname.find('/'));
+
+	      // find dirname in RCDirectories
+	      if (dirname != "")
+	      {
+		 RCDirectoryMap::iterator dir_it = RCDirectories.find(dirname);
+
+		 if (dir_it == RCDirectories.end())
+		 {
+		    // not found: create new entry in map
+		    // RCDirectories
+		    dirptr = new RCDirectory;
+		    dirptr->setName(dirname);
+
+		    if (value.substr(0,value.find((string)"/" + dirname)).empty())
+		    {
+		       dirptr->setBranch("/");
+		    }
+		    else
+		    {
+		       dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
+		       *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
+		       //if (*dirPath != "")
+		       //DirectorySet.insert(*dirPath);
+		    }
+		    RCDirectories[dirname] = *dirptr;
+		    dirptr = NULL;
+		 }
+		 else
+		 {
+		    // found: set values of found entry
+		    dirptr = &dir_it->second;
+		    dirptr = NULL;
+		 }
+	      }
+	   }
+	   RCDirectoryMap::iterator dir_it = RCDirectories.find(lowleveldir);
+
+	   if (dir_it != RCDirectories.end())
+	   {
+	      // found: add variable name to current lowlevel
+	      // directory
+	      dirptr = &dir_it->second;
+	      dirptr->addVariable(varname);
+	      dirptr = NULL;
+	   }
 	}
-    }
+	// set datatype of the RCVariable
+	else if (property == "type")
+	{
+	   // enum
+	   if (value.find("enum") == 0)
+	   {
+	      varptr->setDatatype("enum");
+	      string options = after(value,"enum ");
+	      substitute(options,",", "\",\n      \"");
+	      varptr->setOptions(options + "\n      ");
+	   }
+	   // boolean
+	   else if (value.find("boolean") == 0)
+	   {
+	      varptr->setDatatype("boolean");
+	      varptr->setOptions("\"yes\",\n      \"no\"\n      ");
+	   }
+	   // default
+	   else
+	      varptr->setDatatype(value);
+	}
+	// set the typedef of the RCVariable
+	// ("strict" or "not_strict")
+	else if (property == "typedef")
+	   varptr->setTypedef(value);
+     }
+     else
+     {
+	// variable name not found in map RCVariables: so it
+	// could be a directory descr.
+	rest     = after_any(stringLine," \t");
+	property = rest.substr(0,rest.find(' '));
+	value    = after_any(rest," \t");
+
+	// save all(!) descriptions of directories in a StringMap
+	if (property == "descr")
+	   DirectoryDescriptions[varname] = value;
+     }
+  }
   // close file input stream
   fin.close();
 
   // Iterate all variables if their branch is "/etc/...", then
   // this variable has to be put into the variable list of the
   // "etc" RCDirectory.
-  for(RCVariableMap::iterator variable_it = RCVariables.begin();
-      variable_it != RCVariables.end();
-      ++variable_it)
-    {
-      if (variable_it->second.getBranch().find("/etc/")!=string::npos)
+  if ( !firewall_mode )
+  {
+     for(RCVariableMap::iterator variable_it = RCVariables.begin();
+	 variable_it != RCVariables.end();
+	 ++variable_it)
+     {
+	if (variable_it->second.getBranch().find("/etc/")!=string::npos)
 	{
-	  RCDirectoryMap::iterator dir_it = RCDirectories.find("etc");
-	  if (dir_it == RCDirectories.end())
-	    continue;
+	   RCDirectoryMap::iterator dir_it = RCDirectories.find("etc");
+	   if (dir_it == RCDirectories.end())
+	      continue;
 
-	  // found: add variable name to current lowlevel directory
-	  dirptr = &dir_it->second;
-	  dirptr->addVariable(variable_it->first);
-	  dirptr = NULL;
+	   // found: add variable name to current lowlevel directory
+	   dirptr = &dir_it->second;
+	   dirptr->addVariable(variable_it->first);
+	   dirptr = NULL;
 	}
-    }
-
+     }
+  }
+  
   ///////////////////////////////////////////////////////////////////
   //
   // Generate branch, parent and entrynb of the RCVariables if there
@@ -834,16 +867,19 @@ int main()
 
   // print all elements of NewRCDirectories to fout
   RCDirectoryMap::const_iterator ci_newdirectories = NewRCDirectories.begin();
-  fout_rc_config_keys << "  \""
-		      << ci_newdirectories->first
-		      << ci_newdirectories->second;
-  ++ci_newdirectories;
-
-  for (; ci_newdirectories != NewRCDirectories.end(); ++ci_newdirectories )
-    fout_rc_config_keys << ",\n  \""
-			<< ci_newdirectories->first
-			<< ci_newdirectories->second;
-
+  if( ci_newdirectories !=  NewRCDirectories.end())
+  {
+     fout_rc_config_keys << "  \""
+			 << ci_newdirectories->first
+			 << ci_newdirectories->second;
+     ++ci_newdirectories;
+  
+     for (; ci_newdirectories != NewRCDirectories.end(); ++ci_newdirectories )
+	fout_rc_config_keys << ",\n  \""
+			    << ci_newdirectories->first
+			    << ci_newdirectories->second;
+  }
+  
   fout_rc_config_keys << "\n]" << endl;
 
   // close fout
