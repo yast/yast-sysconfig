@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Oct 27 09:07:43 CEST 2004 - lslezak@suse.cz
+
+- adapted to new Mode:: API
+- version 2.11.1
+
+-------------------------------------------------------------------
 Mon Oct 18 16:22:49 CEST 2004 - lslezak@suse.cz
 
 - removed help text from search dialog (#46605)

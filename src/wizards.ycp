@@ -54,7 +54,7 @@ include "sysconfig/dialogs.ycp";
     Wizard::SetDesktopIcon(Sysconfig::powertweak_mode ? "powertweak" : "sysconfig");
 
     // initialization
-    if (Mode::config && !Sysconfig::Modified() && (Sysconfig::tree_content == nil || size(Sysconfig::tree_content) == 0))
+    if (Mode::config() && !Sysconfig::Modified() && (Sysconfig::tree_content == nil || size(Sysconfig::tree_content) == 0))
     {
 	Sysconfig::Read();
     }
