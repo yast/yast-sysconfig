@@ -59,6 +59,13 @@ map actions = $[];
 
 global boolean ConfirmActions = false;
 
+
+/**
+ * Write only, used during autoinstallation.
+ * Don't run services and SuSEconfig, it's all done at one place.
+ */
+global boolean write_only = false;
+
 /**
  * Data was modified?
  * @return true if modified
@@ -1146,7 +1153,8 @@ global define boolean Write() ``{
     }
 
     // reenable progress bar
-    Progress::on();
+	if (!write_only)
+	     Progress::on();
 
     foreach (string vid, string new_val, modified_variables, ``{
 	// get activation map for variable

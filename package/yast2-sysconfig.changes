@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 12 20:28:56 CEST 2003 - nashif@suse.de
+
+- Dont turn Progress on in autoinst mode
+
+-------------------------------------------------------------------
 Fri Sep 12 07:09:02 CEST 2003 - nashif@suse.de
 
 - #30291: return list of required packages for autoinstallation
