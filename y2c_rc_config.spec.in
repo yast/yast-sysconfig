@@ -44,7 +44,11 @@ make install
 %files
 
 %dir @YAST2DIR@/clients
+%dir @YAST2DIR@/include
 %dir @YAST2DIR@/menuentries
 @YAST2DIR@/menuentries/menuentry_rc_config.ycp
 @YAST2DIR@/clients/rc_config_step1.ycp
 @YAST2DIR@/clients/rc_config.ycp
+@YAST2DIR@/meta_rc.config
+@YAST2DIR@/include/rc_dialogs.ycp
+@YAST2DIR@/include/rc_process_db.ycp   

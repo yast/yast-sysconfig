@@ -464,10 +464,8 @@
     UI(``{
     define SearchDlg()
     ``{
-	  // helptext for popup create partition line 1 of 6
-	  string helptextCR = _("Here you can enter one token, which you are searching for.
- You can enter a part of key like \"MAIL_\"
- or a part of word which can be found in the description of a key like \"network\""); 
+	  // helptext for popup search
+	  string helptextCR = _("Type the word related to the information you are looking for"); 
 
 	  OpenDialog( `opt(`decorated ),
 		      `VBox(`HSpacing(60),
@@ -528,6 +526,47 @@
 	   {
 	       return( answer );
 	   }
+    }; });
+
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   // Search dialog                                                                                 //
+   //-----------------------------------------------------------------------------------------------//
+   //-----------------------------------------------------------------------------------------------//
+
+    
+    UI(``{
+    define HelpDlg()
+    ``{
+	  // helptext for popup create partition line
+	  string helptextCR = 
+		_("<p>With this Editor, you can edit the variables in /etc/rc.config,
+the central configuration file of your SuSE Linux<\p>") +
+		_("<p>Please notice, that many of this variables are
+set by specialized YaST2 configuration modules like the \"Network configuration\"<\p>"); 
+
+	      OpenDialog( `opt(`decorated ),
+			  `HBox( `VSpacing(16),
+				 `VBox(
+				       `HSpacing(60),
+				       `Heading(_("Help")),
+				       `VSpacing(0.5),
+				       `RichText( helptextCR ),
+				       `VSpacing(1.5),
+				// popup create partition:
+				       `PushButton(`id(`ok), `opt(`default),    _("&OK"))
+				       )
+				 )
+			  );
+	    
+	      SetFocus(`id(`ok));
+
+	      UserInput();
+	      //
+	      CloseDialog();
+
+	     return;
+    
     }; });
 
 

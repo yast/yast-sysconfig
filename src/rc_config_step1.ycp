@@ -244,7 +244,7 @@
      // Initial Settings:
      term curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
 the central configuration file of your SuSE Linux<\p>")) + UI(_("<p>Please notice, that many of this variables are
-set by specialized configuration modules like the \"Network configuration\"<\p>")));
+set by specialized YaST2 configuration modules like the \"Network configuration\"<\p>")));
      
      UI( `ChangeWidget(  `id(`next), `Label,  _("&Save") ) );
      UI( `ChangeWidget(  `id(`key),  `Tree,  tree_data));
@@ -264,7 +264,14 @@ set by specialized configuration modules like the \"Network configuration\"<\p>"
      {
         ret= UI(`UserInput());
 
-	if ( ret == `search )
+	if ( ret == `help )
+	{
+            //////////////////////////////////////////////////////////////////////////////////
+	    // User has pushed the HELP
+            //////////////////////////////////////////////////////////////////////////////////
+	    UI(`HelpDlg());
+	}
+	else if ( ret == `search )
 	{
             //////////////////////////////////////////////////////////////////////////////////
 	    // User has pushed the Search
