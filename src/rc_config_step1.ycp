@@ -87,8 +87,8 @@
 */
 
 {
-    Include (`rc_process_db() );
-    Include (`rc_dialogs()    );
+    Include "rc_process_db.ycp";
+    Include "rc_dialogs.ycp";
 
     
     ////////////////////////////////////////////////////////////
