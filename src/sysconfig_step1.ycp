@@ -506,7 +506,7 @@ configuration modules like the \"Network configuration\".</p>
 		    else
 		    {
 			//UI(`WaitSuSEconfig());
-		        // TODO FIXME: uncomment this line CallFunction( `inst_suseconfig( false, false ) );
+		        // TODO FIXME: uncomment this line WFM::CallFunction( `inst_suseconfig( false, false ) );
 			//ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
 			//UI(`CloseDialog());
 		    }

@@ -15,11 +15,11 @@
   textdomain "sysconfig";
   global boolean firewall_mode   = false;
 
-  integer arg_n = size(Args()) - 1;
+  integer arg_n = size(WFM::Args()) - 1;
 
   while (arg_n >= 0)
   {
-      if (Args(arg_n) == ".firewall")
+      if (WFM::Args(arg_n) == ".firewall")
       {
 	  firewall_mode = true;
       }
@@ -175,11 +175,11 @@
   UI(`ChangeWidget(`id(`package),   `Label, _("Reading /etc/rc.config and additional describing data ...")));
   UI(`ChangeWidget(`id(`package),   `Value, 10));
 
-  arg_n = size(Args()) - 1;
+  arg_n = size(WFM::Args()) - 1;
   boolean test_mode = false;
 
   while (arg_n >= 0) {
-      if (Args(arg_n) == .test) {
+      if (WFM::Args(arg_n) == .test) {
 	  test_mode = true;
       }
       arg_n = arg_n - 1;
@@ -193,7 +193,7 @@
    */
 
   list dialog = [
-                ``(CallFunction (`sysconfig_step1() ))
+                ``(WFM::CallFunction (`sysconfig_step1() ))
   ];
 
   integer id = 0;
