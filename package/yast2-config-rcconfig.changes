@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 24 14:14:34 CEST 2001 - mike@suse.de
+
+- fixed: broken logfile of scripts
+  fixed: deleted stop of pers. firewall 
+
+-------------------------------------------------------------------
 Thu Sep 20 14:47:23 CEST 2001 - mike@suse.de
 
 - moved menuentry to group security

@@ -465,10 +465,9 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 		    if ( firewall_mode )
 		    {
 			UI(`WaitRestartFirewall());
-			SCR(`Execute(.target.bash, "echo /sbin/rcSuSEfirewall2 restart2 >>/var/log/firewall.log 2>&1"));
+			SCR(`Execute(.target.bash, "echo /sbin/rcSuSEfirewall2 restart2 >/var/log/firewall.log 2>&1"));
 			SCR(`Execute(.target.bash, "/sbin/rcSuSEfirewall2 restart2 >>/var/log/firewall.log 2>&1"));
-			SCR(`Execute(.target.bash, "echo /usr/sbin/rcpersonal-firewall start >/var/log/firewall.log 2>&1"));
-			SCR(`Execute(.target.bash, "/usr/sbin/rcpersonal-firewall stop >/var/log/firewall_stop.log 2>&1"));
+			SCR(`Execute(.target.bash, "echo /usr/sbin/rcpersonal-firewall start >>/var/log/firewall.log 2>&1"));
 			SCR(`Execute(.target.bash, "/usr/sbin/rcpersonal-firewall start >>/var/log/firewall.log 2>&1"));
 			UI(`CloseDialog());
 		    }
