@@ -31,7 +31,7 @@
 
 using namespace std;
 
-#include <String.h>
+#include <string>
 #include <list.h>
 
 /*!
@@ -82,21 +82,21 @@ class TreeNode
 
     \return The name of the curren TreeNode.
   */
-  String getName() const { return *itsName; }
+  string getName() const { return *itsName; }
 
   /*! 
     Get the StringList of the current TreeNode.
 
     \return The StringList of the current TreeNode.
   */
-  list<String> getStringList() const { return *itsStringList; }
+  list<string> getStringList() const { return *itsStringList; }
 
   /*! 
     Get a pointer to the StringList of the current TreeNode.
 
     \return A pointer to the StringList of the current TreeNode.
   */
-  list<String>* getStringListPtr() const { return itsStringList; }
+  list<string>* getStringListPtr() const { return itsStringList; }
 
   ////////////////////////////////////////////////////////////////////////////////
   //
@@ -107,16 +107,16 @@ class TreeNode
   /*!
     Set the name of the TreeNode.
 
-    \param String name.
+    \param string name.
    */
-  void setName( String name ) { *itsName = name; }
+  void setName( string name ) { *itsName = name; }
 
   /*!
     Set the StringList.
 
-    \param list<String> stringlist.
+    \param list<string> stringlist.
    */
-  void setStringList( list<String> stringlist ) { *itsStringList = stringlist; }
+  void setStringList( list<string> stringlist ) { *itsStringList = stringlist; }
 
   ////////////////////////////////////////////////////////////////////////////////
   //
@@ -124,7 +124,7 @@ class TreeNode
   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  //  void addString(String s);
+  //  void addString(string s);
 
   /*!
     Overloading function of the output stream operator <code><<</code>.
@@ -148,10 +148,10 @@ class TreeNode
   ////////////////////////////////////////////////////////////////////////////////
 
   //! Name of the TreeNode.
-  String *itsName;
+  string *itsName;
 
   //! The StringList of the current TreeNode.
-  list<String> *itsStringList;
+  list<string> *itsStringList;
 };
 
 #endif

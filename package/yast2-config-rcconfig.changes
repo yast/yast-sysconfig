@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul 25 15:26:46 CEST 2001 - lnussel@suse.de
+
+- ported to libstdc++, libg++ no longer necessary
+
+-------------------------------------------------------------------
 Tue May  8 14:53:45 CEST 2001 - mike@suse.de
 
 - added varaiables for 7.2, added Documentation

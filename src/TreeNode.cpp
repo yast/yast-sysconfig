@@ -33,14 +33,14 @@
 
 TreeNode::TreeNode()
 {
-  itsName        = new String("");
-  itsStringList  = new list<String>;
+  itsName        = new string("");
+  itsStringList  = new list<string>;
 }
 
 TreeNode::TreeNode(const TreeNode & rhs)
 {
-  itsName        = new String;
-  itsStringList  = new list<String>;
+  itsName        = new string;
+  itsStringList  = new list<string>;
 
   *itsName       = rhs.getName();
   *itsStringList = rhs.getStringList();

@@ -29,7 +29,7 @@
 #ifndef __RCVARIABLE_H
 #define __RCVARIABLE_H
 
-#include <String.h>
+#include <string>
 
 /*!
   \class RCVariable
@@ -80,7 +80,7 @@ class RCVariable
 
     \return The name of the curren RCVariable.
   */
-  String getName() const { return *itsName; }
+  string getName() const { return *itsName; }
 
   /*!
     Get the branch in which the RCVariable is saved in the
@@ -89,7 +89,7 @@ class RCVariable
 
     \return The branch.
   */
-  String getBranch() const { return *itsBranch; }
+  string getBranch() const { return *itsBranch; }
 
   /*!
     Get the datatype of the RCVariable: i.e.
@@ -99,7 +99,7 @@ class RCVariable
 
     \return The type of dialog to display in the editor.
   */
-  String getDatatype() const { return *itsDatatype; }
+  string getDatatype() const { return *itsDatatype; }
 
   /*!
     Get the description of the RCVariable saved in the
@@ -110,7 +110,7 @@ class RCVariable
 
     /return The description of the curren variable.
   */
-  String getDescr() const { return *itsDescr; }
+  string getDescr() const { return *itsDescr; }
 
   /*!
     Get the number of other RCVariables saved in the same branch
@@ -128,7 +128,7 @@ class RCVariable
 
     \return The optional values the current variable can take.
   */
-  String getOptions() const { return *itsOptions; }
+  string getOptions() const { return *itsOptions; }
 
   /*!
     Get the name of the parent directory.<br>
@@ -136,7 +136,7 @@ class RCVariable
 
     \return The parent directory.
    */
-  String getParent() const { return *itsParent; }
+  string getParent() const { return *itsParent; }
 
   /*!
     Get the path of the configuration file the current
@@ -145,7 +145,7 @@ class RCVariable
 
     \return The path.
    */
-  String getPath() const { return *itsPath; }
+  string getPath() const { return *itsPath; }
 
   /*!
     Get the type of the RCVariable. Commonly this ist `options.<br>
@@ -153,7 +153,7 @@ class RCVariable
 
     \return The type of the variable.
    */
-  String getType() const { return *itsType; }
+  string getType() const { return *itsType; }
 
   /*!
     Get the typedef of the RCVariable. Only <code>strict</code>
@@ -163,7 +163,7 @@ class RCVariable
 
     \return The type definition of the current variable.
    */
-  String getTypedef() const { return *itsTypedef; }
+  string getTypedef() const { return *itsTypedef; }
 
   /*!
     Get the currently saved value of the RCVariable defined in one of the
@@ -172,7 +172,7 @@ class RCVariable
 
     \return The actually set value of the variable.
    */
-  String getValue() const { return *itsValue; }
+  string getValue() const { return *itsValue; }
 
   ////////////////////////////////////////////////////////////////////////////////
   // set methods
@@ -181,30 +181,30 @@ class RCVariable
   /*!
     Set the name of the RCVariable.
 
-    \param String name.
+    \param string name.
    */
-  void setName( String name ) { *itsName = name; }
+  void setName( string name ) { *itsName = name; }
 
   /*!
     Set the branch of the RCVariable.
 
-    \param String branch.
+    \param string branch.
    */
-  void setBranch( String branch ) { *itsBranch = branch; }
+  void setBranch( string branch ) { *itsBranch = branch; }
 
   /*!
     Set the datatype of the RCVariable.
 
-    \param String datatype.
+    \param string datatype.
    */
-  void setDatatype( String datatype ) { *itsDatatype = datatype; }
+  void setDatatype( string datatype ) { *itsDatatype = datatype; }
 
   /*!
     Set the description of the RCVariable.
 
-    \param String descr.
+    \param string descr.
    */
-  void setDescr( String descr ) { *itsDescr = descr; }
+  void setDescr( string descr ) { *itsDescr = descr; }
 
   /*!
     Set the entrynb of the RCVariable.
@@ -216,45 +216,45 @@ class RCVariable
   /*!
     Set the options of the RCVariable.
    
-    \param String options.
+    \param string options.
   */
-  void setOptions( String options ) { *itsOptions = options; }
+  void setOptions( string options ) { *itsOptions = options; }
 
   /*!
     Set the parent directory of the RCVariable.
   
-    \param String parent.
+    \param string parent.
   */
-  void setParent( String parent ) { *itsParent = parent; }
+  void setParent( string parent ) { *itsParent = parent; }
 
   /*!
     Set the path of the RCVariable.
   
-    \param String path.
+    \param string path.
   */
-  void setPath( String path ) { *itsPath = path; }
+  void setPath( string path ) { *itsPath = path; }
 
   /*!
     Set the type of the RCVariable.
   
-    \param String typ.
+    \param string typ.
   */
-  void setType( String typ ) { *itsType = typ; }
+  void setType( string typ ) { *itsType = typ; }
 
   /*!
     Set the type definition of the RCVariable.
 
-    \param String typed.
+    \param string typed.
    */
-  void setTypedef( String typed ) { *itsTypedef = typed; }
+  void setTypedef( string typed ) { *itsTypedef = typed; }
 
   /*!
     Set the value of the RCVariable. (Only in the map, not in the
     configuration file!)
 
-    \param String value.
+    \param string value.
    */
-  void setValue( String value ) { *itsValue = value; }
+  void setValue( string value ) { *itsValue = value; }
 
   ////////////////////////////////////////////////////////////////////////////////
   // other methods
@@ -305,37 +305,37 @@ class RCVariable
   ////////////////////////////////////////////////////////////////////////////////
 
   //! Name of the RCVariable.
-  String *itsName;
+  string *itsName;
 
   //! Branch of the RCVariable.
-  String *itsBranch;
+  string *itsBranch;
 
   //! Datatype of the RCVariable.
-  String *itsDatatype;
+  string *itsDatatype;
 
   //! Description of the RCVariable.
-  String *itsDescr;
+  string *itsDescr;
 
   //! Entrynb of the RCVariable.
   int    *itsEntrynb;
 
   //! Options of the RCVariable.
-  String *itsOptions;
+  string *itsOptions;
 
   //! Parent directory of the RCVariable.
-  String *itsParent;
+  string *itsParent;
   
   //! Path of the RCVariable.
-  String *itsPath;
+  string *itsPath;
   
   //! Type of the RCVariable.
-  String *itsType;
+  string *itsType;
   
   //! Typedef of the RCVariable.
-  String *itsTypedef;
+  string *itsTypedef;
   
   //! Value of the RCVariable.
-  String *itsValue;
+  string *itsValue;
 };
 
 #endif

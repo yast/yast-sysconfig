@@ -29,14 +29,14 @@
 #ifndef __RCDIRECTORY_H
 #define __RCDIRECTORY_H
 
-#include <String.h>
+#include <string>
 #include <vector.h>
 #include <iostream.h>
 
 using namespace std;
 
 //typedef vector<RCVariable*> RCVarVector;
-typedef vector<String> StringVector;
+typedef vector<string> StringVector;
 
 /*!
   \class RCDirectory
@@ -85,9 +85,9 @@ class RCDirectory
     Get the Name of the current directory.<br>
     e.g.: <code>Usb</code> 
 
-    \return The name of the current RCDirectory as a String.
+    \return The name of the current RCDirectory as a string.
   */
-  String getName() const { return *itsName; }
+  string getName() const { return *itsName; }
 
   /*!
     Get the branch of the directory.<br>
@@ -95,7 +95,7 @@ class RCDirectory
 
     \return The branch of the current RCDirectory.
   */
-  String getBranch() const { return *itsBranch; }
+  string getBranch() const { return *itsBranch; }
 
   /*!
     Get the description of the directory saved in the EDDB file
@@ -104,7 +104,7 @@ class RCDirectory
 
     \return The description of the current directory.
   */
-  String getDescr() const { return *itsDescr; }
+  string getDescr() const { return *itsDescr; }
 
   /*!
     Get the dialogtype of the directory.<br>
@@ -112,7 +112,7 @@ class RCDirectory
 
     \return The type of dialog to display in the editor.
   */
-  String getDialogtype() const { return *itsDialogtype; }
+  string getDialogtype() const { return *itsDialogtype; }
  
   /*!
     Get the variable vector of the current directory.
@@ -135,30 +135,30 @@ class RCDirectory
   /*!
     Set the name of the RCDirectory.
     
-    \param String name.
+    \param string name.
    */
-  void setName( String name ) { *itsName = name; }
+  void setName( string name ) { *itsName = name; }
 
   /*!
     Set the branch of the directory.
 
-    \param String branch.
+    \param string branch.
    */
-  void setBranch( String branch ) { *itsBranch = branch; }
+  void setBranch( string branch ) { *itsBranch = branch; }
 
   /*!
     Set the description of the RCDirectory.
 
-    \param String descr.
+    \param string descr.
    */
-  void setDescr( String descr ) { *itsDescr = descr; }
+  void setDescr( string descr ) { *itsDescr = descr; }
 
   /*!
     Set the dialogtype of the directory.
 
-    \param String dialogtype.
+    \param string dialogtype.
    */
-  void setDialogtype( String dialogtype ) { *itsDialogtype = dialogtype; }
+  void setDialogtype( string dialogtype ) { *itsDialogtype = dialogtype; }
 
   /*!
     Set the variable vector.
@@ -174,9 +174,9 @@ class RCDirectory
   /*!
     Add a name of a RCVariable to the VariableVector of the current RCDirectory.
 
-    \param String varname.
+    \param string varname.
    */
-  void addVariable( String varname )
+  void addVariable( string varname )
     {
       itsVariableVector->push_back(varname);
       increaseNumberOfVariables();
@@ -223,7 +223,7 @@ class RCDirectory
    */
   friend ostream& operator<<(ostream& s, const RCDirectory& x)
     {
-      String descr = "";
+      string descr = "";
       if (x.getDescr() != "")
 	{
 	  descr = x.getDescr();
@@ -244,13 +244,13 @@ class RCDirectory
   ////////////////////////////////////////////////////////////////////////////////
 
   //! Name of the RCDirectory.
-  String *itsName;
+  string *itsName;
 
   //! File path the current directory is in.
-  String *itsBranch;
+  string *itsBranch;
 
   //! Description of the current directory used by the Editor.
-  String *itsDescr;
+  string *itsDescr;
 
   /*!
     Dialogtype the Editor has to use for displaying the current directory.
@@ -258,7 +258,7 @@ class RCDirectory
     Example: <code>d3</code> means that there are three RCVariables to be
     displayed in the current directory.
   */
-  String *itsDialogtype;
+  string *itsDialogtype;
 
   /*!
     This Vector holds the names of all RCVariables that are located in 
@@ -291,11 +291,11 @@ class RCDirectory
     the current directory.
 
     \return The vector in which all variables are saved that are located as a
-    String.
+    string.
    */
-  String getDirectoryVectors() const
+  string getDirectoryVectors() const
     {
-      String ret = "\n        ";
+      string ret = "\n        ";
 
       for (StringVector::const_iterator ci = itsVariableVector->begin();
 	   ci != itsVariableVector->end();

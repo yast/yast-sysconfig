@@ -33,20 +33,20 @@
 
 RCDirectory::RCDirectory()
 {
-  itsName              = new String("");
-  itsBranch            = new String("/");
-  itsDescr             = new String("");
-  itsDialogtype        = new String("dir");
+  itsName              = new string("");
+  itsBranch            = new string("/");
+  itsDescr             = new string("");
+  itsDialogtype        = new string("dir");
   itsVariableVector    = new StringVector();
   itsNumberOfVariables = new int(0);
 }
 
 RCDirectory::RCDirectory(const RCDirectory & rhs)
 {
-  itsName              = new String;
-  itsBranch            = new String;
-  itsDescr             = new String;
-  itsDialogtype        = new String;
+  itsName              = new string;
+  itsBranch            = new string;
+  itsDescr             = new string;
+  itsDialogtype        = new string;
   itsVariableVector    = new StringVector;
   itsNumberOfVariables = new int;
 

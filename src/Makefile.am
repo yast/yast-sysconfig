@@ -33,7 +33,7 @@ rc_create_data_SOURCES = \
 	main.cpp	 
 
 
-rc_create_data_LDADD   = -lg++
+#rc_create_data_LDADD   = -lg++
 # $(LIBSOCKET)
 
 

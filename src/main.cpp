@@ -39,11 +39,12 @@
 */
 
 #include <iostream.h>
-#include <String.h>
+#include <string>
 #include <map.h>
 #include <set.h>
 #include <list.h>
 #include <fstream.h>
+#include <algorithm>
 #include <glob.h>
 #include <unistd.h>
 #include "RCVariable.h"
@@ -62,37 +63,37 @@ using namespace std;
   RCVariableMap is a container for all RCVariables.
   The key is the name of the variable.
  */
-typedef map<String, RCVariable> RCVariableMap;
+typedef map<string, RCVariable> RCVariableMap;
 
 /*!
   RCDirectoryMap is a container for all RCDirectories.
   The key is the name of the directory.
  */
-typedef map<String, RCDirectory> RCDirectoryMap;
+typedef map<string, RCDirectory> RCDirectoryMap;
 
 /*!
   StringMap is a container for the Descriptions of the RCDirectories.
   The key is the name of the variable. This container is neccesary
   because the directories are not created when the EDDB is read.
  */
-typedef map<String, String> StringMap;
+typedef map<string, string> StringMap;
 
 /*!
   StringSet is a container for Strings. It is used as container for
   all directory paths.
  */
-typedef set<String> StringSet;
+typedef set<string> StringSet;
 
 /*!
   StringList is a container for Strings. It is used as container for
   the directory tree in shape of a list.
 */
-typedef list<String> StringList;
+typedef list<string> StringList;
 
 /*!
   Tree is a container for the directory tree.
 */
-typedef map<String, TreeNode> Tree;
+typedef map<string, TreeNode> Tree;
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -128,6 +129,191 @@ void showList(const list<T>& v);
  */
 template<class T>
 void writeListToFile(const list<T>* rootPtr, const char* filename);
+
+
+//helperfunctions which were present in libg++ but not in libstdc++
+
+// removes leading and trailing whitespace
+string trim(const string& str)
+{
+  string s;
+  string::size_type idx;
+  if (str.empty()) return str;
+
+  if ((idx=str.find_first_not_of(" \t")) != string::npos)
+    s=str.substr(idx);
+  else
+    s="";
+
+  if(s.empty()) return s;
+
+  if((idx=s.find_last_not_of(" \t"))!=string::npos)
+    s=s.substr(0,idx+1);
+  else
+    s="";
+
+  return s;
+}
+
+//return lowercase version of str
+string downcase(const string& str)
+{
+  string s=str;
+  transform (s.begin(), s.end(), s.begin(), tolower);
+  return s;
+}
+
+//replace every a by b in str
+void substitute(string& str, const string& a, const string& b)
+{
+  string::size_type idx=0;
+  idx = str.find(a);
+  while( idx != string::npos)
+  {
+    str.replace(idx,a.length(),b);
+    idx=str.find(a,idx+b.length());
+  }
+}
+
+//return string after pattern
+string after(const string& str, const string& pattern)
+{
+  string s="";
+  string::size_type idx;
+  
+  if ((idx=str.find(pattern))!=string::npos)
+  {
+    s=str.substr(idx+pattern.length());
+  }
+
+  return s;
+}
+
+//return string after any character in pattern
+string after_any(const string& str, const string& pattern)
+{
+  string s="";
+  string::size_type idx=0;
+  
+  //search for the fist occurence of pattern
+  if ((idx=str.find_first_of(pattern))!=string::npos)
+  {
+    //search the end of this zone
+    if ((idx=str.find_first_not_of(pattern,idx))!=string::npos)
+    {
+      s=str.substr(idx);
+    }
+  }
+
+  return s;
+}
+/*
+//split str in tokens delimited by characters  in sep, store up to max_tok in res
+//treats multiple delimiters as one
+int split (const string& str, string res[], int max_tok, const string& sep)
+{
+  string::size_type idx,idx2,start=0;
+  int tok_nr=0;
+  
+  string::size_type len=str.length();
+
+  while(tok_nr<max_tok-1 && start != string::npos && start<len)
+  {
+    idx = str.find_first_not_of(sep,start);
+  
+    //consists only of delimiters
+    if(idx==string::npos) return tok_nr;
+
+    //find end of token
+    idx2=str.find_first_of(sep,idx);
+
+    //end of string reached?
+    if(idx2 != string::npos)
+    {
+      res[tok_nr]=str.substr(idx,idx2-idx);
+      start=idx2+1;
+    }
+    else
+    {
+      res[tok_nr]=str.substr(idx);
+      start=string::npos;
+    }
+    tok_nr++;
+  }
+
+  //abort because of max_tok reached?
+  //if yes assign rest
+  if(!(tok_nr<max_tok-1) && start!=string::npos)
+  {
+    res[tok_nr]=str.substr(start);
+    tok_nr++;
+  }
+
+  return tok_nr;
+}
+*/
+
+int split (const string& str, string res[], int max_tok, const string& sep)
+{
+	string::size_type idx=0,idx2;
+	int tok_nr=0;
+	
+	string::size_type len=str.length();
+
+	while(tok_nr<max_tok-1 && idx != string::npos && idx<len)
+	{
+		//find end of token
+		idx2=str.find_first_of(sep,idx);
+
+		//end of string reached?
+		if(idx2 != string::npos)
+		{
+			res[tok_nr]=str.substr(idx,idx2-idx);
+			idx=idx2+1;
+		}
+		else
+		{
+			res[tok_nr]=str.substr(idx);
+			idx=string::npos;
+		}
+		tok_nr++;
+	}
+
+	//abort because of max_tok reached?
+	//if yes assign rest
+	if(!(tok_nr<max_tok-1) && idx!=string::npos)
+	{
+		res[tok_nr]=str.substr(idx);
+		tok_nr++;
+	}
+
+	return tok_nr;
+}
+
+
+/*
+some replacement rules g++ -> stl:
+
+- descr.gsub("  ", " ");
++ substitute(descr,"  ", " ");
+:s/\([a-z]*\)\.gsub(/substitute(\1,/
+
+only for single characters !!!!:
+- stringLine.after('#');
++ stringLine.substr(stringLine.find('#')+1);
+:s/\([a-z]*\)\.after(\(.*\))/\1.substr(\1.find(\2)+1)/
+else use 
+  after(stringLine,"pattern");
+
+- value.before('#');
++ value.substr(0,value.find('#'));
+:s\([a-z]*\)\.before(\(.*\))/\1.substr(0,\1.find(\2))/
+
+index -> find, rfind
+contains -> find
+.gsub -> new substitute function
+*/
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -181,7 +367,7 @@ int main()
   // some pointers
   RCVariable* varptr  = NULL;
   RCDirectory* dirptr = new RCDirectory();
-  String* dirPath     = new String;
+  string* dirPath     = new string;
 
   // some containers
   RCVariableMap  RCVariables;
@@ -193,15 +379,15 @@ int main()
   StringList     rcFileList;
   Tree           dirTree;
 
-  // some String and char variables
+  // some string and char variables
   char   line[INPUT_LINE_LENGTH + 1];
-  String stringLine;
-  String filename;
-  String varname;
-  String value;
-  String descr;
-  String rest;
-  String property;
+  string stringLine;
+  string filename;
+  string varname;
+  string value;
+  string descr;
+  string rest;
+  string property;
 
   // initially push directory /etc in the directory map
   dirptr->setName("etc");
@@ -211,9 +397,9 @@ int main()
   dirptr = NULL;
 
   // add the directories "/" and "/etc" to the directory set
-  *dirPath = (String)"/";
+  *dirPath = (string)"/";
   DirectorySet.insert(*dirPath);
-  *dirPath = (String)"/etc";
+  *dirPath = (string)"/etc";
   DirectorySet.insert(*dirPath);
 
   ///////////////////////////////////////////////////////////////////
@@ -232,7 +418,7 @@ int main()
     {
       glob(globpattern[j], 0, NULL, &globbuffer);
       for (int i = 0; i < (signed int)globbuffer.gl_pathc ; ++i)
-	rcFileList.push_back((String)globbuffer.gl_pathv[i]);
+	rcFileList.push_back((string)globbuffer.gl_pathv[i]);
     }
 
   // Open every existing rc.config file in the array and save the
@@ -243,7 +429,7 @@ int main()
     {
       //filename = globbuffer.gl_pathv[i];
       filename = *filenameit;
-      ifstream fin_filename(filename);
+      ifstream fin_filename(filename.c_str());
       if(!fin_filename)
 	{
 	  // must be written to the y2log file
@@ -257,35 +443,35 @@ int main()
             
       while (fin_filename.getline(line,INPUT_LINE_LENGTH))
 	{
-	  stringLine = (String)line;
+	  stringLine = (string)line;
 	  
 	  // filters all comments
-	  if ( stringLine.contains("#") )
+	  if ( stringLine.find('#') != string::npos )
 	    {
-	      descr = descr + stringLine.after("#");
-	      rest  = stringLine.before("#");
-	      rest.gsub(RXwhite,"");
+	      descr = descr + stringLine.substr(stringLine.find('#')+1);
+	      rest  = stringLine.substr(0,stringLine.find('#'));
+	      rest=trim(rest);
 
-	      // if there is nothing necessary before the comment
+	      // if there is nothing left before the comment
 	      // sign go on to the next input line
-	      if (rest == "")
+	      if (rest.empty())
 		continue;
 	    }
 
 	  // a valid rc.config variable defintion must contain a "="
-	  if (!stringLine.contains("="))
+	  if (stringLine.find('=') == string::npos)
 	    continue;
 
 	  // get the names of rc.config variables
-	  varname = stringLine.before("=");
+	  varname = stringLine.substr(0,stringLine.find('='));
 
 	  // delete some special entries in the rc.config files
-	  if (varname.contains("test"))
+	  if (varname.find("test") != string::npos)
 	    continue;
 
 	  // filters empty strings
-	  varname.gsub(RXwhite, "");
-	  if (varname != "")
+	  varname=trim(varname);
+	  if (!varname.empty())
 	    {
 	      // test if RCVariable "varname" exists in RCVariableMap
 	      RCVariableMap::iterator it = RCVariables.find(varname);
@@ -307,32 +493,33 @@ int main()
 		    {
 		      varptr->setPath(".rc.system." + varname);
 		    }
-		  else if (!filename.contains(".rc.config"))
+		  //not ending with .rc.config
+		  else if (filename.find(".rc.config") == string::npos)
 		    {
-		      String base = filename.after("/etc/rc.");
+		      string base = after(filename,"/etc/rc.");
 		      varptr->setPath(".rc." + base + "." + varname);
 		    }
 		  else
 		    {
-		      String base = filename.after("/etc/rc.config.d/");
-		      base        = (String)base.before(".rc.config");
+		      string base = after(filename,"/etc/rc.config.d/");
+		      base        = base.substr(0,base.find(".rc.config"));
 		      varptr->setPath(".rc." + base + "." + varname);
 		    }
 
 		  // add descr to RCVariable and afterwards set descr
 		  // to "", filter comments
-		  descr.gsub("\"", "\\\"");
-		  descr.gsub("#", "");
-		  while (descr.contains("  "))
-		    descr.gsub("  ", " ");
+		  substitute(descr,"\"", "\\\"");
+		  substitute(descr,"#", "");
+		  while (descr.find("  ") != string::npos)
+		    substitute(descr,"  ", " ");
 		  varptr->setDescr(descr);
 		  descr = "";
 		  RCVariables[varname] = *varptr;
 		}
-	      value = stringLine.after("=");
-	      if (value.contains("#"))
-		value = value.before("#");
-	      if (!value.contains("\""))
+	      value = stringLine.substr(stringLine.find("=")+1);
+	      if (value.find("#") != string::npos)
+		value = value.substr(0,value.find("#"));
+	      if (value.find("\"") == string::npos)
 		value = "\"" + value + "\"";
 	      varptr->setValue(value);
 	      varptr = NULL;
@@ -358,16 +545,16 @@ int main()
   while (fin.getline(line,INPUT_LINE_LENGTH))
     {
       // todo: better filter for comments
-      stringLine = (String)line;
+      stringLine = (string)line;
 
-      if ( stringLine.contains("#") )
-	stringLine = stringLine.before("#");
+      if ( stringLine.find('#') != string::npos )
+	stringLine = stringLine.substr(0,stringLine.find('#'));
 
-      if (stringLine == "")
+      if (stringLine.empty())
 	continue;
 
       // get the variable name
-      varname = stringLine.before(" ");
+      varname = stringLine.substr(0,stringLine.find(' '));
       
       // test if RCVariable "varname" exists in RCVariableMap
       RCVariableMap::iterator it = RCVariables.find(varname);
@@ -378,25 +565,25 @@ int main()
 	  varptr = &it->second;
   
 	  // get property and value
-	  rest     = stringLine.after(RXwhite);
-	  property = rest.before(" ");
-	  value    = rest.after(RXwhite);
+	  rest     = after_any(stringLine," \t");
+	  property = rest.substr(0,rest.find(' '));
+	  value    = after_any(rest," \t");
 	
 	  // set branch of the RCVariable
 	  if (property == "path") 
 	    {
 	      varptr->setBranch(value + "/" + downcase(varname));
 
-	      String rest_dir = value;
-	      String dirname = "";
-	      String lowleveldir = value.after(value.index("/", -1));
+	      string rest_dir = value;
+	      string dirname = "";
+	      string lowleveldir = value.substr(value.rfind('/')+1);
 
-	      while (rest_dir.contains("/"))
+	      while (rest_dir.find('/') != string::npos)
 		{
-		  dirname  = rest_dir.after("/");
+		  dirname  = rest_dir.substr(rest_dir.find('/')+1);
 		  rest_dir = dirname;
-		  if (dirname.contains("/"))
-		    dirname = dirname.before("/");
+		  if (dirname.find('/')!=string::npos)
+		    dirname = dirname.substr(0,dirname.find('/'));
 
 		  // find dirname in RCDirectories
 		  if (dirname != "")
@@ -410,14 +597,14 @@ int main()
 			  dirptr = new RCDirectory;
 			  dirptr->setName(dirname);
 
-			  if (value.before("/" + dirname) == "")
+			  if (value.substr(0,value.find((string)"/" + dirname)).empty())
 			    {
 			      dirptr->setBranch("/");
 			    }
 			  else
 			    {
-			      dirptr->setBranch(value.before("/" + dirname));
-			      *dirPath = ((String)(value.before("/" + dirname)));
+			      dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
+			      *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
 			      //if (*dirPath != "")
 			      //DirectorySet.insert(*dirPath);
 			    }
@@ -447,15 +634,15 @@ int main()
 	  else if (property == "type")
 	    {
 	      // enum
-	      if (value.index("enum") == 0)
+	      if (value.find("enum") == 0)
 		{
 		  varptr->setDatatype("enum");
-		  String options = value.after("enum ");
-		  options.gsub(",", "\",\n      \"");
+		  string options = after(value,"enum ");
+		  substitute(options,",", "\",\n      \"");
 		  varptr->setOptions(options + "\n      ");
 		}
 	      // boolean
-	      else if (value.index("boolean") == 0)
+	      else if (value.find("boolean") == 0)
 		{
 		  varptr->setDatatype("boolean");
 		  varptr->setOptions("\"yes\",\n      \"no\"\n      ");
@@ -473,9 +660,9 @@ int main()
 	{
 	  // variable name not found in map RCVariables: so it
 	  // could be a directory descr.
-	  rest     = stringLine.after(RXwhite);
-	  property = rest.before(' ');
-	  value    = rest.after(RXwhite);
+	  rest     = after_any(stringLine," \t");
+	  property = rest.substr(0,rest.find(' '));
+	  value    = after_any(rest," \t");
 	  
 	  // save all(!) descriptions of directories in a StringMap
 	  if (property == "descr")
@@ -492,7 +679,7 @@ int main()
       variable_it != RCVariables.end();
       ++variable_it)
     {
-      if (variable_it->second.getBranch().contains("/etc/"))
+      if (variable_it->second.getBranch().find("/etc/")!=string::npos)
 	{
 	  RCDirectoryMap::iterator dir_it = RCDirectories.find("etc"); 
 	  if (dir_it == RCDirectories.end())
@@ -539,7 +726,7 @@ int main()
 	       ++cii)
 	    {
 	      RCVariable* var_ptr = &RCVariables[*cii];
-	      var_ptr->setBranch(var_ptr->getBranch().before("/" + downcase(*cii)));
+	      var_ptr->setBranch(var_ptr->getBranch().substr(0,var_ptr->getBranch().find("/" + downcase(*cii))));
 	      var_ptr->setParent(ci->first);
 	      var_ptr->setEntrynb(entrynb++);
 	      
@@ -572,7 +759,7 @@ int main()
 	      dir_ptr->addVariable(*cii);
 	      NewRCDirectories[downcase(*cii)] = *dir_ptr;
 
-	      *dirPath = ((String)(ci->second.getBranch() + "/" 
+	      *dirPath = ((string)(ci->second.getBranch() + "/" 
 				   + ci->second.getName() 
 				   + "/" + downcase(*cii)));
 	      DirectorySet.insert(*dirPath);
@@ -592,7 +779,6 @@ int main()
   // into the file /usr/lib/YaST2/rc_config_keys
   //
   ///////////////////////////////////////////////////////////////////
-
 
   // open new output file stream
   ofstream fout_rc_config_keys(rc_config_keys);
@@ -665,13 +851,13 @@ int main()
        ++ci)
     {
       // ignore empty strings
-      if (((String)*ci) != "")
+      if (((string)*ci) != "")
 	{
 	  // array for the splitted directory paths
-	  String words[MAX_DIR_DEPTH+1];
+	  string words[MAX_DIR_DEPTH+1];
 
 	  // split the path at "/" and count the number of substrings
-	  int numOfWords = split(*ci, words, MAX_DIR_DEPTH, (String)"/");
+	  int numOfWords = split(*ci, words, MAX_DIR_DEPTH, (string)"/");
 
 	  // iterate each substring
 	  for (int i = 1; i < numOfWords; ++i)
@@ -719,7 +905,7 @@ int main()
 	   strlistit != rootPtr->end();
 	   ++strlistit)
 	{
-	  if ((String)*strlistit == "")
+	  if ((string)*strlistit == "")
 	    continue;
 
 	  // treeIt poinst to the tree node with name "*strlistit"
@@ -772,14 +958,14 @@ template<class T>
 void showSet(const set<T>& v)
 {
   for (set<T>::const_iterator ci = v.begin(); ci != v.end(); ++ci)
-    cout << (String)*ci << endl;
+    cout << (string)*ci << endl;
 }
 
 template<class T>
 void showList(const list<T>& v)
 {
   for (list<T>::const_iterator ci = v.begin(); ci != v.end(); ++ci)
-    cout << (String)*ci << " ";
+    cout << (string)*ci << " ";
   cout << endl;
 }
 
@@ -799,34 +985,34 @@ void writeListToFile(const list<T>* rootPtr, const char* filename)
       StringList::const_iterator ci_next = ++ci;
       --ci;
 
-      if ((String)*ci == "]")
+      if ((string)*ci == "]")
 	{
-	  if ((String)*ci_next == "]" || (String)*ci_next == "];")
+	  if ((string)*ci_next == "]" || (string)*ci_next == "];")
 	    fout << " ]) ";
 	  else
 	    fout << " ]), ";
 	}
-      else if ((String)*ci == "];")
+      else if ((string)*ci == "];")
 	fout << " ] ";
-      else if ((String)*ci == "[")
+      else if ((string)*ci == "[")
 	fout << " [ ";
-      else if ((String)*ci_next == "[")
+      else if ((string)*ci_next == "[")
 	fout << "\n  `item(`id(\"" 
-	     << (String)*ci 
+	     << (string)*ci 
 	     << "\"), \"" 
-	     << (String)*ci 
+	     << (string)*ci 
 	     << "\", false, ";
-      else if ((String)*ci_next == "]" || (String)*ci_next == "];" )
+      else if ((string)*ci_next == "]" || (string)*ci_next == "];" )
 	fout << " `item(`id(\"" 
-	     << (String)*ci 
+	     << (string)*ci 
 	     << "\"), \"" 
-	     << (String)*ci 
+	     << (string)*ci 
 	     << "\", false) ";
       else
 	fout << " `item(`id(\"" 
-	     << (String)*ci 
+	     << (string)*ci 
 	     << "\"), \"" 
-	     << (String)*ci 
+	     << (string)*ci 
 	     << "\", false), ";
     }
   fout.close();
@@ -843,8 +1029,8 @@ void showTree(const Tree& v)
       for (StringList::const_iterator cii = strlist.begin();
 	   cii != strlist.end();
 	   ++cii)
-	cout << (String)*cii << " ";
+	cout << (string)*cii << " ";
       cout << "\n";
     }
 }
-// end: main.cpp
+// end: main.cpp vim:sw=2

@@ -33,32 +33,32 @@
 
 RCVariable::RCVariable()
 {
-  itsName     = new String("");
-  itsBranch   = new String("");
-  itsDatatype = new String("string");
-  itsDescr    = new String("");
+  itsName     = new string("");
+  itsBranch   = new string("");
+  itsDatatype = new string("string");
+  itsDescr    = new string("");
   itsEntrynb  = new int(1);
-  itsOptions  = new String("");
-  itsParent   = new String("");
-  itsPath     = new String("");
-  itsType     = new String("`options");
-  itsTypedef  = new String("strict");
-  itsValue    = new String("");
+  itsOptions  = new string("");
+  itsParent   = new string("");
+  itsPath     = new string("");
+  itsType     = new string("`options");
+  itsTypedef  = new string("strict");
+  itsValue    = new string("");
 }
 
 RCVariable::RCVariable(const RCVariable & rhs)
 {
-  itsName     = new String;
-  itsBranch   = new String;
-  itsDatatype = new String;
-  itsDescr    = new String;
+  itsName     = new string;
+  itsBranch   = new string;
+  itsDatatype = new string;
+  itsDescr    = new string;
   itsEntrynb  = new int;
-  itsOptions  = new String;
-  itsParent   = new String;
-  itsPath     = new String;
-  itsType     = new String;
-  itsTypedef  = new String;
-  itsValue    = new String;
+  itsOptions  = new string;
+  itsParent   = new string;
+  itsPath     = new string;
+  itsType     = new string;
+  itsTypedef  = new string;
+  itsValue    = new string;
 
   *itsName     = rhs.getName();
   *itsBranch   = rhs.getBranch();
