@@ -274,9 +274,17 @@ Create it and use powerteak?
     //rc_config_keys = ReadY2("rc_config_keys");
     rc_config_keys = SCR(`Read(.target.yast2, rc_config_file ));
 
+    // check for missing descriptions
+    foreach(string var, map info, rc_config_keys, ``{
+	    if (haskey(info, `descr) && info[`descr]:"" == "")
+	    {
+		y2warning("Variable %1 has no description", var);
+	    }
+	}
+    );
+
     // remove generated file
     SCR::Execute(.target.remove, Directory::ydatadir + "/" + rc_config_file);
-    //    SCR(`Write (.dumpto.tmp.rc_config_keys_1, rc_config_keys ));
 
     // show processing steps ...
     UI(`ChangeWidget(`id(`package),   `Value, 90));
@@ -287,8 +295,6 @@ Create it and use powerteak?
 
     // remove generated file
     SCR::Execute(.target.remove, Directory::ydatadir + "/" + tree_data_file);
-
-    //    SCR(`Write (.dumpto.tmp.tree_data, tree_data ));
 
     // show processing steps ...
     UI(`ChangeWidget(`id(`package),   `Value, 100));

@@ -5,7 +5,7 @@
 ; $Id$
 ;
 
-[Y2Module sysconfig]
+[Y2Module powertweak]
 
 ; name of the entry, shown in y2cc
 Name = _("Powertweak configuration")
@@ -15,13 +15,13 @@ Name = _("Powertweak configuration")
 Group = System
 
 ; icon displayed in y2cc
-Icon = rc_config.png
+Icon = powertweak.png
 
 ; *one* *short* descriptive line for y2cc
 Helptext = _("Configure powertweak settings -- only for experts!")
 
 ; arguments, seperated by space
-Arguments = .powertweak
+Arguments =
 
 ; whether root privileges are required to run this module
 RequiresRoot = true
