@@ -121,7 +121,65 @@
 
 	  return( descr );
       };
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // sync the dynamically mounted agents (/etc/sysconfig)
+    // Mount dynamically an etc/sysconfig/* agent
+    //////////////////////////////////////////////////////////////////////////////////
+
+    list registered_list = [];
+
+    global define sync_sysconfig()
+    ``{
+	foreach( `entry, registered_list, ``{
+	    y2debug("Sync %1", entry );
+	    SCR::Write( entry, nil);
+	});
+    };
+
+    global define write_value( path   key,                                     //  .etc.sysconfig.network.dhcpcd.IP	
+			       string value )                                    //  "10.10.0.12"
+    ``{
+
+	list    path_list   = splitstring( "" + key, "." );                 // ["", "etc", "sysconfig", "network", "dhcpcd"]
+	string  variable    = select( path_list, size(path_list)-1, "");
+	path_list           = remove( path_list, size(path_list)-1);
+	string  path_string = mergestring( path_list, "." );                      // ".etc.sysconfig.network.dhcpcd"
+	path    path_path   = topath( path_string );                              //  .etc.sysconfig.network.dhcpcd	
+	string  path_slash  = mergestring(splitstring( path_string, "."), "/");   // "/etc/sysconfig/network/dhcpcd"
+
+	if ( regexpmatch( path_slash, ".*rc/config.*" ) )
+	{
+           path_slash = regexpsub( path_slash, "(.*)rc/config(.*)",  "\\1rc.config\\2" );
+	}
     
+	y2milestone( "VAR  %1", variable );
+	y2milestone( "EEEE %1", path_list );
+	y2milestone( "EEEEs %1", path_string );
+	y2milestone( "EEEEp %1", path_path );
+	y2milestone( "EEEEl %1", path_slash );
+ 	    
+ 	if ( !contains(registered_list, path_path))
+ 	{
+ 	    y2debug("REGISTER____________________________ %1", path_path);
+ 	    string tmp = SCR::Read(.target.tmpdir);
+ 	    if (tmp == nil || tmp == "") tmp = "/tmp";
+    
+ 	    tmp = tmp + "/_" + path_string + ".scr";
+    
+ 	    string scrfile = path_string + "\n" + "`ag_ini( SysConfigFile(\"" + path_slash + "\"))\n";
+    
+       
+ 	    SCR::Write (.target.string, tmp, scrfile);
+ 	    SCR::RegisterAgent(path_path, tmp);
+ 	    registered_list = add( registered_list, path_path );
+ 	    y2debug("Registered: %1", registered_list );
+ 	}
+    
+ 	SCR::Write( topath(path_string + "." + variable), value);
+    };
+
     
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     //////                                       STATIC DATA                                       //////
@@ -331,28 +389,32 @@ configuration modules like the \"Network configuration\".</p>
 
 	    /////////////////////////////////////////////////////////////////
 	    // save Changes
+	    y2milestone( "TTTTTTTTT"); 
  
             if ( dialogtype == "d1" ||  dialogtype == "d2" ||  dialogtype == "d3" ||
 		 dialogtype == "d4" ||  dialogtype == "d5"                          )
 	    {
+    	        y2milestone( "TTTTBB"); 
 	       integer max_item = tointeger(substring(dialogtype, 1));
 	       integer i = 1;
 	       while ( i <= max_item )
 	       {
 		  string new_val = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Value));
-		  string key     = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Label));
+		  string key     =  deletechars( UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Label)), "&");
 
 		  if ( lookup(lookup(rc_config_keys, key, $[]), `value, nil) != new_val )
 		  {
 		     map curr_key = lookup(rc_config_keys, key, nil);
+		     y2milestone( "jTTTTTTTTTBB: %1", curr_key); 
 		     curr_key     = add( curr_key, `value, new_val);
 		     curr_key     = add( curr_key, `new,   true);
+		     y2milestone( "jTTTTTTTTTBB: %1", curr_key); 
 
 		     rc_config_keys = add( rc_config_keys, key, curr_key);
 		  }
 		  
-		  // y2milestone( "TTTTTTTTTBB: %1", new_val); 
-		  // y2milestone( "TTTTTTTTTBB: %1", new_lab); 
+		  y2milestone( "TTTTTTTTTBB: %1", new_val); 
+		  y2milestone( "TTTTTTTTTBB: %1", key); 
 		  i=i+1;
 	       }
 	    }
@@ -441,26 +503,11 @@ configuration modules like the \"Network configuration\".</p>
 		    // this list contains all rc_file paths, that must be saved before starting SuSEconfig
 		    list rc_file_list = [];
 
-		    list ret_list = maplist( `entry, changes_list, ``( {
-		      SCR( `Write(lookup(entry, `path, nil), lookup(entry, `value, nil)));
+		    list ret_list = maplist( `entry, changes_list, ``{
+			write_value(lookup(entry, `path, nil), lookup(entry, `value, nil));
+		    });
 
-		      string this_path    = sformat("%1", lookup(entry, `path,    ""));
-		      string this_linekey = sformat("%1", lookup(entry, `linekey, ""));
-
-		      this_path  = substring( this_path, 0, (size(this_path)-size(this_linekey)-1) );
-		      
-		      // add filepath to list, convert string to path before
-		      rc_file_list = add( rc_file_list, topath(this_path) );
-		    }));
-
-		    // delete duplicate filepaths from the list
-		    rc_file_list = toset(rc_file_list);
-
-		    path rc_file_path = nil;
-
-		    // save all changed files before start SuSEconfig
-		    foreach(`rc_file_path, rc_file_list, ``{ SCR( `Write(rc_file_path, nil)); });
-
+		    sync_sysconfig();
 		    y2milestone("Starting config scripts");
 
 
@@ -476,9 +523,10 @@ configuration modules like the \"Network configuration\".</p>
 		    }
 		    else
 		    {
-			UI(`WaitSuSEconfig());
-			ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
-			UI(`CloseDialog());
+			//UI(`WaitSuSEconfig());
+   		        CallFunction( `inst_suseconfig( false, false ) );
+			//ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
+			//UI(`CloseDialog());
 		    }
 
 		    if ( ret == 0 )

@@ -372,6 +372,7 @@ int main(int argc, char* argv[])
 
   // array of all file patterns to search for rc.config files
   const char* globpattern[] = {
+    "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config",
     "/etc/sysconfig/network/ifcfg-lo",
     "/etc/sysconfig/network/ifcfg-eth0",
@@ -405,6 +406,7 @@ int main(int argc, char* argv[])
     "/etc/sysconfig/windowmanager",
     "/etc/sysconfig/xntp",
     "/etc/sysconfig/ypbind",
+    "/etc/rc.config",
     "/etc/rc.dialout"
   };
 
@@ -501,6 +503,8 @@ int main(int argc, char* argv[])
   {
      //filename = globbuffer.gl_pathv[i];
      filename = *filenameit;
+     cout << "\n### File: " << filename << endl;
+     
      ifstream fin_filename(filename.c_str());
      if(!fin_filename)
      {
@@ -555,27 +559,16 @@ int main(int argc, char* argv[])
 	   }
 	   else
 	   {
+              cout << "\nVar: " << varname << endl;
 	      // not found: create new entry in RCVariableMap and
 	      // set branch, parent, path, ...
 	      varptr = new RCVariable;
 	      varptr->setName(varname);
 	      varptr->setBranch("/etc/" + downcase(varname));
 	      varptr->setParent(downcase(varname));
-	      if (filename == "/etc/rc.config")
-	      {
-		 varptr->setPath(".rc_config." + varname);
-	      }
-	      else if (filename == "/etc/rc.dialout")
-	      {
-		 varptr->setPath(".rc_dialout." + varname);
-	      }
-	      //not ending with .rc.config
-	      else
-	      {
-		 string base = after(filename,"/etc/sysconfig/");
-                 substitute( base, "/", "." );
-		 varptr->setPath(".sysconf." + base + "." + varname);
-	      }
+	      string base = filename;
+	      substitute( base, "/", "." );
+	      varptr->setPath( base + "." + varname);
 
 	      // add descr to RCVariable and afterwards set descr
 	      // to "", filter comments
