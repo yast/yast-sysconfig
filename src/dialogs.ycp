@@ -74,17 +74,17 @@ global define map display_search_dialog()
     if (ui == `ok)
     {
 	ret = add(ret, "search", UI::QueryWidget(`id(`search_entry), `Value));
-	ret = add(ret, "ignore", UI::QueryWidget(`id(`ignore), `Value));
+	ret = add(ret, "insensitive", UI::QueryWidget(`id(`ignore), `Value));
 	ret = add(ret, "varname", UI::QueryWidget(`id(`nkey), `Value));
 	ret = add(ret, "value", UI::QueryWidget(`id(`nvalue), `Value));
-	ret = add(ret, "descripton", UI::QueryWidget(`id(`ndescr), `Value));
+	ret = add(ret, "description", UI::QueryWidget(`id(`ndescr), `Value));
     }
 
     UI::CloseDialog();
     return ret;
 }
 
-global define symbol display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label) ``{
+global define map display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label) ``{
 
     UI::OpenDialog(`opt(`decorated), `HBox(
 	`VSpacing(14),
@@ -95,7 +95,7 @@ global define symbol display_variables_dialog(string header, string label, list 
 	    `VSpacing(0.5),
 
 	    // table column header
-	    `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old value"), _("Description")), table_content),
+	    `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old value"), _("File"), _("Description")), table_content),
 `VSpacing(0.5),
 	    `HBox(
 		// push button label
@@ -103,15 +103,16 @@ global define symbol display_variables_dialog(string header, string label, list 
 		// push button label
 		`PushButton(`id(`cancel), cancel_label)
 	    )
-			   )
-		    )
+	   )
+          )
 	);
 
     symbol ret = UI::UserInput();
+    string selected = UI::QueryWidget(`id(`table), `CurrentItem);
 
     UI::CloseDialog();
 
-    return ret;
+    return $[ "ui" : ret, "selected" : selected ];
 }
 
 /* EOF */
