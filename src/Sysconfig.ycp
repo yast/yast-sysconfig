@@ -592,14 +592,17 @@ global define string get_only_comment(string input) ``{
     foreach(string line, lines, ``{
 	    string com_line = regexpsub(line, "^#([^#].*)", "\\1");
 
-	    if (com_line != nil)
+	    if (com_line == nil)
 	    {
-		com_line = regexpsub(com_line, "^[ \t]*(.*)", "\\1");
+		// add empty lines
+		if (regexpmatch(line, "^#[ \t]*$") == true)
+		{
+		    ret = ret + "\n";
+		}
 	    }
-
-	    if (com_line != nil)
+	    else
 	    {
-		ret = ret + com_line + " ";
+		ret = ret + com_line + "\n";
 	    }
 	}
     );

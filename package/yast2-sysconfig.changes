@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Feb 25 13:12:54 CET 2003 - lslezak@suse.de
+
+- don't change comment formatting (#24205)
+- testsuite updated
+- version 2.7.8
+
+-------------------------------------------------------------------
 Mon Feb 24 13:48:06 CET 2003 - lslezak@suse.de
 
 - removed workaround for bug #23721 ("&lt;" was not interpreted

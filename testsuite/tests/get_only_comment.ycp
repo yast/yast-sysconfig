@@ -11,13 +11,49 @@ include "testsuite.ycp";
 
 import "Sysconfig";
 
-TEST( ``(Sysconfig::get_only_comment(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_only_comment("") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_only_comment("# sdfa  ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_only_comment("### gfh ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_only_comment("# dsfds") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_only_comment("# adsf \n# sdfwer") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_only_comment("\n\n#134\n   \n#34763\n  ##Path") ), [ $[], $[], $[] ], nil );
+// Note: DUMP is used instead of TEST, because it supports multiline
+// output (TEST dumps only first line)
+
+string input = nil;
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
+DUMP( "---" );
+
+input = "";
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
+DUMP( "---" );
+
+input = "# sdfa  ";
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
+DUMP( "---" );
+
+input = "### gfh ";
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
+DUMP( "---" );
+
+input = "# dsfds";
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
+DUMP( "---" );
+
+input = "# adsf \n# sdfwer\n";
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
+DUMP( "---" );
+
+input = "\n\n#134\n   \n#34763\n  ##Path";
+DUMP( sformat("Input: %1", input) );
+DUMP( "Output:" );
+DUMP( Sysconfig::get_only_comment(input) );
 
 }
 

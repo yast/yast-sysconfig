@@ -4,10 +4,10 @@ Read	.syseditor.value."variable"."nonexisting" nil
 Return	$["comment":"", "file":"variable", "location":"", "name":"nonexisting", "value":nil]
 Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "# Only comment, no metadata"
 Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
-Return	$["comment":"Only comment, no metadata ", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"no", "value":"yes"]
+Return	$["comment":" Only comment, no metadata\n", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"no", "value":"yes"]
 Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Path: Test\n## Description: help\n## Type: yesno\n# Comment with metadata"
 Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
-Return	$["Description":"help", "Path":"Test", "Type":"yesno", "comment":"Comment with metadata ", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"no", "value":"yes"]
+Return	$["Description":"help", "Path":"Test", "Type":"yesno", "comment":" Comment with metadata\n", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"no", "value":"yes"]
 Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Path: Test\n## Description: help\n## Type: yesno\n##Path: Second path definition\n# Comment with metadata"
 Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
-Return	$["Description":"help", "Path":"Second path definition", "Type":"yesno", "comment":"Comment with metadata ", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"no", "value":"yes"]
+Return	$["Description":"help", "Path":"Second path definition", "Type":"yesno", "comment":" Comment with metadata\n", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"no", "value":"yes"]

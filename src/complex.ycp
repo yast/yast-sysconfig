@@ -215,6 +215,14 @@ global define string create_richtext_description(map description) ``{
 	comment = mergestring(splitstring(comment, "<"), "&lt;");
 	comment = mergestring(splitstring(comment, ">"), "&gt;");
 
+	// keep comment formatting:
+	// convert '\n' => '<BR>'
+	comment = mergestring(splitstring(comment, "\n"), "<BR>");
+	// convert ' ' => '&nbsp;'
+	comment = mergestring(splitstring(comment, " "), "&nbsp;");
+
+	y2debug("formatted comment: %1", comment);
+
 	// rich text value
 	result = result + "<P><B>" + _("Description: ") + "</B><BR> " + comment + "</P>";
     }
@@ -409,7 +417,7 @@ global define list combo_list(map description, boolean set_default) ``{
 	if (!contains(ret, value)) ret = add(ret, value);
     }
 
-    y2milestone("combo list: %1", ret);
+    y2debug("combo list: %1", ret);
 
     return ret;
 }
