@@ -65,22 +65,22 @@ global define map display_search_dialog()
 
     UI::SetFocus(`id(`search_entry));
 
-    symbol ui = UI::UserInput();
+    symbol ui = (symbol)UI::UserInput();
 
     while (ui != `ok && ui != `cancel)
     {
-	ui = UI::UserInput();
+	ui = (symbol)UI::UserInput();
     }
 
     map ret = $[];
 
     if (ui == `ok)
     {
-	ret = add(ret, "search", UI::QueryWidget(`id(`search_entry), `Value));
-	ret = add(ret, "insensitive", UI::QueryWidget(`id(`ignore), `Value));
-	ret = add(ret, "varname", UI::QueryWidget(`id(`nkey), `Value));
-	ret = add(ret, "value", UI::QueryWidget(`id(`nvalue), `Value));
-	ret = add(ret, "description", UI::QueryWidget(`id(`ndescr), `Value));
+	ret = add(ret, "search", (string)UI::QueryWidget(`id(`search_entry), `Value));
+	ret = add(ret, "insensitive", (boolean)UI::QueryWidget(`id(`ignore), `Value));
+	ret = add(ret, "varname", (boolean)UI::QueryWidget(`id(`nkey), `Value));
+	ret = add(ret, "value", (boolean)UI::QueryWidget(`id(`nvalue), `Value));
+	ret = add(ret, "description", (boolean)UI::QueryWidget(`id(`ndescr), `Value));
     }
 
     UI::CloseDialog();
@@ -123,9 +123,9 @@ global define map display_variables_dialog(string header, string label, list tab
         )
     );
 
-    symbol ret = UI::UserInput();
-    string selected = UI::QueryWidget(`id(`table), `CurrentItem);
-    boolean box = (size(checkboxlabel) > 0) ? UI::QueryWidget(`id(`chbox), `Value) : nil;
+    symbol ret = (symbol)UI::UserInput();
+    string selected = (string)UI::QueryWidget(`id(`table), `CurrentItem);
+    boolean box = (size(checkboxlabel) > 0) ? (boolean)UI::QueryWidget(`id(`chbox), `Value) : nil;
 
     UI::CloseDialog();
 
@@ -162,8 +162,8 @@ The package \"powertweak-extra\" extends configuration options of powertweak.
 	)
     );
 
-    symbol ui = UI::UserInput();
-    boolean extra = UI::QueryWidget(`id(`extra), `Value);
+    symbol ui = (symbol)UI::UserInput();
+    boolean extra = (boolean)UI::QueryWidget(`id(`extra), `Value);
 
     UI::CloseDialog();
 
@@ -207,10 +207,10 @@ global define map add_new_variable()
 
     while(ui != `ok && ui != `cancel)
     {
-	ui = UI::UserInput();
+	ui = (symbol)UI::UserInput();
 
-	name = UI::QueryWidget(`id(`name), `Value);
-	file = UI::QueryWidget(`id(`file), `Value);
+	name = (string)UI::QueryWidget(`id(`name), `Value);
+	file = (string)UI::QueryWidget(`id(`file), `Value);
 
 	if (ui == `ok)
 	{
@@ -235,7 +235,7 @@ global define map add_new_variable()
 	}
     }
 
-    string value = UI::QueryWidget(`id(`value), `Value);
+    string value = (string)UI::QueryWidget(`id(`value), `Value);
 
     UI::CloseDialog();
 
