@@ -1,14 +1,17 @@
 /**
- * Author:	Ladislav Slezak <lslezak@suse.cz>
- * Summary:	Alias - enable 'yast2 powertweak' command
+ * File:	clients/powertweak.ycp
+ * Package:	Sysconfig editor
+ * Summary:	Powertweak editor
+ * Authors:	Ladislav Slezak <lslezak@suse.cz>
+ *
  * $Id$
  *
- * Powertweak alias - start sysconfig in powertweak mode
+ * Powertweak alias - start sysconfig in powertweak mode.
  */
 
 {
-    return WFM::CallFunction ("sysconfig", add(WFM::Args (), ".powertweak"));
+
+return WFM::CallFunction("sysconfig", add(WFM::Args(), ".powertweak"));
+
+/* EOF */
 }
-
-
-

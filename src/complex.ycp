@@ -529,12 +529,12 @@ global define void update_combo(map description, boolean set_default) ``{
     if (combo_editable(description))
     {
 	// combo box widget label - variable name is appended to the string
-	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`editable, `hstretch), _("&Setting of: ") + varname + modif_flag, combo_list(description, set_default)));
+	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`editable, `hstretch), _("S&etting of: ") + varname + modif_flag, combo_list(description, set_default)));
     }
     else
     {
 	// combo box widget label - variable name is appended to the string
-	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`hstretch), _("&Setting of: ") + varname + modif_flag, combo_list(description, set_default)));
+	UI::ReplaceWidget(`id(`replace), `ComboBox (`id(`combo), `opt(`hstretch), _("S&etting of: ") + varname + modif_flag, combo_list(description, set_default)));
     }
 
     // disable combo for non-leaf nodes
@@ -659,7 +659,7 @@ global define symbol MainDialog() ``{
 				`HBox(
 				    `ReplacePoint(`id(`replace),
 					// combo box label
-					`ComboBox (`id(`combo), `opt(`disabled, `hstretch), _("&Setting of: "),  [""])
+					`ComboBox (`id(`combo), `opt(`disabled, `hstretch), _("S&etting of: "),  [""])
 				    ),
 				    `VBox(
 					// dummy widget used to align button
