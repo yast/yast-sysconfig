@@ -127,6 +127,8 @@
 			       string value )                                    //  "10.10.0.12"
     ``{
 
+    y2internal("%1=%2", key, value);
+
 	list    path_list   = splitstring( "" + key, "." );                 // ["", "etc", "sysconfig", "network", "dhcpcd"]
 	string  variable    = select( path_list, size(path_list)-1, "");
 	path_list           = remove( path_list, size(path_list)-1);
@@ -155,7 +157,7 @@
 	    registered_list = add( registered_list, path_path );
 	    y2debug("Registered: %1", registered_list );
 	}
-
+	y2internal("path=%1  value=%2", topath(path_string + "." + variable), value);
 	SCR::Write( topath(path_string + "." + variable), value);
     };
 
@@ -203,6 +205,7 @@
     // the other output is the tree_data list.
     //list tree_data =  ReadY2("tree_data");
     list tree_data = SCR(`Read(.target.yast2, tree_data_file));
+
     //    SCR(`Write (.dumpto.tmp.tree_data, tree_data ));
 
     // show processing steps ...
@@ -367,7 +370,8 @@ configuration modules like the \"Network configuration\".</p>
 
 	    /////////////////////////////////////////////////////////////////
 	    // save Changes
-	    y2milestone( "TTTTTTTTT");
+	    y2milestone( "TTTTTTTTT dialogtype: %1", dialogtype);
+
 
             if ( dialogtype == "d1" ||  dialogtype == "d2" ||  dialogtype == "d3" ||
 		 dialogtype == "d4" ||  dialogtype == "d5"                          )
@@ -411,7 +415,7 @@ configuration modules like the \"Network configuration\".</p>
 
             entry_list               = filter(  `entry, entry_list, ``( lookup( entry, `parent, "" ) == key ));
 
-            y2debug("dialogtype %1", dialogtype);
+            y2debug("dialogtype: %1, curr_entry: %2 entry_list: %3", dialogtype, curr_entry, entry_list);
 
             if ( dialogtype == "d1" )
             {
@@ -502,7 +506,7 @@ configuration modules like the \"Network configuration\".</p>
 		    else
 		    {
 			//UI(`WaitSuSEconfig());
-		        CallFunction( `inst_suseconfig( false, false ) );
+		        // TODO FIXME: uncomment this line CallFunction( `inst_suseconfig( false, false ) );
 			//ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
 			//UI(`CloseDialog());
 		    }

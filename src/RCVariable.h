@@ -150,7 +150,32 @@ class RCVariable
 
     \return The path.
    */
-  string getPath() const { return *itsPath; }
+  string getPath() const {
+      string path = *itsPath; 
+
+      // Powertweak hack
+      // some powertweak var. names contain ':' or '/'
+      if (path.find_first_of(":/") != string::npos)
+      {
+	  // There is ':' in the path name
+	  unsigned int pos = path.rfind(".");
+
+	  string var = "";
+	  string newpath = "";
+
+	  if (pos != string::npos)
+	  {
+	      newpath = path.substr(0, pos);
+	      var = path.substr(pos + 1, path.size() - pos);
+	  }
+
+	  path = newpath + ".\"" + var + "\"";
+
+	  //cout << "result: " << path << endl;
+      }
+
+      return path;
+  }
 
   /*!
     Get the type of the RCVariable. Commonly this ist `options.<br>
