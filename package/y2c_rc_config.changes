@@ -1,4 +1,5 @@
 -------------------------------------------------------------------
-0 - mike@suse.de
+Fri Dec  8 17:11:41 CET 2000 - mike@suse.de
 
-- initial version
+- new module for 7.1 
+  graphical /etc/rc.config editor
