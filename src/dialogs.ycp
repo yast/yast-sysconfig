@@ -115,5 +115,33 @@ global define map display_variables_dialog(string header, string label, list tab
     return $[ "ui" : ret, "selected" : selected ];
 }
 
+global define map powertweak_install_dialog() ``{
+
+    string helptext = _("This module requires package \"powertweak\", do you want to install it?\n\nClick \"Install\" to install packages and start module or click \"Cancel\" to quit without any change.\nPackage \"powertweak-extra\" extends configuration options of powertweak package.");
+
+    UI::OpenDialog(`opt(`decorated),
+	`VBox(
+	    `Heading(_("Install powertweak package?")),
+	    `VSpacing(1),
+	    `Label(helptext),
+	    `VSpacing(1),
+	    // check box label text
+	    `Left(`CheckBox(`id(`extra), _("Install powertweak-extra package"), true)),
+	    `VSpacing(1),
+	    `HBox(
+		`PushButton(`id(`ok), _("Install")),
+		`PushButton(`id(`cancel), UI::CancelButtonLabel())
+	    )
+	)
+    );
+
+    symbol ui = UI::UserInput();
+    boolean extra = UI::QueryWidget(`id(`extra), `Value);
+
+    UI::CloseDialog();
+
+    return $[ "ui" : ui, "extra" : extra ];
+}
+
 /* EOF */
 }

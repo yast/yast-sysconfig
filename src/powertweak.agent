@@ -1,6 +1,5 @@
-`ag_ini( IniAgent("/etc/powertweak/tweaks",
     $[
-    "options" : [ "line_can_continue", "global_values", "join_multiline", "comments_last", "flat"],
+    "options" : [ "line_can_continue", "global_values", "join_multiline", "comments_last" ],
     "comments": [ "^[ \t]*#.*$", "#.*", "^[ \t]*$", ],
     "params" : [
         $[

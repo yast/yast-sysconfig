@@ -43,6 +43,8 @@ map variable_locations = $[];
 
 global list tree_content = [];
 
+global boolean powertweak_mode = false;
+
 /**
  * Data was modified?
  * @return true if modified
@@ -667,7 +669,7 @@ global define boolean Read(list(string) files) ``{
     }
 
     // register configuration files in SCR using INI-agent
-    string agentdef = sformat(".syseditor\n\n`ag_ini(IniAgent( %1,\n", files) + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    string agentdef = sformat(".syseditor\n\n`ag_ini(IniAgent( %1,\n", files) + SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
     string tmp = tmpdir + "/sysconfig-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -681,7 +683,7 @@ global define boolean Read(list(string) files) ``{
     foreach(string par, files, ``{param = param + "'" + par + "' ";});
 
     // create tree definition list and description map using external Perl script
-    SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + param + "> " + tmpdir + "/treedef.ycp");
+    SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + (powertweak_mode ? "--powertweak " : "") + param + "> " + tmpdir + "/treedef.ycp");
 
     // read list
     list parsed_output = SCR::Read(.target.ycp, tmpdir + "/treedef.ycp");

@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Thu Nov 28 16:26:32 CET 2002 - lslezak@suse.cz
+
+- check if new value is valid (according to specified data type)
+- save modified values to files
+- search in configuration files
+- use metadata from previous variable if comment is missing
+- powertweak subpackage is working now
+- install powertweak packages on request (removed from Require:)
+- version 2.7.1
+
+-------------------------------------------------------------------
 Tue Nov 19 11:14:39 CET 2002 - lslezak@suse.cz
 
 - removed metadata database (now part of configuration files)

@@ -13,6 +13,7 @@ textdomain "sysconfig";
 
 import "Wizard";
 import "Sysconfig";
+import "Runlevel";
 
 include "ui/common_popups.ycp";
 include "ui/common_messages.ycp";
@@ -42,8 +43,79 @@ global define symbol ReadDialog() ``{
     Wizard::RestoreHelp(HELPS["read"]:"");
     Sysconfig::AbortFunction = ``{ return PollAbort();};
 
+    string powertweakconfig = "/etc/powertweak/tweaks";
+
+    if (Sysconfig::powertweak_mode == true)
+    {
+	// do not ask user to create powertweak configuration file
+	// after package installation - suppose "yes"
+	boolean just_installed = false;
+
+	y2debug("Powertweak MODE");
+
+	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") < 0)
+	{
+	    // include require.ycp only when it is really needed,
+	    // because it starts package manager
+	    include "require.ycp";
+
+	    y2warning("Package powertweak is not installed");
+
+	    // ask user to install powertweak package
+	    map ask = powertweak_install_dialog();
+
+	    if (ask["ui"]:`cancel == `cancel)
+	    {
+		return `abort;
+	    }
+
+	    // install powertweak package
+
+	    list(string) install = [ "powertweak" ];
+
+	    if (ask["extra"]:false == true)
+	    {
+		install = add(install, "powertweak-extra");
+	    }
+
+	    just_installed = DoInstallAndRemove(install, []);
+
+	    if (just_installed == false)
+	    {
+		UI::ErrorMessage("Installation of package failed.\nPress OK to exit.");
+		return `abort;
+	    }
+	}
+
+	y2debug("Installed packages: just_installed=%1", just_installed);
+
+	if (SCR::Read(.target.size, powertweakconfig) == -1 || SCR::Read(.target.size, powertweakconfig) == 0)
+	{
+	    // popup dialog question
+	    if (just_installed == true || UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.
+Create it and use powerteak?
+"), YesButtonLabel(), NoButtonLabel(), `focus_no) == true)
+	    {
+		// create powertweak config
+		integer exit = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
+
+		if (exit != 0)
+		{
+		    y2warning("Powertweak exit code: %1", exit);
+		    // warning popup message
+		    UI::WarningPopup(_("Powertweak failed: configuration file may be missing or broken"));
+		}
+	    }
+	    else
+	    {
+		return `abort;
+	    }
+	}
+    }
+
+
 // FIXME:    boolean ret = Sysconfig::Read(["/etc/sysconfig/*"]);
-    boolean ret = Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*"]);	// TODO: add metadata file with predefined paths and descriptions
+    boolean ret = (Sysconfig::powertweak_mode) ? Sysconfig::Read([powertweakconfig]) : Sysconfig::Read(["/tmp/fillup-templates/*", "/etc/sysconfig/*"]);	// TODO: add metadata file with predefined paths and descriptions
 
     return ret ? `next : `abort;
 }
@@ -63,8 +135,19 @@ global define symbol WriteDialog() ``{
 	// write changes
 	ret = Sysconfig::Write();
 
-	// start suseconfig
-	WFM::CallFunction(`inst_suseconfig(false, false));
+	if (Sysconfig::powertweak_mode == true)
+	{
+	    y2milestone("Activating powertweak configuration");
+	    SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
+
+	    // activate powertweak at startup
+	    Runlevel::ServiceAdjust("powertweakd", "enable");
+	}
+	else
+	{
+	    // start suseconfig
+	    WFM::CallFunction(`inst_suseconfig(false, false));
+	}
     }
 
     return ret ? `next : `abort;
@@ -229,9 +312,13 @@ global define list combo_list(map description, boolean set_default) ``{
 	if (!contains(ret, value)) ret = add(ret, value);
     }
 
-    string deflt = description["Default"]:"";
-    list parsed = Sysconfig::parse_options(deflt);
-    deflt = parsed[0]:deflt;
+    string deflt = description["Default"]:nil;
+
+    if (deflt != nil)
+    {
+	list parsed = Sysconfig::parse_options(deflt);
+	deflt = parsed[0]:deflt;
+    }
 
     string type = description["Type"]:"";
 
@@ -271,7 +358,7 @@ global define list combo_list(map description, boolean set_default) ``{
     }
 
     // add default value to the list
-    if (!contains(ret, deflt)) ret = add(ret, deflt);
+    if (deflt != nil && !contains(ret, deflt)) ret = add(ret, deflt);
 
     // add old value to the list if variable was modified
     if (new_value != nil)
