@@ -165,6 +165,25 @@ string trim(const string& str)
   return s;
 }
 
+// get number of characters in string
+unsigned int charcount(const string s, char ch)
+{
+    unsigned int pos = s.find(ch);
+    unsigned int num = 0;
+
+    if (s.size() == 0) return 0;
+
+    while (pos != string::npos)
+    {
+	num++;
+	pos++;
+	pos = s.find(ch, pos);
+//	cout << "count: " << num << " pos: " << pos << endl;
+    }
+
+    return num;
+}
+
 // wrapper class for tolower
 struct mytolower : public std::unary_function <int, int>
 {
@@ -605,6 +624,21 @@ int main(int argc, char* argv[])
 	   
 	   if (value.find("#") != string::npos)
 	      value = value.substr(0,value.find("#"));
+
+	    // check if value continues on next line
+	    if (charcount(value, '"') == 1)
+	    {
+		string nextline;
+		do
+		{
+		    fin_filename.getline(line,INPUT_LINE_LENGTH);
+		    nextline = (string)line;
+		    // add value on next line
+		    value = value + " " + trim(nextline);
+		} while (charcount(nextline, '"') <= 0);
+	    }
+
+
 	   if (value.find("\"") == string::npos)
 	      value = "\"" + value + "\"";
 	   varptr->setValue(value);
@@ -1210,3 +1244,4 @@ void showTree(const Tree& v)
       cout << "\n";
     }
 }
+
