@@ -458,7 +458,7 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 		    // save all changed files before start SuSEconfig
 		    foreach(`rc_file_path, rc_file_list, ``{ SCR( `Write(rc_file_path, nil)); });
 
-		    y2milestone("Starting SuSEconfig");
+		    y2milestone("Starting config scripts");
 
 
 		    any ret = 0;
@@ -468,9 +468,8 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 			SCR(`Execute(.target.bash, "echo /usr/sbin/rcpersonal-firewall start >/var/log/firewall.log 2>&1"));
 			SCR(`Execute(.target.bash, "/usr/sbin/rcpersonal-firewall stop >/var/log/firewall_stop.log 2>&1"));
 			SCR(`Execute(.target.bash, "/usr/sbin/rcpersonal-firewall start >>/var/log/firewall.log 2>&1"));
-			SCR(`Execute(.target.bash, "echo /sbin/rcSuSEfirewall2 start >>/var/log/firewall.log 2>&1"));
-			SCR(`Execute(.target.bash, "/sbin/rcSuSEfirewall2 stop  >>/var/log/firewall_stop.log 2>&1"));
-			SCR(`Execute(.target.bash, "/sbin/rcSuSEfirewall2 start >>/var/log/firewall.log 2>&1"));
+			SCR(`Execute(.target.bash, "echo /sbin/rcSuSEfirewall2 restart2 >>/var/log/firewall.log 2>&1"));
+			SCR(`Execute(.target.bash, "/sbin/rcSuSEfirewall2 restart2 >>/var/log/firewall.log 2>&1"));
 			UI(`CloseDialog());
 		    }
 		    else
@@ -499,10 +498,13 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 			    if ( !firewall_mode )
 			    {
 				text = SCR(`Read(.target.string,  "/var/log/SuSEconfig.log" ));
+				SCR(`Execute(.target.bash, "rm /var/log/SuSEconfig.log "));
+
 			    }
 			    else
 			    {
 				text = SCR(`Read(.target.string,  "/var/log/firewall.log" ));
+				SCR(`Execute(.target.bash, "rm /var/log/firewall.log"));
 			    }
 			    
 			    y2debug( "<<%1", text);
