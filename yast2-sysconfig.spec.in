@@ -43,6 +43,7 @@ Summary:	Powertweak configuration
 @configdir@/sysconfig.y2cc
 @ybindir@/parse_configs.pl
 @ydatadir@/sysedit.agent
+@ydatadir@/descriptions
 %doc @docdir@
 
 %files -n yast2-powertweak

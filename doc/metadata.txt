@@ -1,0 +1,184 @@
+
+               Sysconfig files 
+             ===================
+
+
+Author:  Ladislav Slezak <lslezak@suse.cz>
+Last change: Feb 5 2003
+
+
+Introduction
+------------
+
+  Yast2 sysconfig editor can edit /etc/sysconfig files. In this editor users
+can change values in easy way using GUI. Yast2 sysconfig editor needs more
+data (metadata) to display and edit sysconfig variables - metadata were stored
+in meta_sys.config file in yast2-sysconfig package. This file contained
+information about position in tree widget, allowed values, etc.
+
+  This separation between data and metadata caused inconsistency - new variable
+in sysconfig file had no metadata and removed variables still had metadata in
+yast2 package. (If variable was renamed both problems occured...)
+
+  There was also problem with maintenance of data and metadata: data were
+maintained by package maintainer but metadata by yast2 sysconfig maintainer.
+
+
+  It was decided to change this situation and make metadata part of
+sysconfig file.
+
+
+
+Metadata - description of variable
+----------------------------------
+
+  At first here is small example to see how metadata look. Here is
+part of /etc/sysconfig/boot file with new metadata:
+
+## Path:	System/Boot
+## Description:	Boot configuration
+## Type:	yesno
+## Default:	no
+# 
+# For interactive debugging of the startup process. If set
+# to "yes" the system will ask whether to confirm every
+# step of the boot process.
+#
+PROMPT_FOR_CONFIRM="no"
+
+
+  Metadata are part of variable description comment, metadata line begins with
+double hash character ("##"). It contains pairs <keyword>:<value>. More values
+can be specified in comma separated list, values in list which contain comma or
+space character have to be quoted (e.g. "value with spaces").
+
+  Long values can be splitted to more lines. To use multiple values use
+backslash (\) as a last character on the line. (Trailing backslash and double
+hash character at beginning of the next line will be removed and lines will be
+concatenated.)
+
+  Normal comment (after single hash characer) is displayed as help text,
+comment after three hash characer is ignored - part of comment can be hidden
+for yast2 user.
+
+  Metadata block have to be located at beginnig of comment block. Metadata can
+have any order in metadata block. (Exception is Description tag which is
+related to the previous Path tag.)
+
+
+Metadata keywords:
+
+    Path - where variable will be located in tree widget, valid for all next
+           variables in file - path have to be specified at least in first
+           variable in file. First character of subtree name should be upper
+	   case letter.
+	   
+	   Fillup utility adds missing variables at the end of output - if more
+	   templates are merged to one sysconfig file and each template have
+	   different path it is possible that variable with description comment
+	   will be stored in another location in target file (this can happen
+	   if variable is defined in more templates). In this case each path
+	   specification should be located at unique variable or each variable
+	   should have explicitly defined path.
+
+    Description - description of path, displayed if user selects path in tree instead
+	   of variable. It should contain description of whole subtree - each path
+	   specification should have description. If path has more than one
+	   description last found will be used.
+	   
+	   If more packages requires same base package then description should
+	   be located only in the base package. If packages are independent
+	   description should be located in separate file (located in yast2
+	   sysconfig package.)
+
+	   Desription value is related to previous Path keyword (which can be
+	   located even in previous variables).
+	   
+    Type - type of variable. This keyword specifies data type of value, it is
+           used for checking entered value.
+
+           Supported types:
+
+	    Type			Valid values
+	    ---------------------------------------------------------------------
+	    string		any value
+	    string(v1,v2,...)	value from list or any value
+	    list(v1,v2,...)	only value from list
+	    integer		integer
+	    integer(min:max)	integer in specified range (one limit can be missing,
+				use e.g. integer(0:) for values >= 0)
+	    boolean		only "true" or "false"
+	    yesno		only "yes" or "no"
+	    ip			IPv4 or IPv6 adress (e.g. 10.20.0.1)
+	    ip4			IPv4 adress
+	    ip6			IPv6 adress
+	    regexp(re)		only strings that matches regular expression re
+				(POSIX Extended Regular Expression), e.g. use
+				regexp(^0[0-7]*$) for octal values.
+		
+	    If this keyword is missing default value "string" will be used.
+
+    Default - default value. Valid value (allowed by keyword Type) which will be
+           set if user press [Default] button in yast2 module.
+
+
+  All keywords are optional.
+
+
+Predefined paths
+
+  All sysconfig variables will be divided into basic categories:
+
+Hardware - all hardware related settings (e.g. sysconfig files: sound, keyboard...)
+System - basic system configuration (boot, suseconfig, cron, console, security...)
+Desktop - desktop settings (kde, gnome, xdm...)
+Applications - java, ispell, man...
+Network - network services (apache, mail, nfs...)
+Other - other settings which does not fit into classes above (This section will
+    be used as fallback if no section is specified in sysconfig file - in this
+    case name of subtree will be file name.)
+
+  In path specification should be used one path from list above as first part
+of path (e.g. path: Hardware/Joystick, path: System/Console). Depth of path can be
+greater than two - e.g. System/Filesystem/Fam.
+
+  Description of predefined paths and paths defined in more templates is read
+from separate file, which is part of yast2 sysconfig module.
+  
+
+Missing metadata
+
+  If variable does not have any metadata previous will be used. If previous
+metadata is missing yast2 cannot offer predefined values to user. In this
+case will be used "Type: string" as default metadata so user can enter any value. 
+
+  
+  Example (/etc/sysconfig/joystick):
+
+#
+# Gameport module names
+# (typically "ns558" for legacy gameport support)
+#
+GAMEPORT_MODULE_0=""
+GAMEPORT_MODULE_1=""
+GAMEPORT_MODULE_2=""
+GAMEPORT_MODULE_3=""
+
+
+  Comment description (and metadata "Type: string") will be used for all
+four variables.
+
+
+
+Update problem
+--------------
+
+  At update old and new config files are merged by fillup utility, but old
+comments are preserved (user's comments will not be deleted or changed...),
+but metadata should be updated to new values - this requires some changes
+in fillup utility.
+
+  Sysconfig file must have a template - even files created by Yast, this is
+required for updating metadata at package update.
+
+
