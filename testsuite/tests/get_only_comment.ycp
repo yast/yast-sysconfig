@@ -1,0 +1,23 @@
+// Sysconfig module - testsuite
+//
+// get_only_comment tests
+//
+// $Id$
+//
+
+{
+
+include "testsuite.ycp";
+
+import "Sysconfig";
+
+TEST( ``(Sysconfig::get_only_comment(nil) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_only_comment("") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_only_comment("# sdfa  ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_only_comment("### gfh ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_only_comment("# dsfds") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_only_comment("# adsf \n# sdfwer") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_only_comment("\n\n#134\n   \n#34763\n  ##Path") ), [ $[], $[], $[] ], nil );
+
+}
+

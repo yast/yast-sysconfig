@@ -1,0 +1,24 @@
+// Sysconfig module - testsuite
+//
+// remove_whitespaces tests
+//
+// $Id$
+//
+
+{
+
+include "testsuite.ycp";
+
+import "Sysconfig";
+
+TEST( ``(Sysconfig::remove_whitespaces(nil) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("    ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("  var") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("  var  ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("v  a  r") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("va r ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::remove_whitespaces("var") ), [ $[], $[], $[] ], nil );
+
+}
+

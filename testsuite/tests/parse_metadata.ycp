@@ -1,0 +1,22 @@
+// Sysconfig module - testsuite
+//
+// parse_metadata tests
+//
+// $Id$
+//
+
+{
+
+include "testsuite.ycp";
+
+import "Sysconfig";
+
+TEST( ``(Sysconfig::parse_metadata(nil) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_metadata("") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_metadata("    ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_metadata("## Type: abc") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_metadata("## Type: abc\n## Default: x") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::parse_metadata("## Type: abc\n\n##Default:x\n\n ") ), [ $[], $[], $[] ], nil );
+
+}
+

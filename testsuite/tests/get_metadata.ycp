@@ -1,0 +1,24 @@
+// Sysconfig module - testsuite
+//
+// get_metadata tests
+//
+// $Id$
+//
+
+{
+
+include "testsuite.ycp";
+
+import "Sysconfig";
+
+TEST( ``(Sysconfig::get_metadata(nil) ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_metadata("") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_metadata(" ## Type: ip  ") ), [ $[], $[], $[] ], nil );
+
+TEST( ``(Sysconfig::get_metadata("## Type: ip  ") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_metadata("##Type: ip") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_metadata("## Type: sdf  \n## Default: sdf") ), [ $[], $[], $[] ], nil );
+TEST( ``(Sysconfig::get_metadata("\n\n## Type\n   \n##Def\n  ##Path") ), [ $[], $[], $[] ], nil );
+
+}
+
