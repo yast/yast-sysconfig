@@ -35,7 +35,7 @@
     //  Helptext                                                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
-  UI(``{  define HelpMsgStart()``{
+  UI(``{  global define HelpMsgStart()``{
       return( // helptext for popup 
 	     _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
 the central configuration file</b> of your SuSE Linux</p>"));
@@ -47,7 +47,7 @@ the central configuration file</b> of your SuSE Linux</p>"));
   //  Helptext                                                                        //
   //////////////////////////////////////////////////////////////////////////////////////
     
-  UI(``{ define HelpMsgBody() ``{
+  UI(``{ global define HelpMsgBody() ``{
       return(  // helptext for popup 
 	     _("<p>After you save your changes, this editor changes the variables in the
 corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/ *. Then it runs
@@ -74,7 +74,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
   //  Helptext                                                                        //
   //////////////////////////////////////////////////////////////////////////////////////
 
-  UI(``{ define HelpMsgNotice()``{
+  UI(``{ global define HelpMsgNotice()``{
       return( // helptext for popup 
 	     _("<p>Please note, that many of these variables are set by specialized YaST2
  configuration modules like the \"Network configuration</p>"));
@@ -87,7 +87,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
   // read the possible entrys of combobox, and mark the real value, so that it is shown as default //
   //-----------------------------------------------------------------------------------------------//
     
-  define getComboList( string key, map entry_map )
+  global define getComboList( string key, map entry_map )
       ``{
       // get real value of the entry
       map    key_map      = lookup( rc_config_keys, key, $[] );
@@ -117,7 +117,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
   // Read the description                                                                          //
   //-----------------------------------------------------------------------------------------------//
     
-  define getDescr( string key )
+  global define getDescr( string key )
       ``{
       map key_map          = lookup( rc_config_keys, key, $[] );
       any descr            = lookup(key_map, `descr, nil);
@@ -157,7 +157,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
     // Returns the typedef of the given key                                                          //
     //-----------------------------------------------------------------------------------------------//
-    define getTypedef( string key )
+    global define getTypedef( string key )
     ``{
              map key_map          = lookup( rc_config_keys, key, $[] );
              any typedef          = lookup(key_map, `typedef, nil);
@@ -180,7 +180,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
     // Returns the type of the given key                                                             //
     //-----------------------------------------------------------------------------------------------//
-    define getType( string key )
+    global define getType( string key )
     ``{
              map key_map          = lookup( rc_config_keys, key, $[] );
              any mytype          = lookup(key_map, `datatype, nil);
@@ -205,7 +205,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
     // Returns the necessary options for the ComboBox value depending on the type and typedef        //
     //-----------------------------------------------------------------------------------------------//
-    define getComboBoxOption( string key )
+    global define getComboBoxOption( string key )
 	``{
 	if ( getType(key) == "boolean" )        // boolean: distinction of cases
 	{
@@ -247,7 +247,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
 
     UI( ``{
-	define ErrorMessage() ``{
+	global define ErrorMessage() ``{
 	    // ok pushbutton: confirm the dialog
 	    OpenDialog(
 		`opt(`decorated),
@@ -276,7 +276,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
     
     UI( ``{
-	define DisplayLogFile( string msg_text ) ``{
+	global define DisplayLogFile( string msg_text ) ``{
 	    term text = `RichText( `opt(`plainText), msg_text );	  
 	    OpenDialog(`opt ( `decorated ),
 		       `VBox (`HSpacing(75),
@@ -302,7 +302,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
 
     UI( ``{
-	define AskShowLog( ) ``{
+	global define AskShowLog( ) ``{
 	    OpenDialog(`opt(`decorated), 
 		       `VBox( `Heading( _("SuSEConfig Logging" )) ,
 			      `VBox( `Label( _("Your changes are set, and SuSEconfig was run.\nWould now you like to see the logging of SuSEConfig?" )),
@@ -326,7 +326,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //-----------------------------------------------------------------------------------------------//
 
     UI( ``{
-	define WaitSuSEconfig( ) ``{
+	global define WaitSuSEconfig( ) ``{
 	    OpenDialog(`opt(`decorated), 
 		       `VBox( `Heading( _("SuSEConfig is running ..." )) ,
 			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time." ))
@@ -342,7 +342,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Predefined standard dialog for 5 entries                                                      //
     //-----------------------------------------------------------------------------------------------//
 
-    define getD5Dialog( list entry_list )
+    global define getD5Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
@@ -429,7 +429,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Predefined standard dialog for 4 entries                                                      //
     //-----------------------------------------------------------------------------------------------//
 
-    define getD4Dialog( list entry_list )
+    global define getD4Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
@@ -509,7 +509,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Predefined standard dialog for 3 entries                                                      //
     //-----------------------------------------------------------------------------------------------//
 
-    define getD3Dialog( list entry_list )
+    global define getD3Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
@@ -573,7 +573,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Predefined standard dialog for 2 entries                                                      //
     //-----------------------------------------------------------------------------------------------//
 
-    define getD2Dialog( list entry_list )
+    global define getD2Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
@@ -621,7 +621,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Predefined standard dialog for one entrie                                                     //
     //-----------------------------------------------------------------------------------------------//
    
-    define getD1Dialog( list entry_list )
+    global define getD1Dialog( list entry_list )
 	``{
 
 	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
@@ -658,7 +658,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Predefined standard dialog for displaying only a message                                      //
     //-----------------------------------------------------------------------------------------------//
    
-    define getDirDialog( string curr_text )
+    global define getDirDialog( string curr_text )
 	``{
 	return( `VBox(`HSpacing(60),`VSpacing(1), `RichText( curr_text) ));
     };
@@ -668,7 +668,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     // Layout Mainwindow                                                                             //
     //-----------------------------------------------------------------------------------------------//
 
-    define getMainWindowTerm( list tree_data )
+    global define getMainWindowTerm( list tree_data )
 	``{
 	return(
 	    // Main dialog edit rc_config 
@@ -691,7 +691,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 
     
     UI(``{
-	define SearchDlg()
+	global define SearchDlg()
 	    ``{
 	    // helptext for popup search
 	    string helptextCR = _("Type the word related to the information you are looking for"); 
@@ -765,7 +765,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 
     
     UI(``{
-	define HelpDlg()
+	global define HelpDlg()
 	    ``{
 	    string helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
 
@@ -801,7 +801,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 
     
     UI(``{
-	define SaveDlg( list entry_list )
+	global define SaveDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
 	    string helptextCR = _("Here you see the values, YaST2 will change.
@@ -878,7 +878,7 @@ Choose \"Cancel\" to edit the values again");
 
     
     UI(``{
-	define GotoDlg( list entry_list )
+	global define GotoDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
 	    string helptextCR = _("Here you see the results of your search. If you see your item you have searched for, click at this item and then click \"OK\", else click \"Cancel\" to quit the search."); 

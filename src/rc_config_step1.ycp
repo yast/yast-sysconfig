@@ -108,7 +108,7 @@
     /////                                    D E F I N E S                                       /////
     //////////////////////////////////////////////////////////////////////////////////////////////////
     
-    define getDirDescr( string key )
+    global define getDirDescr( string key )
     ``{
 	  string|void descr = getDescr( key );
 
