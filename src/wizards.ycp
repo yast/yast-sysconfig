@@ -25,7 +25,7 @@ include "sysconfig/dialogs.ycp";
  * Main workflow of the sysconfig configuration
  * @return sequence result
  */
-global define symbol MainSequence() ``{
+ define symbol MainSequence() ``{
 
     map aliases = $[
 	"main"	:   ``(MainDialog())
@@ -49,7 +49,7 @@ global define symbol MainSequence() ``{
  * For use with autoinstallation.
  * @return sequence result
  */
-global define symbol SysconfigAutoSequence() ``{
+ define symbol SysconfigAutoSequence() ``{
     Wizard::CreateDialog();
 
     symbol ret = MainSequence();
@@ -62,7 +62,7 @@ global define symbol SysconfigAutoSequence() ``{
  * Whole configuration of sysconfig
  * @return sequence result
  */
-global define boolean SysconfigSequence() ``{
+ define boolean SysconfigSequence() ``{
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],

@@ -18,7 +18,7 @@ import "Popup";
  * If modified, ask for confirmation
  * @return true if abort is confirmed
  */
-global define boolean ReallyAbort() ``{
+ define boolean ReallyAbort() ``{
     return !Sysconfig::Modified() || Popup::ReallyAbort(true);
 }
 
