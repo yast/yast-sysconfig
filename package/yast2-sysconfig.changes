@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Feb 23 17:42:03 CET 2004 - lslezak@suse.cz
+
+- fixed reading values containing '=' character (#34864)
+- fixed editing values with '\$' substring (#34809)
+- version 2.9.7
+
+-------------------------------------------------------------------
 Fri Feb 13 10:55:54 CET 2004 - lslezak@suse.cz
 
 - read /etc/sysconfig/powersave/* files
