@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar 10 09:40:37 CET 2003 - lslezak@suse.de
+
+- fixed ifcfg.template location, comment reading from template
+  (for /etc/sysconfig/network/ifcfg-* files)
+- version 2.7.11
+
+-------------------------------------------------------------------
 Wed Mar  5 08:33:05 CET 2003 - lslezak@suse.de
 
 - ignore escaped slash in Path tag (#24571)
