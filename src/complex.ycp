@@ -724,6 +724,23 @@ Really set this value?
     return table_content;
 }
 
+    list<map> GenerateTree(list<map> Tree, string parent, list<list> input) {
+
+        foreach(list i, input, ``{
+                string id = i[0,0]:"";
+                string title = i[1]:"";
+                boolean enabled = i[2]:false;
+                list<list> children = i[3]:[];
+                Tree = Wizard::AddTreeItem(Tree , parent,  title, id );
+                if (size(children) > 0 ) {
+                    Tree = GenerateTree(Tree, id, children);
+                }
+        });
+        return Tree;
+    }
+
+
+
 /**
  * Display main configuration dialog
  * @return dialog result
@@ -736,21 +753,49 @@ Really set this value?
 	 `HStretch(),
 	 `PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()),
 	 `HStretch(),
-	  // Translation: push button label
+	 // Translation: push button label
 	 `PushButton(`id(`search), _("&Search")),
 	 `HStretch(),
 	 `PushButton(`id(`next), `opt(`key_F10), Label::FinishButton())
     );
 
     // tree widget label
-    term help_space_content = `Tree(`id(`tree), `opt(`notify, `vstretch), _("&Configuration Options"), Sysconfig::tree_content);
+    // term help_space_content = `Tree(`id(`tree), `opt(`notify, `vstretch), _("&Configuration Options"), Sysconfig::tree_content);
 
-    Wizard::OpenCustomDialog(help_space_content, button_box);
+    // Wizard::OpenCustomDialog(help_space_content, button_box);
+    Wizard::CreateTreeDialog();
+    list<map> Tree = GenerateTree([], "", Sysconfig::tree_content) ;
+    Wizard::CreateTree(Tree, _("&Configuration Options"));
+
+    string helptext = (Sysconfig::powertweak_mode == true) ?
+
+		// help text (powertweak mode)
+		_("<p>After you save your changes, this editor changes the variables in the
+/etc/powertweak/tweaks file. Then it restarts the powertweak daemon, which activates changes.</p>
+")
+
+	    :
+	    (
+		// helptext for popup - part 1/3
+		_("<p>After you save your changes, this editor changes the variables in the
+corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,
+and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
+") +
+
+                // helptext for popup - part 2/3
+		_("<p><b>Important:</b> You still can edit each individual configuration file manually. The name of file is displayed in the variable description.</p>") +
+
+                // helptext for popup - part 3/3
+		_("<p> SuSEconfig saves a checksum of each configuration file, so it can detect if
+ you have manually changed any of them. If you have changed a configuration file manually,
+ it will not touch it.</p>
+")
+	    );
 
     Wizard::SetContents(_("/etc/sysconfig Editor"),
 			    `VBox(
 				// label widget
-				`Left(`Heading(`id(`heading), `opt(`hstretch), _("Current Selection: "))),
+				`Left(`Label(`id(`heading), `opt(`hstretch), _("Current Selection: "))),
 				`VSpacing(0.5),
 				`HBox(
 				    `HWeight(1,
@@ -778,16 +823,26 @@ Really set this value?
 					`PushButton(`id(`add_new), `opt(`key_F3), _("&Add New Variable..."))
 				    ) : `Empty()
 	),
-	nil, true, true
-    );
+	helptext, true, true);
 
+    if (UI::WidgetExists(`id(`back)))
+    {
+        UI::ChangeWidget(`id(`back), `Label,  _("&Search") );
+    }
+    UI::ChangeWidget(`id(`next), `Label, Label::FinishButton() );
+    if (UI::WidgetExists(`id(`wizardTree)))
+    {
+        UI::ReplaceWidget(`id(`rep_button_box ), button_box );
+    }
     Wizard::SetDesktopIcon("sysconfig");
 
-    symbol ret = `dummy;
+    any ret = nil;
 
-    while(ret != `cancel && ret != `abort && ret != `next && ret != `back)
+    while(ret != `cancel && ret != `abort && ret != `next )
     {
-	ret = (symbol)Wizard::UserInput();
+        map event = UI::WaitForEvent();
+        ret = event["ID"]:nil;
+
 
 	// "Default" button
 	if (ret == `def)
@@ -825,7 +880,7 @@ Choose \"Cancel\" to edit the values again.
 		Sysconfig::ConfirmActions = result["checkbox"]:false;
 	    }
 	}
-	else if (ret == `search)
+	else if (ret == `back || ret == `search) // This is for Search actually FIXME
 	{
 	    map search_parameters = display_search_dialog();
 
@@ -852,10 +907,14 @@ Choose \"Cancel\" to edit the values again.
 			if (sel != nil)
 			{
 			    // select variable in the tree
-			    UI::ChangeWidget(`id(`tree), `CurrentItem, sel);
+			    //UI::ChangeWidget(`id(`tree), `CurrentItem, sel);
+                            Wizard::SelectTreeItem(sel);
 
 			    // display selected variable
-			    ret = `tree;
+                            if (UI::WidgetExists(`id(`wizardTree)))
+			        ret = `wizardTree;
+                            else
+                                ret = sel;
 			}
 		    }
 		}
@@ -866,53 +925,28 @@ Choose \"Cancel\" to edit the values again.
 		}
 	    }
 	}
-	else if (ret == `help)
-	{
-	    string helptext = (Sysconfig::powertweak_mode == true) ?
-
-		// help text (powertweak mode)
-		_("<p>After you save your changes, this editor changes the variables in the
-/etc/powertweak/tweaks file. Then it restarts the powertweak daemon, which activates changes.</p>
-")
-
-	    :
-	    (
-		// helptext for popup - part 1/3
-		_("<p>After you save your changes, this editor changes the variables in the
-corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,
-and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
-") +
-
-                // helptext for popup - part 2/3
-		_("<p><b>Important:</b> You still can edit each individual configuration file manually. The name of file is displayed in the variable description.</p>") +
-
-                // helptext for popup - part 3/3
-		_("<p> SuSEconfig saves a checksum of each configuration file, so it can detect if
- you have manually changed any of them. If you have changed a configuration file manually,
- it will not touch it.</p>
-")
-	    );
-
-
+        else if (ret == `help)
+        {
             UI::OpenDialog( `opt(`decorated ),
-		`HBox( `VSpacing(16),
-		       `VBox(
-			   `HSpacing(60),
-			   // popup window header
-			   `Heading(_("Help")),
-			   `VSpacing(0.5),
-			   `RichText(helptext),
-			   `VSpacing(1.5),
-			    // push button label
-			   `PushButton(`id(`ok), `opt(`default, `key_F10), Label::OKButton())
-			   )
-		    )
+                `HBox( `VSpacing(16),
+                       `VBox(
+                           `HSpacing(60),
+                           // popup window header
+                           `Heading(_("Help")),
+                           `VSpacing(0.5),
+                           `RichText(helptext),
+                           `VSpacing(1.5),
+                            // push button label
+                           `PushButton(`id(`ok), `opt(`default, `key_F10), Label::OKButton())
+                           )
+                    )
             );
 
             UI::SetFocus(`id(`ok));
             UI::UserInput();
             UI::CloseDialog();
-	}
+        }
+
 	else if (ret == `abort || ret == `cancel)
 	{
 	    if (!ReallyAbort())
@@ -953,11 +987,12 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 	    }
 	}
 
-	if (ret == `tree)
+	if (ret == `wizardTree || is(ret, string))
 	{
 	    check_set_current_value(false);
 
-	    string selected = (string)UI::QueryWidget(`id(`tree), `CurrentItem);
+	    // string selected = (string)UI::QueryWidget(`id(`tree), `CurrentItem);
+            string selected = Wizard::QueryTreeItem();
 	    selected_variable = selected;
 	    y2milestone("Selected: %1", selected);
 
@@ -981,7 +1016,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 
     UI::CloseDialog();
 
-    return ret;
+    return (symbol)ret;
 }
 
 }

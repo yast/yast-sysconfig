@@ -56,7 +56,7 @@ global map parse_param = $[
 
 global boolean write_only = false;
 
-global list tree_content = [];
+global list<list> tree_content = [];
 
 global boolean powertweak_mode = false;
 
@@ -184,6 +184,7 @@ global define list<string> search(map params, boolean show_progress) ``{
 
     if (search_string == "")
     {
+        UI::CloseDialog();
 	return found;
     }
 
