@@ -56,3 +56,4 @@ Name[sl]=Urejevalnik za datoteke v imeniku /etc/sysconfig
 GenericName[sl]=Spremeni nastavitve v datotekah v imeniku /etc/sysconfig
 Name[tr]=/etc/sysconfig dosyaları düzenleyicisi
 GenericName[tr]=/etc/sysconfig yapılandırma dosyalarınıdaki ayarları değiştirir
+X-KDE-SubstituteUID=true
