@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun 15 10:44:19 CEST 2004 - lslezak@suse.cz
+
+- don't escape values in single quotes (#41984)
+- version 2.10.1
+
+-------------------------------------------------------------------
 Fri Jun 11 12:52:57 CEST 2004 - lslezak@suse.cz
 
 - read also files from /etc/sysconfig/uml/ (UML config. directory)

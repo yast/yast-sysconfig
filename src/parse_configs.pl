@@ -461,6 +461,13 @@ for my $fname (@list)
 	    }
 	    
 	    $actions{$1.'$'.$fname} = \%tmp;
+
+	    # check whether single quotes are used,
+	    # values in single quotes won't be escaped by yast
+	    if ($line =~ /^\s*([-\w\/:]*)\s*=\s*'.*'/)
+	    {
+		$tmp{'SingleQt'} = 1;
+	    }
 	}
 	# SuSEconfig script specification
 	elsif ($line =~ /^##\s*Config\s*:\s*((\s*\S+)*)\s*$/)
