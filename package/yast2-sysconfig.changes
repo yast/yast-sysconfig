@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep 15 12:33:31 CEST 2003 - lslezak@suse.de
+
+- fixed empty ("") value bug (#30644)
+- documentation update
+- version 2.8.7
+
+-------------------------------------------------------------------
 Fri Sep 12 20:28:56 CEST 2003 - nashif@suse.de
 
 - Dont turn Progress on in autoinst mode
