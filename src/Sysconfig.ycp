@@ -19,6 +19,7 @@ import "Progress";
 import "Report";
 import "Summary";
 import "Directory";
+import "Product";
 
 include "sysconfig/routines.ycp";
 include "network/ip.ycp";
@@ -51,6 +52,11 @@ global map parse_param = $[
 global list tree_content = [];
 
 global boolean powertweak_mode = false;
+
+// map of actions to start when variable is modified
+map actions = $[];
+
+global boolean ConfirmActions = false;
 
 /**
  * Data was modified?
@@ -591,7 +597,7 @@ global define map get_description(string varid) ``{
 
     if (deflt != nil)
     {
-	list parsed = parse_options(deflt, parse_param);
+	list parsed = ParseString(deflt, parse_param);
 	meta["Default"] = parsed[0]:deflt;
     }
 
@@ -895,7 +901,7 @@ global define symbol set_value(string variable, string new_value, boolean force,
 		else if (regexpmatch(type, "^list\\(.*\\)$"))
 		{
 		    string listopt = regexpsub(type, "^list\\((.*)\\)$", "\\1");
-		    list parsed_opts = parse_options(listopt, parse_param);
+		    list parsed_opts = ParseString(listopt, parse_param);
 
 		    valid = contains(parsed_opts, new_value);
 		}
@@ -1060,6 +1066,9 @@ global define boolean Read(list(string) files) ``{
 	y2warning("Redefined variables: %1", redefined_vars);
     }
 
+    // read map of actions
+    actions = parsed_output[4]:$[];
+
     return true;
 }
 
@@ -1077,10 +1086,12 @@ global define boolean Write() ``{
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
 	// progress bar item
-	    _("Write and activate the settings"),
+	    _("Write the new settings"),
+	    _("Activate the changes"),
 	], [
 	// progress bar item
-	    _("Writing and activating the settings..."),
+	    _("Writing the new settings..."),
+	    _("Activating the changes..."),
 	// progress bar item
 	    _("Finished")
 	],
@@ -1097,36 +1108,7 @@ global define boolean Write() ``{
 	    path value_path = add(add(.syseditor.value, file), name);
 
 	    boolean written = SCR::Write(value_path, new_val);
-	    if (written == true)
-	    {
-		// activate changes in normal mode, (in powertweak mode activate all changes at the end of function)
-		if (powertweak_mode == false)
-		{
-		    // flush changes
-		    SCR::Write(.syseditor, nil);
-
-		    // activate changes
-		    map descr = get_description(vid);
-		    string ifchanged = descr["Ifchanged"]:"";
-		    if (ifchanged != "" && ifchanged != nil)
-		    {
-			map output = SCR::Execute(.target.bash_output, ifchanged);
-			integer exit = output["exit"]:0;
-
-			y2milestone("Command: '%1', result: %2, stdout: %3, stderr: %4", ifchanged,
-			    exit, output["stdout"]:"", output["stderr"]:""
-			);
-
-			if (exit != 0)
-			{
-			    // error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
-			    Report::Error(sformat(_("Activation script for variable %1\n (file %2) failed"), name, file ));
-			    ret = false;
-			}
-		    }
-		}
-	    }
-	    else
+	    if (written == false)
 	    {
 		// error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
 		Report::Error(sformat(_("Saving variable %1 to the file %2 failed"), name, file));
@@ -1137,17 +1119,205 @@ global define boolean Write() ``{
 	}
     );
 
+    // flush changes
+    SCR::Write(.syseditor, nil);
+
+/*    TODO: remove this, update powertweak file generator? No, problem at update...
     if (powertweak_mode == true)
     {
-	// flush changes
-	SCR::Write(.syseditor, nil);
-
 	y2milestone("Activating powertweak configuration");
 	SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
 
 	// activate powertweak at startup
 	Runlevel::ServiceAdjust("powertweakd", "enable");
+    }*/
+
+    // remember all actions - start each action only once
+    map Configmodules = $[];
+    map Restarted = $[];
+    map Reloaded = $[];
+    map Commands = $[];
+    // will be complete SuSEconfig started?
+    boolean CompleteSuSEconfig = false;
+
+    // SuSEconfig script name
+    string SuSEconfigName = (Product::unitedlinux == true) ? "ULconfig" : "SuSEconfig";
+
+    foreach (string vid, string new_val, modified_variables, ``{
+	// get activation map for variable
+	map activate = actions[vid]:$[];
+
+	// TODO parse options (it's a list)
+	string restart_service = activate["Rest"]:nil;
+	string reload_service = activate["Reld"]:nil;
+	string config_module = activate["Cfg"]:nil;
+	string bash_command = activate["Cmd"]:nil;
+
+	if (config_module == nil && reload_service == nil && restart_service == nil && bash_command == nil && CompleteSuSEconfig == false)
+	{
+	    // start complete SuSEconfig (backward compatibility)
+	    CompleteSuSEconfig = true;
+	}
+	else
+	{
+	    if (restart_service != nil)
+	    {
+		list parsed = ParseString(restart_service, parse_param);
+		foreach(string s, parsed,
+		    ``{
+			Restarted[s] = true;
+		    }
+		);
+	    }
+
+	    if (reload_service != nil)
+	    {
+		list parsed = ParseString(reload_service, parse_param);
+		foreach(string s, parsed,
+		    ``{
+			Reloaded[s] = true;
+		    }
+		);
+	    }
+
+	    if (config_module != nil)
+	    {
+		list parsed = ParseString(config_module, parse_param);
+		foreach(string s, parsed,
+		    ``{
+			Configmodules[s] = true;
+		    }
+		);
+	    }
+
+	    if (bash_command != nil)
+	    {
+		Commands[bash_command] = true;
+	    }
+	}
+    });
+
+    // now start required activation commands
+    boolean abort = false;
+
+    // start SuSEconfig
+    if (CompleteSuSEconfig == true)
+    {
+	// action command is missing, start complete SuSEconfig (backward compatibility)
+	string start_command = sformat("/sbin/%1", SuSEconfigName);
+	string confirm = sformat("Complete %1 will be started", SuSEconfigName);
+	string label = sformat(_("Starting %1 ..."), SuSEconfigName);
+	string error = sformat(_("Script %1 failed"), SuSEconfigName);
+
+	if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
+	{
+	    return false;
+	}
     }
+    else if (size(Configmodules) > 0)
+    {
+	// start only required SuSEconfig modules
+	foreach(string modulename, boolean dummy, Configmodules,
+	``{
+	    if (abort) return;
+
+	    // action command is missing, start complete SuSEconfig (backward compatibility)
+	    string start_command = sformat("/sbin/%1 --module %2", SuSEconfigName, modulename);
+	    string confirm = sformat("%1 module %2 will be started", SuSEconfigName, modulename);
+	    string label = sformat(_("Starting %1 module %2..."), SuSEconfigName, modulename);
+	    string error = sformat(_("%1 module %2 failed"), SuSEconfigName, modulename);
+
+	    if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
+	    {
+		abort = true;
+	    }
+	}
+	);
+    }
+
+    if (abort) return false;
+
+    if (size(Reloaded) > 0)
+    {
+	// restart required services
+	foreach(string servicename, boolean dummy, Reloaded,
+	``{
+	    if (abort) return;
+	    // check whether service is running
+	    string check_command = sformat("/etc/init.d/%1 status", servicename);
+	    integer result = SCR::Execute(.target.bash, check_command);
+	    y2milestone("%1 service status: %2", servicename, result);
+
+	    if (result == 0)
+	    {
+		// service is running, reload it
+		string start_command = sformat("/etc/init.d/%1 reload", servicename);
+		string confirm = sformat("Service %1 will be reloaded", servicename);
+		string label = sformat(_("Reloading service %1..."), servicename);
+		string error = sformat(_("Reload of the service %1 failed"), servicename);
+
+		if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
+		{
+		    abort = true;
+		}
+	    }
+	}
+	);
+    }
+
+    if (abort) return false;
+
+    if (size(Restarted) > 0)
+    {
+	// restart required services
+	foreach(string servicename, boolean dummy, Restarted,
+	``{
+	    // check whether service is running
+	    string check_command = sformat("/etc/init.d/%1 status", servicename);
+	    integer result = SCR::Execute(.target.bash, check_command);
+	    y2milestone("%1 service status: %2", servicename, result);
+
+	    if (result == 0)
+	    {
+		// service is running, restart it
+		string start_command = sformat("/etc/init.d/%1 restart", servicename);
+		string confirm = sformat("Service %1 will be restarted", servicename);
+		string label = sformat(_("Restarting service %1..."), servicename);
+		string error = sformat(_("Restart of the service %1 failed"), servicename);
+
+		if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
+		{
+		    abort = true;
+		}
+	    }
+	}
+	);
+    }
+
+    if (size(Commands) > 0)
+    {
+	// start generic commands
+	foreach(string cmd, boolean dummy, Commands,
+	``{
+	    if (size(cmd) > 0)
+	    {
+		string confirm = _("A command will be executed");
+		string label = sformat(_("Starting command: %1..."), cmd);
+		string error = sformat(_("Command %1 failed"), cmd);
+
+		if (StartCommand(cmd, label, error, confirm, ConfirmActions) == `abort)
+		{
+		    abort = true;
+		}
+	    }
+	}
+	);
+    }
+
+    if (abort) return false;
+
+    // set 100% in progress bar
+    Progress::NextStep();
 
     return ret;
 }
@@ -1264,6 +1434,73 @@ global define list Summary() ``{
     return summary;
 }
 
+define symbol ConfirmationDialog(string message, string command) ``{
+    UI::OpenDialog(
+	`opt(`decorated),
+	`VBox(
+	    `Label(message),
+	    (size(command) > 0) ? `Label(_("Command: ") + command) : `Empty(),
+	    `VSpacing(0.5),
+	    `HBox(
+		`PushButton(`id(`cont), UI::ContinueButtonLabel()),
+		// button label
+		`PushButton(`id(`skip), _("S&kip")),
+		`PushButton(`id(`abort), UI::AbortButtonLabel())
+	    )
+	)
+    );
+
+    symbol ret = nil;
+
+    while (ret != `cont && ret != `skip && ret != `abort)
+    {
+	ret = UI::UserInput();
+
+	if (ret == `close)
+	{
+	    ret = `abort;
+	}
+    }
+
+    UI::CloseDialog();
+
+    return ret;
+}
+
+define symbol StartCommand(string start_command, string label, string error, string confirm, boolean confirmaction) ``{
+    if (size(start_command) == 0)
+    {
+	return `success;
+    }
+
+    // set progress bar label
+    Progress::Title(label);
+
+    if (confirmaction == true)
+    {
+	// show confirmation dialog
+	symbol input = ConfirmationDialog(confirm, start_command);
+
+	if (input != `cont)
+	{
+	    return input;
+	}
+    }
+
+    y2milestone("Starting: %1", start_command);
+
+    map output = SCR::Execute(.target.bash_output, start_command);
+    integer exit = output["exit"]:0;
+    y2milestone("Result: %1", exit);
+
+    if (exit != 0)
+    {
+	Report::Error(error);
+	return `failed;
+    }
+
+    return `success;
+}
 
 /* EOF */
 }
