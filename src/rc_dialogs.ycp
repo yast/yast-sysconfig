@@ -71,11 +71,11 @@
     ``{
              map key_map          = lookup( rc_config_keys, key, $[] );
              any descr            = lookup(key_map, `descr, `not_read);
-	     
-	     if ( descr  == `not_read )
+
+	     y2log(descr);
+	     if ( descr == nil )
 	     {
-	     	descr = SCR( `Read(topath(sformat("%1.comment", lookup( key_map,`path,"")))));
-		if ( descr == nil ) descr = "";
+		descr = "";
 
 	     	// save it
 	     	key_map        = add( key_map, `descr, descr);
@@ -122,13 +122,13 @@
 	  
 	  string help_text = "";
 	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p><b>%5: </b>%6</p>",
+	  help_text = sformat( "<b>%1:</b><p>%2<p><b>%3:</b><p>%4</p><p><b>%5:</b><p>%6</p>",
 			       l1_key, getDescr(l1_key),
 			       l1_key, getDescr(l1_key),
 			       l2_key, getDescr(l2_key),
 			       l3_key, getDescr(l3_key)   );
 			       
-	  help_text = sformat( "%1<p><b>%2: </b>%3</p><p><b>%4: </b>%5</p>", help_text,
+	  help_text = sformat( "%1<p><b>%2:</b><p>%3</p><p><b>%4:</b><p>%5</p>", help_text,
 			       l4_key, getDescr(l4_key),
 			       l5_key, getDescr(l5_key));
 
@@ -171,12 +171,12 @@
 	  
 	  string help_text = "";
 	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p><b>%5: </b>%6</p>",
+	  help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
 			       l1_key, getDescr(l1_key),
 			       l2_key, getDescr(l2_key),
 			       l3_key, getDescr(l3_key)   );
 			       
-	  help_text = sformat( "%1<p><b>%2: </b>%3</p>", help_text,
+	  help_text = sformat( "%1<p><b>%2:</b><br>%3</p>", help_text,
 			       l4_key, getDescr(l4_key));
 	  
 	  return( 
@@ -213,7 +213,7 @@
 	  
 	  string help_text = "";
 	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p><b>%5: </b>%6</p>",
+	  help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
 			       l1_key, getDescr(l1_key),
 			       l2_key, getDescr(l2_key),
 			       l3_key, getDescr(l3_key)   );
@@ -249,7 +249,7 @@
 	  
 	  string help_text = "";
 	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p>",
+	  help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p>",
 			       l1_key, getDescr(l1_key),
 			       l2_key, getDescr(l2_key)   );
 			       
@@ -271,6 +271,7 @@
    
    define getD1Dialog( list entry_list )
    ``{
+       y2log( entry_list );
 
 	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
 
@@ -280,7 +281,7 @@
 	  
 	  string help_text = "";
 	  
-	  help_text = sformat( "<b>%1: </b>%2", l1_key, getDescr(l1_key)   );
+	  help_text = sformat( "<b>%1:</b><br>%2", l1_key, getDescr(l1_key)   );
 			       
 	  return( 
 	  `VBox(`HSpacing(60),`VSpacing(1.2),

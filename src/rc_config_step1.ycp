@@ -146,8 +146,37 @@
       
     ];
 
+    
+    define xy2debug( string s) ``{ y2log(.milestone, "s", 1, s); };
+    
+    xy2debug ( "vor read eddb");
+    list rc_config_eddb_raw = SCR( `Read( .suseconfig.meta_rc_config ));
+    xy2debug ( "nach read eddb");
 
-
+    rc_config_eddb = maplist( `entry, rc_config_eddb_raw, 
+       ``{
+	     string|void enum_list = lookup( entry, `list, nil );
+	     if ( enum_list == nil )
+	     {
+		return( $[
+			  `key     :lookup(entry, "key"),
+			  `property:lookup(entry, "property"),
+			  `value   :lookup(entry,"value")
+		]);
+	     }
+	     else
+	     {
+		return( $[
+			  `key     :lookup(entry, "key"),
+			  `property:lookup(entry, "property"),
+			  `value   :lookup(entry,"value"),
+			  `list    :splitstring(enum_list, ",") 
+		]);
+	     }
+       });
+     xy2debug ( "nach ma eddb");
+    
+	     
    
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    // Main helptext                                                                                 //
@@ -167,7 +196,7 @@
     /////////////////////////////////////////////////////////////////
     //  Read the list of all rc_config variables
     //  get the data of all varaiables and put them into the table
-    /////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////// 
 
 
      map  rc_config_keys = $[];
@@ -254,28 +283,6 @@ set by specialized configuration modules like the \"Network configuration\"<\p>"
 		
 		// AbC matches abc
                 if ( ignore ) search_str = tolower( search_str );
-		
-                // first read all descr, if this is not done
-		if ( ndescr && descr_read )
-		{
-		    rc_config_keys = mapmap( `key, `kmap, rc_config_keys,
-			``{
-			    string descr = SCR( `Read(topath(sformat("%1.comment", lookup( kmap,`path,"")))));
-			    return([key, add( kmap, `descr, descr )]);
-  			  });
-		    descr_read = false;
-		}
-		
-                // first read all value, if this is not done
-		if ( nvalue && value_read )
-		{
-		    rc_config_keys = mapmap( `key, `kmap, rc_config_keys,
-			``{
-			    string value = SCR( `Read(topath(lookup( kmap,`path,""))));
-			    return([key, add( kmap, `value, value )]);
-  			  });
-		    value_read = false;
-		}
 		
 		// The User want to serach fo the string "search_str"
 		list  entry_list = maplist( `linekey, `line, rc_config_keys,

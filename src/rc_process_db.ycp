@@ -38,8 +38,11 @@
 //                              With this hierarchie, compute the widget tree  
 //-----------------------------------------------------------------------------------------------//
 
+   
 define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 ``{
+
+   integer MAX_AUTO_DIALOG_KEYS = 5;
 
   
    list testdata_rc_config_eddb =
@@ -80,7 +83,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 
    if ( lib_test_mode )
    {
-      rc_config_eddb = testdata_rc_config_eddb;
+      // rc_config_eddb = testdata_rc_config_eddb;
       // rc_config_keys = testdata_rc_config_keys;
    }
 
@@ -300,8 +303,36 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
         counter = counter -1;
         return(select( rc_config_branch_hash, counter ));
      });  
-	
 
+   
+   //////////////////////////////////////////////////////
+   // rc_config_keys example:
+   // 
+   //    $[
+   //   "ARGUS_INTERFACE" : $[
+   //     `branch : "/etc/argus_interface",
+   //     `descr : "\n#\n# What interface should argus listen?\n#\n",
+   //     `entrynb : 1,
+   //     `parent : "argus_interface",
+   //     `path : .rc.system.ARGUS_INTERFACE,
+   //     `value : "eth0"
+   //   ],
+   //   "ARGUS_LOGFILE" : $[
+   //     `branch : "/etc/argus_logfile",
+   //     `descr : "\n#\n# Where to write the argus logfile? (Remember to check this file\n# periodica
+   //     `entrynb : 1,
+   //     `parent : "argus_logfile",
+   //     `path : .rc.system.ARGUS_LOGFILE,
+   //     `value : "/var/log/argus.log"
+   //   ],
+   //     "base" : $[
+   //     `branch : "/",
+   //     `dialogtype : "dir"
+   //   ],
+   // ...
+
+   SCR(`Write (.dumpto.tmp.treev1, rc_config_keys ));
+   
    // _reduced: like other hash, but only dir and dialogs
    list rc_config_branch_hash_reduced = [];
    
@@ -328,7 +359,49 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 		if ( lookup( curr_map, `dialogtype, nil) == nil )
 		{
 		    // automaic dialog
-		    change( curr_map, `dialogtype, sformat( "d%1", last_entrynb));
+		   if ( last_entrynb > MAX_AUTO_DIALOG_KEYS )
+		   {
+
+		      // Ooohps we have mor than max. dialogs
+		      // we have to insert subdialogs for all keys
+		      //
+		      // - patch the rc_config_keys: ;-) its  the main db
+		      // - patch the rc_config_branch_hash
+		      
+		      map sub_map = filter ( `key, `rc_map, rc_config_keys,``( lookup(rc_map, `branch, "") == branch ) );
+		      
+		      // faster?  change rc_config_keys with mapmap
+		      foreach( `key, `rc_map, sub_map,
+		      ``{
+			   map rc_map_reference = lookup( rc_config_keys, key     );
+  			   string branch        = lookup( rc_map,         `branch);
+			   string new_branch    = sformat( "%1/%2", branch, tolower(key));
+			   
+			   change( rc_map_reference,       `branch,       new_branch);
+			   change( rc_map_reference,       `entrynb,      1);
+			   change( rc_map_reference,       `parent,       tolower(key));
+			   			           
+			   change( rc_config_keys,          tolower(key), $[ `branch    : branch,
+			   				 		     `dialogtype: "d1"
+			   					           ]);
+			   // change( rc_config_branch_hash,   new_branch);
+			   change( rc_config_branch_hash_reduced, new_branch );
+
+			 });
+		      
+		      change( curr_map, `dialogtype,   "dir");
+		      
+		      y2log( curr_map );
+		      xy2debug( rc_branch );
+		      xy2debug( branch );
+		      xy2debug( key );
+		      
+		   }
+		   else
+		   {
+		      change( curr_map, `dialogtype, sformat( "d%1", last_entrynb));
+		   }
+		      
 		}
 	     }
 	     else
@@ -359,7 +432,6 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 
    y2debug( "8");
 
-
    
    ////////////////////////////////////////////////////////////////////////
    // Let`s build the WidgetTree
@@ -378,52 +450,31 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 
    foreach( `branch, rc_config_branch_hash_reduced, 
    ``{
-         boolean initial_show_node = false;
-         string  rc_branch        = substring( branch,   0, findlastof( branch,    "/" )  );
-	 string  key              = substring( branch,      findlastof( branch,    "/" )+1);
-	 string  parent_key       = "";
+	   boolean initial_show_node = false;
+	   string  rc_branch        = substring( branch,   0, findlastof( branch,    "/" )  );
+	   string  key              = substring( branch,      findlastof( branch,    "/" )+1);
+	   string  parent_key       = "";
 
-	 if ( rc_branch == "" )
-	 {
-	     rc_branch          = "/";
-	     parent_key        = "root";
-	     if ( branch != "/etc" ) initial_show_node = true;         
-	 }
-	 else
-	 {
-	     parent_key = substring( rc_branch,   findlastof( rc_branch, "/" )+1);
-	 }
+	   if ( rc_branch == "" )
+	   {
+	       rc_branch          = "/";
+	       parent_key        = "root";
+	       if ( branch != "/etc" ) initial_show_node = true;         
+	   }
+	   else
+	   {
+	       parent_key = substring( rc_branch,   findlastof( rc_branch, "/" )+1);
+	   }
 
-	 // y2log( .milestone, "XX", 1, sformat( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key ));
-	 
-	 list|void subitems = lookup( subitems_map, key, nil);
+	   // y2log( .milestone, "XX", 1, sformat( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key ));
+	   
+	   list|void subitems = lookup( subitems_map, key, nil);
 
-	 // do we have subitems or is it a leaf
-	 if ( subitems != nil )
-	 {
-	     // subitems exist (we are a dialog or a dir)
-	     
-	     list|void parent_subitems = lookup( subitems_map, parent_key, nil);
-
-	     // does our parent already have a list with subitems,
-	     // or must we create this list
-	     
-	     if ( parent_subitems != nil )
-	     {
-		 // parent has list
-		 // add this item with the subitems
-		 change( parent_subitems,  `item( `id(key), key, initial_show_node, subitems));
-	     }
-	     else
-	     {
-		 // parent has no list until now
-		 change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node, subitems) ]);
-	     }
-	 }
-	 else
-	 {
-	     // subitems do not exist (we are a leaf)
-	     
+	   // do we have subitems or is it a leaf
+	   if ( subitems != nil )
+	   {
+	       // subitems exist (we are a dialog or a dir)
+	       
 	       list|void parent_subitems = lookup( subitems_map, parent_key, nil);
 
 	       // does our parent already have a list with subitems,
@@ -432,25 +483,46 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	       if ( parent_subitems != nil )
 	       {
 		   // parent has list
-		   // add this item 
-		   change( parent_subitems,  `item( `id(key), key, initial_show_node));
+		   // add this item with the subitems
+		   change( parent_subitems,  `item( `id(key), key, initial_show_node, subitems));
 	       }
 	       else
 	       {
 		   // parent has no list until now
-		   change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node) ]);
+		   change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node, subitems) ]);
 	       }
-	 }
+	   }
+	   else
+	   {
+	       // subitems do not exist (we are a leaf)
+	       
+		 list|void parent_subitems = lookup( subitems_map, parent_key, nil);
+
+		 // does our parent already have a list with subitems,
+		 // or must we create this list
+		 
+		 if ( parent_subitems != nil )
+		 {
+		     // parent has list
+		     // add this item 
+		     change( parent_subitems,  `item( `id(key), key, initial_show_node));
+		 }
+		 else
+		 {
+		     // parent has no list until now
+		     change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node) ]);
+		 }
+	   }
 
    });
 
    y2debug( "9");
 
    // debug
-   // SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
-   // SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
+    SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
+    SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
     SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
-   // SCR(`Write (.dumpto.tmp.hash, subitems_map ));
+    SCR(`Write (.dumpto.tmp.hash, subitems_map ));
 
    return( lookup( subitems_map, "root", nil) ); 
 };
