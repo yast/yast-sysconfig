@@ -1,8 +1,2 @@
-fw
-root
-EDDB
 Makefile
 Makefile.in
-syscreate_data
-.deps
-.libs

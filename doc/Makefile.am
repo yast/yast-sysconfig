@@ -1,9 +1,12 @@
 #
-# Makefile.am for y2c_rc_config/doc
+# Makefile.am for devtools/devtools/skeletons/config/doc
 #
 
 SUBDIRS = autodocs
 
-doc_DATA = README
+htmldir = $(docdir)
 
-EXTRA_DIST = $(doc_DATA)
+doc_DATA =
+html_DATA =
+
+EXTRA_DIST = $(doc_DATA) $(html_DATA)

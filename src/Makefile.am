@@ -1,26 +1,35 @@
 #
-# Makefile.am for sysconfig/src
+# Makefile.am for devtools/devtools/skeletons/config/src
 #
 
-client_DATA = sysconfig_step1.ycp sysconfig.ycp powertweak.ycp
-
 yncludedir = @yncludedir@/sysconfig
-ynclude_DATA = sys_dialogs.ycp
 
-config_DATA = sysconfig.y2cc	\
-	      powertweak.y2cc
+client_DATA =			\
+	sysconfig.ycp		\
+	sysconfig_auto.ycp	\
+	sysconfig_proposal.ycp	\
+	sysconfig_write.ycp	\
+	powertweak.ycp
 
-ydata_DATA = meta_sys.config	\
-	    powertweak.agent 
+ynclude_DATA =			\
+	helps.ycp		\
+	wizards.ycp		\
+	dialogs.ycp		\
+	complex.ycp		\
+	routines.ycp
 
-ybin_PROGRAMS = syscreate_data
+config_DATA =			\
+	sysconfig.y2cc		\
+	powertweak.y2cc
 
-EXTRA_DIST = $(ynclude_DATA) $(client_DATA) $(config_DATA) $(ydata_DATA) $(ybin_PROGRAMS) sysconfig_check
+module_DATA =			\
+	Sysconfig.ycp
 
-syscreate_data_SOURCES =		\
-	RCDirectory.cpp RCDirectory.h	\
-	RCVariable.cpp RCVariable.h	\
-	TreeNode.cpp TreeNode.h		\
-	main.cpp
+ybin_SCRIPTS =			\
+	parse_configs.pl
 
-syscreate_data_LDFLAGS = $(all_libraries)
+ydata_DATA =                    \
+	sysedit.agent		\
+	powertweak.agent
+
+EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(config_DATA) $(module_DATA) $(ybin_SCRIPTS) $(ydata_DATA)
