@@ -2,12 +2,14 @@
 //
 // get_only_comment tests
 //
+// testedfiles: Sysconfig.ycp
+//
 // $Id$
 //
 
 {
 
-include "testsuite.ycp";
+import "Testsuite";
 
 import "Pkg";   // override packamanager
 
@@ -15,49 +17,49 @@ import "Mode";		// mode is imported in Product
 Mode::config = true;	// package manager is initialized in Product constructor when Mode::config is false !!
 import "Sysconfig";
 
-// Note: DUMP is used instead of TEST, because it supports multiline
-// output (TEST dumps only first line)
+// Note: Testsuite::Dump is used instead of Testsuite::Test, because it supports multiline
+// output (Testsuite::Test dumps only first line)
 
 string input = nil;
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
-DUMP( "---" );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( "---" );
 
 input = "";
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
-DUMP( "---" );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( "---" );
 
 input = "# sdfa  ";
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
-DUMP( "---" );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( "---" );
 
 input = "### gfh ";
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
-DUMP( "---" );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( "---" );
 
 input = "# dsfds";
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
-DUMP( "---" );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( "---" );
 
 input = "# adsf \n# sdfwer\n";
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
-DUMP( "---" );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( "---" );
 
 input = "\n\n#134\n   \n#34763\n  ##Path";
-DUMP( sformat("Input: %1", input) );
-DUMP( "Output:" );
-DUMP( Sysconfig::get_only_comment(input) );
+Testsuite::Dump( sformat("Input: %1", input) );
+Testsuite::Dump( "Output:" );
+Testsuite::Dump( Sysconfig::get_only_comment(input) );
 
 }
 

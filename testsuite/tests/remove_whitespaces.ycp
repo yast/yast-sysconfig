@@ -2,12 +2,14 @@
 //
 // remove_whitespaces tests
 //
+// testedfiles: Sysconfig.ycp
+//
 // $Id$
 //
 
 {
 
-include "testsuite.ycp";
+import "Testsuite";
 
 import "Pkg";   // override packamanager
 
@@ -15,14 +17,14 @@ import "Mode";		// mode is imported in Product
 Mode::config = true;	// package manager is initialized in Product constructor when Mode::config is false !!
 import "Sysconfig";
 
-TEST( ``(Sysconfig::remove_whitespaces(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("    ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("  var") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("  var  ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("v  a  r") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("va r ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::remove_whitespaces("var") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces(nil) ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("    ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("  var") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("  var  ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("v  a  r") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("va r ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::remove_whitespaces("var") ), [ $[], $[], $[] ], nil );
 
 }
 

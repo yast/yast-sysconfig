@@ -2,12 +2,14 @@
 //
 // get_metadata tests
 //
+// testedfiles: Sysconfig.ycp
+//
 // $Id$
 //
 
 {
 
-include "testsuite.ycp";
+import "Testsuite";
 
 import "Pkg";   // override packamanager
 
@@ -15,14 +17,14 @@ import "Mode";		// mode is imported in Product
 Mode::config = true;	// package manager is initialized in Product constructor when Mode::config is false !!
 import "Sysconfig";
 
-TEST( ``(Sysconfig::get_metadata(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_metadata("") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_metadata(" ## Type: ip  ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata(nil) ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata("") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata(" ## Type: ip  ") ), [ $[], $[], $[] ], nil );
 
-TEST( ``(Sysconfig::get_metadata("## Type: ip  ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_metadata("##Type: ip") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_metadata("## Type: sdf  \n## Default: sdf") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_metadata("\n\n## Type\n   \n##Def\n  ##Path") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata("## Type: ip  ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata("##Type: ip") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata("## Type: sdf  \n## Default: sdf") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_metadata("\n\n## Type\n   \n##Def\n  ##Path") ), [ $[], $[], $[] ], nil );
 
 }
 
