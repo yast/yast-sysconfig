@@ -241,7 +241,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Dialog DisplayLogFile                                                                         //
+    // Dialog                                                                                        //
     //-----------------------------------------------------------------------------------------------//
     // Displays a message to the user in a small dialog with an OK                                   //
     //-----------------------------------------------------------------------------------------------//
@@ -277,10 +277,13 @@ runs  low level configuration tools, so that your configuration in rc.config tak
     
     UI( ``{
 	global define DisplayLogFile( string msg_text ) ``{
-	    term text = `RichText( `opt(`plainText), msg_text );	  
+	    
+	    term text = `RichText( `opt(`plainText), msg_text );
+	    y2debug( "<<--%1", text);
+
 	    OpenDialog(`opt ( `decorated ),
 		       `VBox (`HSpacing(75),
-			      `Heading( _("SuSEConfig Logging" )),
+			      `Heading( _("Logging" )),
 			      text,	// e.g. `Richtext()
 			      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
 			   )
@@ -303,6 +306,7 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 
     UI( ``{
 	global define AskShowLog( ) ``{
+
 	    OpenDialog(`opt(`decorated), 
 		       `VBox( `Heading( _("SuSEConfig Logging" )) ,
 			      `VBox( `Label( _("Your changes are set, and SuSEconfig was run.\nWould now you like to see the logging of SuSEConfig?" )),
@@ -321,6 +325,28 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	};
     });
 
+    UI( ``{
+	global define AskFwShowLog( ) ``{
+
+	    OpenDialog(`opt(`decorated), 
+		       `VBox( `Heading( _("Logging" )) ,
+			      `VBox( `Label( _("Your changes are set, and the firewalls are (re)started. \nWould now you like to see the logging?" )),
+				     `HBox( 
+					 `PushButton( `id(`log),  _("Show Logfile") ),
+					 `PushButton( `id(`no_log), `opt(`default), _("Don't show logfile and exit") )
+					 )
+				  )
+			   )
+		);
+	    any r = UserInput();
+	    CloseDialog();
+
+	     
+	    return (r);
+	};
+    });
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog WaitSuSEconfig                                                                             //
     //-----------------------------------------------------------------------------------------------//
@@ -330,6 +356,20 @@ runs  low level configuration tools, so that your configuration in rc.config tak
 	    OpenDialog(`opt(`decorated), 
 		       `VBox( `Heading( _("SuSEConfig is running ..." )) ,
 			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time." ))
+			   )
+		);
+	};
+    });
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog WaitRestartFirewall                                                                             //
+    //-----------------------------------------------------------------------------------------------//
+
+    UI( ``{
+	global define WaitRestartFirewall( ) ``{
+	    OpenDialog(`opt(`decorated), 
+		       `VBox( `Heading( _("(Re)Start firewall ..." )) ,
+			      `Label( _("\nThis procedure can take some time." ))
 			   )
 		);
 	};

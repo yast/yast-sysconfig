@@ -460,19 +460,52 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 
 		    y2milestone("Starting SuSEconfig");
 
-		    UI(`WaitSuSEconfig());
-		    any ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
-		    UI(`CloseDialog());
 
-		    y2debug( "Shellret %1 %2", ret, ret_list);
+		    any ret = 0;
+		    if ( firewall_mode )
+		    {
+			UI(`WaitRestartFirewall());
+			SCR(`Execute(.target.bash, "echo /usr/sbin/rcpersonal-firewall start >/var/log/firewall.log 2>&1"));
+			SCR(`Execute(.target.bash, "/usr/sbin/rcpersonal-firewall stop >/var/log/firewall_stop.log 2>&1"));
+			SCR(`Execute(.target.bash, "/usr/sbin/rcpersonal-firewall start >>/var/log/firewall.log 2>&1"));
+			SCR(`Execute(.target.bash, "echo /sbin/rcSuSEfirewall2 start >>/var/log/firewall.log 2>&1"));
+			SCR(`Execute(.target.bash, "/sbin/rcSuSEfirewall2 stop  >>/var/log/firewall_stop.log 2>&1"));
+			SCR(`Execute(.target.bash, "/sbin/rcSuSEfirewall2 start >>/var/log/firewall.log 2>&1"));
+			UI(`CloseDialog());
+		    }
+		    else
+		    {
+			UI(`WaitSuSEconfig());
+			ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
+			UI(`CloseDialog());
+		    }
 
 		    if ( ret == 0 )
 		    {
-			any retAsk = UI(`AskShowLog() );
-
+			any retAsk = `log;
+			
+			if ( firewall_mode )
+			{
+			    retAsk = UI(`AskFwShowLog());
+			}
+			else
+			{
+			    retAsk = UI(`AskShowLog());
+			}
+			
 			if ( retAsk == `log )
 			{
-			    string text =  SCR(`Read(.target.string,  "/var/log/SuSEconfig.log" ));
+			    string text =  "";
+			    if ( !firewall_mode )
+			    {
+				text = SCR(`Read(.target.string,  "/var/log/SuSEconfig.log" ));
+			    }
+			    else
+			    {
+				text = SCR(`Read(.target.string,  "/var/log/firewall.log" ));
+			    }
+			    
+			    y2debug( "<<%1", text);
 			    UI(`DisplayLogFile( text ));
 			}
 		    }
