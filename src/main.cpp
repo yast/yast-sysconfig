@@ -524,6 +524,12 @@ int main(int argc, char* argv[])
 	cout << "\n### File: " << filename << " skipped" << endl;
 	continue;
      }
+     else if (!powertweak_only && filename == "/etc/powertweak/tweaks")
+     {
+	cout << "\n### File: " << filename << " skipped" << endl;
+	continue;
+     }
+     
 
      cout << "\n### File: " << filename << endl;
 
