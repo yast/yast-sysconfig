@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  2 08:52:36 CET 2004 - lslezak@suse.cz
+
+- don't use Product:: module
+- version 2.9.9
+
+-------------------------------------------------------------------
 Mon Mar  1 15:57:40 CET 2004 - lslezak@suse.cz
 
 - merged proofread texts
