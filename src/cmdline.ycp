@@ -27,6 +27,8 @@
 
     textdomain "sysconfig";
 
+    global define string variable2id(string variable);
+
     /**
      * Command line interface - handler for list command
      * @param options list command options
