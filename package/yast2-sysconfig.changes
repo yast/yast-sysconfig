@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon Feb 24 13:48:06 CET 2003 - lslezak@suse.de
+
+- removed workaround for bug #23721 ("&lt;" was not interpreted
+  in ncurses)
+- fixed parsing and validating integer and regexp types (#24033)
+- added testsuites
+- added yast2-network to neededforbuild
+- powertweak mode fixes
+- Powermanagement path description update
+- version 2.7.7
+
+-------------------------------------------------------------------
 Mon Feb 17 17:09:41 CET 2003 - lslezak@suse.de
 
 - convert '<', '>' to '&lt;', '&gt;' in richtext comment

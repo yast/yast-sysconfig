@@ -1,0 +1,46 @@
+// Sysconfig module - testsuite
+//
+// get_description() tests
+//
+// $Id$
+//
+
+{
+
+include "testsuite.ycp";
+
+import "Sysconfig";
+
+TEST( ``(Sysconfig::Set([ $[ "sysconfig_key" : "VARIABLE",
+    "sysconfig_path" : "/etc/sysconfig/test",
+    "sysconfig_value" : "no" ] ]) ), [ $[], $[], $[] ], nil );
+
+
+// test non-existing variable
+TEST( ``(Sysconfig::get_description("nonexisting$variable") ), [ $[], $[], $[] ], nil );
+
+// test variable without metadata
+map READ = $[ "syseditor" : $[ "value" : $[ "/etc/sysconfig/test" : $[ "VARIABLE" : "yes" ]],
+			       "value_comment" : $[ "/etc/sysconfig/test" : $[ "VARIABLE" : "# Only comment, no metadata" ]]
+			    ]
+];
+TEST( ``(Sysconfig::get_description("VARIABLE$/etc/sysconfig/test") ), [ READ, $[], $[] ], nil );
+
+
+// test variable with metadata
+READ = $[ "syseditor" : $[ "value" : $[ "/etc/sysconfig/test" : $[ "VARIABLE" : "yes" ]],
+			       "value_comment" : $[ "/etc/sysconfig/test" : $[ "VARIABLE" : "## Path: Test\n## Description: help\n## Type: yesno\n# Comment with metadata" ]]
+			    ]
+];
+TEST( ``(Sysconfig::get_description("VARIABLE$/etc/sysconfig/test") ), [ READ, $[], $[] ], nil );
+
+
+// test multiple keywods in metadata
+READ = $[ "syseditor" : $[ "value" : $[ "/etc/sysconfig/test" : $[ "VARIABLE" : "yes" ]],
+			       "value_comment" : $[ "/etc/sysconfig/test" : $[ "VARIABLE" : "## Path: Test\n## Description: help\n## Type: yesno\n##Path: Second path definition\n# Comment with metadata" ]]
+			    ]
+];
+TEST( ``(Sysconfig::get_description("VARIABLE$/etc/sysconfig/test") ), [ READ, $[], $[] ], nil );
+
+}
+

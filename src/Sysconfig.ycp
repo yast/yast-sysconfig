@@ -751,15 +751,15 @@ global define symbol set_value(string variable, string new_value, boolean force,
 
 			y2milestone("min_int: %1  max_int: %2", min_int, max_int);
 
-			if (max_int != nil && min_int != nil)
+			if (max != "" && min != "")
 			{
 			    valid = (new_int >= min_int && new_int <= max_int);
 			}
-			else if (max_int == nil)
+			else if (max == "")
 			{
 			    valid = (new_int >= min_int);
 			}
-			else if (min_int == nil)
+			else if (min == "")
 			{
 			    valid = (new_int <= max_int);
 			}
@@ -807,6 +807,9 @@ global define symbol set_value(string variable, string new_value, boolean force,
 	    }
 	}
     }
+
+    // value was not changed => OK
+    return `ok;
 }
 
 /**
@@ -894,7 +897,7 @@ global define boolean Read(list(string) files) ``{
 global define boolean Write() ``{
 
     // write dialog caption
-    string caption = _("Saving sysconfig Configuration");
+    string caption = (powertweak_mode == true) ? _("Saving Powertweak Configuration") : _("Saving sysconfig Configuration");
 
     // set the right number of stages
     integer steps = size(modified_variables);
@@ -931,40 +934,55 @@ global define boolean Write() ``{
 }
 
 /**
- * Get all sysconfig settings from the first parameter
+ * Set all sysconfig settings from the list and read information from files
  * (For use by autoinstallation.)
  * @param settings The YCP structure to be imported.
  * @return boolean True on success
  */
 global define boolean Import (list settings) ``{
-
-    modified_variables = $[];
-    list files = configfiles;
-
-    // convert from 8.1 export format
-    foreach(map setting, settings,
-	``{
-	    string n = setting["sysconfig_key"]:"";
-	    string f = setting["sysconfig_path"]:"";
-	    string v = setting["sysconfig_value"]:"";
-
-		// compatibility mode for older release with relative path
-		if (findfirstof(f, "/") != 0)
-			f = sformat("/etc/sysconfig/%1", f);
-	    string key = sformat("%1$%2", n, f);
-
-	    modified_variables = add(modified_variables, key, v);
-
-	    // add configuration file if it isn't already specified
-	    if (!contains(files, f))
-	    {
-		files = add(files, f);
-	    }
-	}
-    );
+    // set values in the list
+    Set(settings);
 
     // register agent for user defined files, read values
     return Sysconfig::Read(files);
+}
+
+/**
+ * Set all sysconfig settings from the list
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be set.
+ */
+global define void Set(list settings) ``{
+    if (settings != nil)
+    {
+	modified_variables = $[];
+	list files = configfiles;
+
+	// convert from 8.1 export format
+	foreach(map setting, settings,
+	    ``{
+		string n = setting["sysconfig_key"]:"";
+		string f = setting["sysconfig_path"]:"";
+		string v = setting["sysconfig_value"]:"";
+
+		// compatibility mode for older release with relative path
+		if (findfirstof(f, "/") != 0)
+		{
+		    f = sformat("/etc/sysconfig/%1", f);
+		}
+
+		string key = sformat("%1$%2", n, f);
+
+		modified_variables = add(modified_variables, key, v);
+
+		// add configuration file if it isn't already specified
+		if (!contains(files, f))
+		{
+		    files = add(files, f);
+		}
+	    }
+	);
+    }
 }
 
 /**
