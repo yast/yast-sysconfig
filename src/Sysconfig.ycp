@@ -23,6 +23,7 @@ import "Label";
 import "IP";
 import "String";
 import "Service";
+import "Mode";
 
 
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
@@ -627,6 +628,13 @@ global define symbol set_value(string variable, string new_value, boolean force,
 
     string modif = modified_variables[variable]:nil;
     string old = desc["value"]:"";
+
+    // use default value (or emty string) instead of the curent value in autoyast
+    if (Mode::config())
+    {
+	old = (haskey(desc, "Default")) ? desc["Default"]:"" : "";
+    }
+
 
     string curr_val = (modif != nil) ? modif : old;
 
