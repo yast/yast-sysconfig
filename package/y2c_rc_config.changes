@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jan 19 18:42:53 CET 2001 - mike@suse.de
+
+- tag a string (make it translatable)
+
+-------------------------------------------------------------------
 Thu Jan 18 15:09:07 CET 2001 - mike@suse.de
 
 - added new 7.1 variables to database
