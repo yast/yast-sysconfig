@@ -417,8 +417,10 @@ Create it and use powerteak?
     while (pos < size(input))
     {
 	string ch = substring(input, pos, 1);
+	string ch_1 = substring(input, pos + 1, 1);
 
-	if (ch == "\\")
+	// don't add backslash before \$ (#34809)
+	if (ch == "\\" && ch_1 != nil && ch_1 != "$")
 	{
 	    escaped = escaped + "\\\\";
 	}
@@ -464,10 +466,12 @@ Create it and use powerteak?
     while (index < size(input))
     {
 	string ch = substring(input, index, 1);
+	string ch_1 = substring(input, index + 1, 1);
 
 	if (backslash == false)
 	{
-	    if (ch == "\\")
+	    // don't remove backslash before \$ (#34809)
+	    if (ch == "\\" && ch_1 != nil && ch_1 != "$")
 	    {
 		backslash = true;
 	    }
@@ -874,6 +878,7 @@ Choose \"Cancel\" to edit the values again.
 ")
 
 	    :
+	    (
 		// helptext for popup - part 1/3
 		_("<p>After you save your changes, this editor changes the variables in the
 corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,
@@ -886,7 +891,8 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
                 // helptext for popup - part 3/3
 		_("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
  you have manually changed any of them. If you have changed a configuration file manually,
- it will not touch it.</p>");
+ it will not touch it.</p>")
+	    );
 
 
             UI::OpenDialog( `opt(`decorated ),

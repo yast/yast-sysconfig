@@ -996,7 +996,7 @@ global define boolean Write() ``{
 	    // get activation map for variable
 	    string presave = (string) (actions[vid, "Pre"]:nil);
 
-	    if (size(presave) > 0)
+	    if (presave != nil && size(presave) > 0)
 	    {
 		string confirm = _("A command will be executed");
 		string label = sformat(_("Starting command: %1..."), presave);
@@ -1044,7 +1044,7 @@ global define boolean Write() ``{
 	}
 	else
 	{
-	    if (size(restart_service) > 0)
+	    if (restart_service != nil && size(restart_service) > 0)
 	    {
 		list parsed = String::ParseOptions(restart_service, parse_param);
 		foreach(string s, parsed,
@@ -1054,7 +1054,7 @@ global define boolean Write() ``{
 		);
 	    }
 
-	    if (size(reload_service) > 0)
+	    if (reload_service != nil && size(reload_service) > 0)
 	    {
 		list parsed = String::ParseOptions(reload_service, parse_param);
 		foreach(string s, parsed,
@@ -1064,7 +1064,7 @@ global define boolean Write() ``{
 		);
 	    }
 
-	    if (size(config_module) > 0)
+	    if (config_module != nil && size(config_module) > 0)
 	    {
 		list parsed = String::ParseOptions(config_module, parse_param);
 		foreach(string s, parsed,
@@ -1074,7 +1074,7 @@ global define boolean Write() ``{
 		);
 	    }
 
-	    if (size(bash_command) > 0)
+	    if (bash_command != nil && size(bash_command) > 0)
 	    {
 		Commands[bash_command] = true;
 	    }
