@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  8 10:48:42 CET 2001 - curry@suse.de
+
+- faster reading and processing of rc.config variables 
+
+-------------------------------------------------------------------
 Fri Jan 19 18:42:53 CET 2001 - mike@suse.de
 
 - tag a string (make it translatable)
