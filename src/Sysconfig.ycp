@@ -1158,7 +1158,7 @@ global define boolean Write() ``{
 	// message
 	string confirm = _("All configuration scripts will be started.");
 	// progeress bar label
-	string label = _("Starting Configuration Scripts...");
+	string label = _("Starting configuration scripts...");
 	// Error message
 	string error = _("Configuration script failed.");
 
