@@ -541,9 +541,9 @@
 	  // helptext for popup create partition line
 	  string helptextCR = 
 		_("<p>With this Editor, you can edit the variables in /etc/rc.config,
-the central configuration file of your SuSE Linux<\p>") +
+the central configuration file of your SuSE Linux</p>") +
 		_("<p>Please notice, that many of this variables are
-set by specialized YaST2 configuration modules like the \"Network configuration\"<\p>"); 
+set by specialized YaST2 configuration modules like the \"Network configuration\"</p>"); 
 
 	      OpenDialog( `opt(`decorated ),
 			  `HBox( `VSpacing(16),
