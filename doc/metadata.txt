@@ -1,10 +1,10 @@
 
-               Sysconfig files 
-             ===================
+               Metadata in sysconfig files 
+             ==============================
 
 
 Author:  Ladislav Slezak <lslezak@suse.cz>
-Last change: Feb 5 2003
+Last change: Sep 4 2003
 
 
 Introduction
@@ -12,7 +12,7 @@ Introduction
 
   Yast2 sysconfig editor can edit /etc/sysconfig files. In this editor users
 can change values in easy way using GUI. Yast2 sysconfig editor needs more
-data (metadata) to display and edit sysconfig variables - metadata were stored
+data (metadata) to display and edit sysconfig variables - metadata were originaly stored
 in meta_sys.config file in yast2-sysconfig package. This file contained
 information about position in tree widget, allowed values, etc.
 
@@ -23,10 +23,13 @@ yast2 package. (If variable was renamed both problems occured...)
   There was also problem with maintenance of data and metadata: data were
 maintained by package maintainer but metadata by yast2 sysconfig maintainer.
 
+  The metadata should contain descriptions of actions required to start when a
+variable is changed. So GUI user does't need to open terminal and write
+commands manualy. This task can be very hard (or impossible) for beginner user.
+
 
   It was decided to change this situation and make metadata part of
 sysconfig file.
-
 
 
 Metadata - description of variable
@@ -67,6 +70,18 @@ related to the previous Path tag.)
 
 
 Metadata keywords:
+------------------
+
+  There are two sets of metada keywords: descriptions and actions. Descriptions
+describe variable - e.g. type of the variable, default value... They limit
+possible values entered by user. Typos, invalid values or values out of range
+can be avoided by defining right descriptions.
+
+  Action keywords describe actions which are required to activate changes.
+Usually it means starting SuSEconfig/ULconfig module and service restart or
+reload.
+
+  I. Descriptive keywords:
 
     Path - where variable will be located in tree widget, valid for all next
            variables in file - path have to be specified at least in first
@@ -125,10 +140,56 @@ Metadata keywords:
            set if user press [Default] button in yast2 module.
 
 
+  II. Activation keywords:
+
+    PreSaveCommand - start bash command before variables are changed. Sometimes
+	   it is required to do an action with old value (e.g. stop daemon
+	   which name is changed)
+
+    Config - start selected SuSEconfig/ULconfig modules
+
+    ServiceReload - reload services if they are running (specify only the init
+           script file names without the path)
+
+    ServiceRestart - restart services if they are running
+
+    Command - start command in the bash shell. It can be used for any action
+	   which cannot be specified using above tags. Value specified by
+	   Command keyword argument is a string. The specified command will be
+	   executed by bash shell (using bash -c option) - it is be possible to
+	   use all bash features (e.g. conditional execution (&&, ||), output
+	   redirection...).
+
+	   The string will not be parsed or changed by YaST2 (except removing
+	   white spaces at the beginning and at the end of the string, multi
+	   line strings will be merged to the one line).
+
+
+    Use comma as a separator for Config, ServiceRestart and ServiceReload tags
+    if more than one parameter is need.
+
+    If the activation command would be too complex (too many dependences or
+    checks) a note should be a part of the comment instead of activation metada
+    - e.g. recommended yast2 module, where is activation process described in
+    the documentation...
+
+    The commands shouldn't do any dangerous action - they will be probably
+    started automatically by beginner user. There is an option to confirm each
+    action in the yaST2 module for experts. Restart of some services should be
+    used carefully, e.g. variable DISPLAYMANAGER requires xdm restart which
+    kills current X session - required action should be only described in the
+    comment in this case.
+
+    Some variables are used in more sysconfig templates - this can cause
+    problems if the actions in the templates are different.
+
+
+
   All keywords are optional.
 
 
 Predefined paths
+----------------
 
   All sysconfig variables will be divided into basic categories:
 
@@ -150,6 +211,7 @@ from separate file, which is part of yast2 sysconfig module.
   
 
 Missing metadata
+----------------
 
   If variable does not have any metadata previous will be used. If previous
 metadata is missing yast2 cannot offer predefined values to user. In this
@@ -158,6 +220,11 @@ case will be used "Type: string" as default metadata so user can enter any value
   
   Example (/etc/sysconfig/joystick):
 
+## Path:        Hardware/Joystick
+## Description: Joystick cofigurations
+## Type:        string
+## Default:     ""
+## ServiceRestart: joystick
 #
 # Gameport module names
 # (typically "ns558" for legacy gameport support)
@@ -168,9 +235,56 @@ GAMEPORT_MODULE_2=""
 GAMEPORT_MODULE_3=""
 
 
-  Comment description (and metadata "Type: string") will be used for all
-four variables.
+  Comment description (and metadata) will be used for all four variables.
 
+
+Saving changed values in Yast2 sysconfig module
+-----------------------------------------------
+
+    When saving the changed variables yast2 sysconfig module
+will start the following actions:
+
+    - start PreSaveCommmand for each changed variable. If it returs non zero
+      exit status then it is supposed that it failed and other activation
+      commmands will be ignored for this variable.
+
+    - save all changed variables
+
+    - start all specified SuSEconfig modules
+
+    - restart/reload specified services which are running (command
+      "/etc/init.d/testservice status" returns 0).
+
+    - start generic commands
+
+
+  If the activation commands are missing in whole sysconfig file the complete
+SuSEconfig will be started for backward compatibility with old sysconfig files.
+Some variables need no activation (e.g. options in /etc/sysconfig/boot file are
+used only at boot), use empty Config: tag (or any from above tags) to not start
+the SuSEconfig script - if some action tag is specified (even empty) the
+backward compatible action (calling the SuSEconfig script) will not be started.
+
+  Each command will be started only once to speed up activation if more
+modified variables need the same activation command. The commands are compared
+without any parsing or semantic check when testing whether the command was
+already executed. For this reason the commands should be consistent at least in
+one file (user usually changes only few variables which are in one file).
+
+
+Global activation keywords
+--------------------------
+
+  It will be possible to specify the action commands globally or for a group
+of variables: if no action keyword is specified then action in the previous
+variable is used - recursively search for action until it is found or the
+beginning of the file is reached. So it is possible to write the activation
+keywords only to the first variable's comment and they will be used for all
+followning variables if they have no action tag specified.
+    
+  This feature should be used carefully especially in the sysconfig files which
+are merged from many small parts, because fillup appends the new variables to
+the end of file but existing variables are left in the original place.
 
 
 Update problem
@@ -183,5 +297,4 @@ in fillup utility.
 
   Sysconfig file must have a template - even files created by Yast, this is
 required for updating metadata at package update.
-
 

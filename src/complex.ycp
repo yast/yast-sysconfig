@@ -186,11 +186,8 @@ global define string create_richtext_description(map description) ``{
 
     if (default_value != nil && size(file) > 0)
     {
-	// quote empty value
-	if (default_value == "")
-	{
-	    default_value = "\"\"";
-	}
+	// TODO: replace empty value by special text (e.g. "</I>empty</I>")
+
 	// rich text value
 	result = result + "<P><B>" + _("Default Value: ") + "</B> " + default_value + "</P>";
     }
@@ -400,6 +397,7 @@ global define list combo_list(map description, boolean set_default) ``{
 
 	if (def != nil)
 	{
+	    y2debug("Adding default value: %1", def);
 	    if (!contains(ret, def)) ret = add(ret, def);
 	}
     }
@@ -414,12 +412,6 @@ global define list combo_list(map description, boolean set_default) ``{
     }
 
     string deflt = description["Default"]:nil;
-
-    if (deflt != nil)
-    {
-	list parsed = Sysconfig::ParseString(deflt, Sysconfig::parse_param);
-	deflt = parsed[0]:deflt;
-    }
 
     string type = description["Type"]:"";
 
