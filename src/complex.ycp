@@ -831,7 +831,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")),
 				// push button label - displayed only in autoinstallation config mode
-				(Mode::config == true) ? `HBox(`PushButton(`id(`use_current), _("&Use Current Value")),
+				(Mode::config() == true) ? `HBox(`PushButton(`id(`use_current), _("&Use Current Value")),
 					// push button label - displayed only in autoinstallation config mode
 					`PushButton(`id(`add_new), `opt(`key_F3), _("&Add New Variable..."))
 				    ) : `Empty()

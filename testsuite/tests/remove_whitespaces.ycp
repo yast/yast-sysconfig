@@ -10,11 +10,7 @@
 {
 
 import "Testsuite";
-
 import "Pkg";   // override packamanager
-
-import "Mode";		// mode is imported in Product
-Mode::config = true;	// package manager is initialized in Product constructor when Mode::config is false !!
 import "Sysconfig";
 
 Testsuite::Test( ``(Sysconfig::remove_whitespaces(nil) ), [ $[], $[], $[] ], nil );
