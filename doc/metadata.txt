@@ -72,6 +72,9 @@ Metadata keywords:
            variables in file - path have to be specified at least in first
            variable in file. First character of subtree name should be upper
 	   case letter.
+
+	   Use slash ('/') as path separator, if slash should be a part of path
+	   name put basckslash before slash ('\/').
 	   
 	   Fillup utility adds missing variables at the end of output - if more
 	   templates are merged to one sysconfig file and each template have
