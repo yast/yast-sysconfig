@@ -2,12 +2,14 @@
 //
 // Set() and Export() tests
 //
+// testedfiles: Sysconfig.ycp
+//
 // $Id$
 //
 
 {
 
-include "testsuite.ycp";
+import "Testsuite";
 
 import "Pkg";   // override packamanager
 
@@ -16,16 +18,16 @@ Mode::config = true;	// package manager is initialized in Product constructor wh
 
 import "Sysconfig";
 
-TEST( ``(Sysconfig::Set(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::Export() ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::Set(nil) ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::Export() ), [ $[], $[], $[] ], nil );
 
-TEST( ``(Sysconfig::Set([]) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::Export() ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::Set([]) ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::Export() ), [ $[], $[], $[] ], nil );
 
-TEST( ``(Sysconfig::Set([ $[ "sysconfig_key" : "VARIABLE",
+Testsuite::Test( ``(Sysconfig::Set([ $[ "sysconfig_key" : "VARIABLE",
     "sysconfig_path" : "/etc/sysconfig/test",
     "sysconfig_value" : "no" ] ]) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::Export() ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::Export() ), [ $[], $[], $[] ], nil );
 
 }
 

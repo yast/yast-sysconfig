@@ -2,12 +2,14 @@
 //
 // get_file_from_id tests
 //
+// testedfiles: Sysconfig.ycp
+//
 // $Id$
 //
 
 {
 
-include "testsuite.ycp";
+import "Testsuite";
 
 import "Pkg";   // override packamanager
 
@@ -15,14 +17,14 @@ import "Mode";		// mode is imported in Product
 Mode::config = true;	// package manager is initialized in Product constructor when Mode::config is false !!
 import "Sysconfig";
 
-TEST( ``(Sysconfig::get_file_from_id(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("var") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("var$file") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("var$") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("$file") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("var$x$file") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::get_file_from_id("$$varx$file") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id(nil) ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("var") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("var$file") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("var$") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("$file") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("var$x$file") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::get_file_from_id("$$varx$file") ), [ $[], $[], $[] ], nil );
 
 }
 

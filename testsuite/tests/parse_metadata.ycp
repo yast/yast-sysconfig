@@ -2,12 +2,14 @@
 //
 // parse_metadata tests
 //
+// testedfiles: Sysconfig.ycp
+//
 // $Id$
 //
 
 {
 
-include "testsuite.ycp";
+import "Testsuite";
 
 import "Pkg";   // override packamanager
 
@@ -15,14 +17,14 @@ import "Mode";		// mode is imported in Product
 Mode::config = true;	// package manager is initialized in Product constructor when Mode::config is false !!
 import "Sysconfig";
 
-TEST( ``(Sysconfig::parse_metadata(nil) ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_metadata("") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_metadata("    ") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_metadata("## Type: abc") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_metadata("## Type: abc\n## Default: x") ), [ $[], $[], $[] ], nil );
-TEST( ``(Sysconfig::parse_metadata("## Type: abc\n\n##Default:x\n\n ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata(nil) ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata("") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata("    ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata("## Type: abc") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata("## Type: abc\n## Default: x") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata("## Type: abc\n\n##Default:x\n\n ") ), [ $[], $[], $[] ], nil );
 // multiline
-TEST( ``(Sysconfig::parse_metadata("## Command: echo sdmvf,vm \\\n## sdgfsdg sdf sf sf sdf \n## Config:x, asdf\n\n ") ), [ $[], $[], $[] ], nil );
+Testsuite::Test( ``(Sysconfig::parse_metadata("## Command: echo sdmvf,vm \\\n## sdgfsdg sdf sf sf sdf \n## Config:x, asdf\n\n ") ), [ $[], $[], $[] ], nil );
 
 }
 
