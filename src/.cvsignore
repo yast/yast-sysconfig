@@ -1,2 +1,4 @@
 Makefile
 Makefile.in
+rc_create_data
+.deps
