@@ -17,10 +17,6 @@ ynclude_DATA =			\
 	cmdline.ycp		\
 	routines.ycp
 
-config_DATA =			\
-	sysconfig.y2cc		\
-	powertweak.y2cc
-
 desktop_DATA =			\
 	sysconfig.desktop	\
 	powertweak.desktop
@@ -43,6 +39,6 @@ ycpchook = sysconfig
 
 YCPCFLAGS=-I.
 
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(config_DATA) $(module_DATA) $(ybin_SCRIPTS) $(ydata_DATA) $(desktop_DATA)
+EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(ybin_SCRIPTS) $(ydata_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
