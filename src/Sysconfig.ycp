@@ -825,6 +825,27 @@ global define map<string, list<string> > get_all_names()
 }
 
 /**
+ * Register .syseditor path (use INI agent in multiple file mode)
+ */
+global define void RegisterAgents() {
+    list<string> files = (Sysconfig::powertweak_mode == true) ? [powertweakconfig] : configfiles;
+    string tmpdir = (string) SCR::Read(.target.tmpdir);
+
+    if (tmpdir == nil || tmpdir == "")
+    {
+	y2security("Using /tmp directory !");
+	tmpdir = "/tmp";
+    }
+
+    // register configuration files in SCR using INI-agent
+    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + (string)SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
+    string tmp = tmpdir + "/sysconfig-agent.scr";
+
+    SCR::Write(.target.string, tmp, agentdef);
+    SCR::RegisterAgent(.syseditor, tmp);
+}
+
+/**
  * Read all sysconfig variables
  * @return true on success
  */
@@ -841,17 +862,12 @@ global define boolean Read() ``{
 	tmpdir = "/tmp";
     }
 
-    // register configuration files in SCR using INI-agent
-    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + (string)SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
-    string tmp = tmpdir + "/sysconfig-agent.scr";
-
-    SCR::Write(.target.string, tmp, agentdef);
-    SCR::RegisterAgent(.syseditor, tmp);
-
+    // register .syseditor path
+    RegisterAgents();
 
     // register agent for reading network template
-    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(`IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + (string) SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
-    tmp = tmpdir + "/sysconfig-template-agent.scr";
+    string agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(`IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + (string) SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    string tmp = tmpdir + "/sysconfig-template-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
     SCR::RegisterAgent(.sysconfig.network.template, tmp);

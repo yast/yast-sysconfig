@@ -78,6 +78,7 @@ else if (func == "Write")
     import "Progress";
     Sysconfig::write_only = true;
     Progress::off();
+    Sysconfig::RegisterAgents();
     ret = Sysconfig::Write();
     Progress::on();
 }

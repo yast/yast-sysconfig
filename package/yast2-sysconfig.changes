@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 27 17:21:09 CEST 2004 - lslezak@suse.cz
+
+- register agent during autoinstallation (#45836)
+- version 2.10.5
+
+-------------------------------------------------------------------
 Tue Sep 14 13:10:42 CEST 2004 - lslezak@suse.cz
 
 - GetModified/SetModified functions (AutoYaST API)
