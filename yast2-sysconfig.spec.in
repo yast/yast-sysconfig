@@ -1,9 +1,9 @@
 @HEADER-COMMENT@
 
-# neededforbuild  gpp libgpp yast2-devel-packages yast2-network
+# neededforbuild  gpp libgpp yast2-devel-packages yast2-network yast2-installation
 
 @HEADER@
-Requires:	yast2 yast2-network perl
+Requires:	yast2 yast2-network perl yast2-installation
 
 BuildArchitectures:	noarch
 
