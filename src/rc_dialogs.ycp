@@ -37,7 +37,7 @@
 
   UI(``{  global define HelpMsgStart()``{
       return( // helptext for popup 
-	     _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
+	     _("<p>With this editor,  edit the variables in <b>/etc/rc.config,
 the central configuration file</b> of your SuSE Linux system.</p>
 "));
   }});
@@ -62,12 +62,11 @@ and runs low-level configuration tools so your configuration in rc.config takes 
  you have manually changed any of them.  If you have changed a configuration file manually,
  it will not touch it.</p>") +
  
-	     _("<p> This concept was chosen, because:
-<ul><li>now you have your basic configuration in \"one\" central file, which is easy to read
- and to edit.</li>
-<li>you can easily copy the rc.config to another computer, run SuSEconfig, and this system is
- nearly ready to work, without having to edit up to twenty individual configuration files
- manually.</li></ul></p>
+	     _("<p> This was arranged so that <ul><li>your basic configuration is stored in \"one\" central file, which 
+is easy to read and edit.</li>
+<li>you can easily copy the rc.config to another computer, run SuSEconfig, 
+and this system will be almost ready for implementation, without having to
+manually edit up to twenty individual configuration files.</li></ul></p>
 "));
   }});
 
@@ -80,7 +79,7 @@ and runs low-level configuration tools so your configuration in rc.config takes 
   UI(``{ global define HelpMsgNotice()``{
       return( // helptext for popup 
 	     _("<p>
-Please note, many of these variables are set by specialized YaST2
+Many of these variables are set by specialized YaST2
 configuration modules like the \"Network configuration\".</p>
 "));
   }});
@@ -316,12 +315,12 @@ Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
 
 	    OpenDialog(`opt(`decorated), 
 		       `VBox( `Heading( _("SuSEConfig Logging")) ,
-			      `VBox( `Label( _("Your changes are set and SuSEconfig has run.
-Would you like to see the logging of SuSEConfig?
+			      `VBox( `Label( _("Your changes have been saved and SuSEconfig has run.
+Do you want to view the SuSEConfig log?
 ")),
 				     `HBox( 
 					 `PushButton( `id(`log),  _("Show Log File") ),
-					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file.") )
+					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
 					 )
 				  )
 			   )
@@ -339,12 +338,12 @@ Would you like to see the logging of SuSEConfig?
 
 	    OpenDialog(`opt(`decorated), 
 		       `VBox( `Heading( _("Logging")) ,
-			      `VBox( `Label( _("Your changes are set and the firewalls are (re)started. 
-Would now you like to see the logging?
+			      `VBox( `Label( _("Your changes have been saved and the firewalls have been restarted. 
+Do you want to view the relevant log file?
 ")),
 				     `HBox( 
 					 `PushButton( `id(`log),  _("Show Log File") ),
-					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file.") )
+					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
 					 )
 				  )
 			   )
@@ -755,7 +754,7 @@ Would now you like to see the logging?
 	global define SearchDlg()
 	    ``{
 	    // helptext for popup search
-	    string helptextCR = _("Type the word related to the information you need."); 
+	    string helptextCR = _("Enter a keyword related to the information needed."); 
 
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(60),
@@ -874,8 +873,8 @@ Would now you like to see the logging?
 	global define SaveDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
-	    string helptextCR = _("Here you see the values YaST2 will change.
-Choose \"OK\" and YaST2 will save these changes.
+	    string helptextCR = _("Here, see the values YaST2 will change.
+Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
 "); 
 
@@ -954,7 +953,7 @@ Choose \"Cancel\" to edit the values again.
 	global define GotoDlg( list entry_list )
 	    ``{
 	    // helptext for popup create partition line 1 of 6
-	    string helptextCR = _("Here you see the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search."); 
+	    string helptextCR = _("Here, view the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search."); 
 
 	    list table_list = maplist( `entry, entry_list,
 				       ``{

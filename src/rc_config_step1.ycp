@@ -219,10 +219,10 @@ requires the linux kernel 2.4 to run.</p>")));
      }
      else
      {
-	 curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
+	 curr_dialog = getDirDialog( UI(_("<p>With this editor, edit the variables in /etc/rc.config,
 the central configuration file of your SuSE Linux system.</p>
 ")) + UI(_("<p>
-Please note, many of these variables are set by specialized YaST2
+Many of these variables are set by specialized YaST2
 configuration modules like the \"Network configuration\".</p>
 ")));
      }
