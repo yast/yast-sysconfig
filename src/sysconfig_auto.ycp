@@ -51,6 +51,10 @@ else if(func == "Summary")
 {
     ret =  Sysconfig::Summary();
 }
+else if (func == "Packages")
+{
+	ret = $[];
+}
 else if (func == "Reset")
 {
     ret = Sysconfig::Import([]);
