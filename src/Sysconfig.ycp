@@ -890,9 +890,9 @@ global define boolean Import (list settings) ``{
 	    modified_variables = add(modified_variables, key, v);
 
 	    // add configuration file if it isn't already specified
-	    if (!contains(files, file))
+	    if (!contains(files, f))
 	    {
-		files = add(files, file);
+		files = add(files, f);
 	    }
 	}
     );
