@@ -294,7 +294,7 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 		     curr_key     = add( curr_key, `value, new_val);
 		     curr_key     = add( curr_key, `new,   true);
 
-		     //rc_config_keys = add( rc_config_keys, key, curr_key);
+		     rc_config_keys = add( rc_config_keys, key, curr_key);
 		  }
 		  
 		  // y2log( .milestone, 1, "ttt", "TTTTTTTTTBB", new_val); 
