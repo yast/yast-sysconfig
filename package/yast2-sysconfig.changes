@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Aug  1 11:10:08 CEST 2002 - lslezak@suse.cz
+
+- added powertweak support
+- created yast2-powertweak subpackage
+- added new entries to meta_sys.config file
+- added comments for translators
+- version 2.6.3
+
+-------------------------------------------------------------------
 Fri Jul 12 16:12:24 CEST 2002 - arvin@suse.de
 
 - use proper namespace for Args and CallFunction (#16776)

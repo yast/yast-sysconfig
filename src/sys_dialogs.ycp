@@ -32,15 +32,17 @@
   //////////////////////////////////////////////////////////////////////////////////////
 
   UI(``{ global define HelpMsgBody() ``{
-      return(  // helptext for popup
+      return(  // helptext for popup - part 1/3
 	     _("<p>After you save your changes, this editor changes the variables in the
 corresponding  sysconfig file. Then it runs
 SuSEconfig, which changes the underlying configuration files, stops and starts daemons,
 and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
 ") +
 
+		// helptext for popup - part 2/3
 	     _("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
 
+		// helptext for popup - part 3/3
 	     _("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
  you have manually changed any of them.  If you have changed a configuration file manually,
  it will not touch it.</p>") );
@@ -235,11 +237,14 @@ configuration modules like the \"Network configuration\".</p>
 		    `HSpacing(1),
 		    `VBox(
 			`VSpacing(0.2),
+			// error popup header
 			`Heading( _("Error")),
 			`VSpacing(0.2),
+			// Error popup message
 			`Label(_("An error occured during execution of SuSEconfig.
 Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
 ")),
+			// push button label
 			`PushButton(`opt(`default), _("&OK and Exit")),
 			`VSpacing(0.2)
 			),
@@ -265,8 +270,10 @@ Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
 
 	    OpenDialog(`opt ( `decorated ),
 		       `VBox (`HSpacing(75),
+			      // header in error popup
 			      `Heading( _("Logging")),
-			      text,	// e.g. `Richtext()
+			      text,
+			      // push button label
 			      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
 			   )
 		);
@@ -290,12 +297,16 @@ Probably \"/sbin/SuSEconfig\" is missing or the module has no root permission.
 	global define AskShowLog( ) ``{
 
 	    OpenDialog(`opt(`decorated),
+			// popup header
 		       `VBox( `Heading( _("SuSEConfig Logging")) ,
+				// popup question
 			      `VBox( `Label( _("Your changes have been saved and SuSEconfig has run.
 Do you want to view the SuSEConfig log?
 ")),
 				     `HBox(
+					// push button label
 					 `PushButton( `id(`log),  _("Show Log File") ),
+					// push button label
 					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
 					 )
 				  )
@@ -313,12 +324,16 @@ Do you want to view the SuSEConfig log?
 	global define AskFwShowLog( ) ``{
 
 	    OpenDialog(`opt(`decorated),
+			// popup header
 		       `VBox( `Heading( _("Logging")) ,
+				// popup question
 			      `VBox( `Label( _("Your changes have been saved and the firewalls have been restarted.
 Do you want to view the relevant log file?
 ")),
 				     `HBox(
+					// push button label
 					 `PushButton( `id(`log),  _("Show Log File") ),
+					// push button label
 					 `PushButton( `id(`no_log), `opt(`default), _("Exit without showing log file") )
 					 )
 				  )
@@ -336,7 +351,7 @@ Do you want to view the relevant log file?
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog WaitSuSEconfig                                                                             //
     //-----------------------------------------------------------------------------------------------//
-
+/*
     UI( ``{
 	global define WaitSuSEconfig( ) ``{
 	    OpenDialog(`opt(`decorated),
@@ -346,7 +361,7 @@ Do you want to view the relevant log file?
 		);
 	};
     });
-
+*/
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Dialog WaitRestartFirewall                                                                             //
     //-----------------------------------------------------------------------------------------------//
@@ -354,7 +369,9 @@ Do you want to view the relevant log file?
     UI( ``{
 	global define WaitRestartFirewall( ) ``{
 	    OpenDialog(`opt(`decorated),
+			// popup window header
 		       `VBox( `Heading( _("(Re)Start firewall ...")) ,
+				// popup window text
 			      `Label( _("\nThis procedure can take some time."))
 			   )
 		);
@@ -649,6 +666,28 @@ Do you want to view the relevant log file?
    };
 
 
+    global define string get_last_path_elemnt(path p)
+    ``{
+	if (size(p) == 0)
+	{
+	    return "";
+	}
+
+	list path_list = splitstring( "" + p, "." );
+	string var = select(path_list, size(path_list) - 1, "unknown");
+
+	if (size(var) > 0 && substring(var, 0, 1) == "\"")
+	{
+	    var = substring(var, 1);
+	}
+
+	if (size(var) > 0 && substring(var, size(var) - 1, 1) == "\"")
+	{
+	    var = substring(var, 0, size(var) - 1);
+	}
+
+	return var;
+    }
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -667,8 +706,9 @@ Do you want to view the relevant log file?
 	string l1_key =  lookup( l1, `linekey, "");
 
 	string help_text = "";
+	string var = get_last_path_elemnt(lookup(l1, `path, .unknown));
 
-	help_text = sformat( "<b>%1:</b><br>%2", l1_key, getDescr(l1_key)   );
+	help_text = sformat( "<b>%1:</b><br>%2", var, getDescr(l1_key)   );
 
 //	  return(
 //	  `VBox(`HSpacing(60),`VSpacing(1.2),
@@ -680,7 +720,8 @@ Do you want to view the relevant log file?
 		 `VBox(`HSpacing(60),`VSpacing(1.2),
 		       `Left(`ComboBox ( `id("d1_1"),
 					 `opt(getComboBoxOption(l1_key),`hstretch),
-					 lookup(l1, `linekey, ""),
+					 var,
+//					 lookup(l1, `linekey, ""),
 					 getComboList(l1_key, l1))),
 		       `VSpacing(1),
 		       `RichText( help_text) ));
@@ -708,6 +749,7 @@ Do you want to view the relevant log file?
 	``{
 	return(
 	    // Main dialog edit rc_config
+	    // tree widget label
 	    `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("&Config options"), tree_data )),
 		  `HSpacing(1),
 		  `HWeight( 65, `VBox(`VSpacing(0.2),
@@ -734,6 +776,7 @@ Do you want to view the relevant log file?
 
 	    OpenDialog( `opt(`decorated ),
 			`VBox(`HSpacing(60),
+			    // search popup window header
 			      `Heading(_("Search for a sysconfig variable")),
 			      `VSpacing(0.5),
 			      `HBox(`VSpacing(10),
@@ -741,11 +784,16 @@ Do you want to view the relevant log file?
 				    `HSpacing(2),
 				    `VBox(
 					`VSpacing(1),
+					// text entry label
 					`TextEntry(`id(`search_entry), _("&Search for:")),
 					`VSpacing(1),
+					// check box label
 					`Left(`CheckBox(`id(`ignore), _("abg &matches AbG"),    true)),
+					// check box label
 					`Left(`CheckBox(`id(`nkey),   _("Search &keyname"),     true)),
+					// check box label
 					`Left(`CheckBox(`id(`ndescr), _("Search &description"), true)),
+					// check box label
 					`Left(`CheckBox(`id(`nvalue), _("Search &value"),       false)),
 					`VSpacing(1)
 					),
@@ -753,9 +801,9 @@ Do you want to view the relevant log file?
 				  ),
 			      `VSpacing(0.5),
 			      `HBox(
-				  // popup create partition:
+				  // push button label
 				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-				  // popup create partition:
+				  // push button label
 				  `PushButton(`id(`cancel), _("&Cancel"))
 				  )
 			    )
@@ -809,6 +857,15 @@ Do you want to view the relevant log file?
 	    {
 	       helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
 	    }
+	    else if (WFM::powertweak_only_mode == true)
+	    {
+		// help text for powertweak only configuration - 1/3
+		helptextCR = _("<p>Here you can edit powertweak configuration, which is stored in /etc/powertweak/tweaks file.</p>")
+		// help text for powertweak only configuration - 2/3
+		+ _("You can configure hardware and kernel parameters listed in tree on the left side of dialog.")
+		// help text for powertweak only configuration - 3/3
+		+ _("<p><b>Warning:</b> Powertweak configuration is only for real experts! Setting wrong value can result in system lock or data loss!</p>");
+	    }
 	    else
 	    {
 	       helptextCR = HelpMsgBody();
@@ -818,11 +875,12 @@ Do you want to view the relevant log file?
 			`HBox( `VSpacing(16),
 			       `VBox(
 				   `HSpacing(60),
+				   // popup window header
 				   `Heading(_("Help")),
 				   `VSpacing(0.5),
 				   `RichText( helptextCR ),
 				   `VSpacing(1.5),
-				// popup create partition:
+				    // push button label
 				   `PushButton(`id(`ok), `opt(`default),    _("&OK"))
 				   )
 			    )
@@ -846,9 +904,10 @@ Do you want to view the relevant log file?
 
 
     UI(``{
-	global define SaveDlg( list entry_list )
+
+	global define SaveDlg( list entry_list, boolean powertweak_only)
 	    ``{
-	    // helptext for popup create partition line 1 of 6
+	    // helptext in popup window
 	    string helptextCR = _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
@@ -860,30 +919,62 @@ Choose \"Cancel\" to edit the values again.
 
 					   // delete # from description
 					   descr = mergestring(splitstring(descr, "#"),"");
-
 					   // delete \n from description
 					   descr = mergestring(splitstring(descr, "\n"),"");
 
-					   return (`item( `id(lookup( entry, `linekey, "x")),
-							  lookup( entry, `linekey, ""),
+					    // remove html tags from helps
+					    list tags = [ "BR", "/P", "P", "B", "/B", "EM", "/EM", "I", "/I", "TT", "/TT",
+						"/BIG",  "BIG",  "CODE", "/CODE", "STRONG", "/STRONG", "PRE",  "/PRE",
+						 "LARGE", "/LARGE", "HR", "H1", "/H1", "H2", "/H2", "H3", "/H3"
+					    ];
+
+					    foreach(string t, tags, ``{
+						    string tag = "<" + t + ">";
+
+						    while (issubstring(descr, tag))
+						    {
+							integer pos = find(descr, tag);
+							descr = substring(descr, 0, pos) + substring(descr, pos + size(tag));
+						    }
+
+						    tag = tolower(tag);
+
+						    while (issubstring(descr, tag))
+						    {
+							integer pos = find(descr, tag);
+							descr = substring(descr, 0, pos) + substring(descr, pos + size(tag));
+						    }
+						}
+					    );
+
+
+					   return (`item( `id(WFM::get_last_path_elemnt(lookup( entry, `path, .x))),
+							  WFM::get_last_path_elemnt(lookup( entry, `path, .x)),
 							  lookup( entry, `value,   ""),
 							  substring( descr, 0, 70)));
 				       });
 
+	    // save dialog - header text
+	    string header = (powertweak_only == true) ?
+	    // save dialog - header text
+	    _("Save Powertweak configuration") :
+	    // save dialog - header text
+	     _("Save sysconfig variables");
 
 	    OpenDialog( `opt(`decorated ),
 			`HBox( `VSpacing(12),
 			       `VBox(`HSpacing(70),
 				     //heading of popup
-				     `Heading(_("Save sysconfig variables")),
+				     `Heading(header),
 				     `Label(  helptextCR ),
 				     `VSpacing(0.5),
+				     // table column header
 				     `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description") ), table_list ),
 				     `VSpacing(0.5),
 				     `HBox(
-					 // popup create partition:
+					 // push button label
 					 `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-					 // popup create partition:
+					 // push button label
 					 `PushButton(`id(`cancel), _("&Cancel"))
 					 )
 				   )
@@ -928,7 +1019,7 @@ Choose \"Cancel\" to edit the values again.
     UI(``{
 	global define GotoDlg( list entry_list )
 	    ``{
-	    // helptext for popup create partition line 1 of 6
+	    // helptext for search popup
 	    string helptextCR = _("Here, view the results of your search. If you see the item you want, click this item then click \"OK\". Otherwise, click \"Cancel\" to quit the search.");
 
 	    list table_list = maplist( `entry, entry_list,
@@ -962,9 +1053,9 @@ Choose \"Cancel\" to edit the values again.
 				  ),
 			      `VSpacing(0.5),
 			      `HBox(
-				  // popup create partition:
+				    // push button label
 				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-				  // popup create partition:
+				    // push button label
 				  `PushButton(`id(`cancel), _("&Cancel"))
 				  )
 			    )

@@ -73,9 +73,13 @@
 {
 
     textdomain "sysconfig";
+    import "Runlevel";
+    import "Directory";
 
     UI(`ChangeWidget(`id(`package),   `Value, 20));
+
     include "sysconfig/sys_dialogs.ycp";
+    include "ui/common_messages.ycp";
 
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
@@ -83,6 +87,22 @@
 
     // todo change
     boolean lib_test_mode = true;
+
+    string powertweakconfig = "/etc/powertweak/tweaks";
+    boolean havepowertweakagent = true;
+
+    // read powertweak agent description
+    string powertweakag = SCR::Read(.target.string, Directory::ydatadir + "/powertweak.agent");
+    y2debug("Powertweak agent: %1", powertweakag);
+
+    if (powertweakag == nil || powertweakag == "")
+    {
+	// error popup message - 1/2
+	UI::ErrorPopup(_("Cannot read file 'powertweak.agent'") + "\n" +
+	// error popup message - 2/2
+	_("Powertweak settings cannot be saved."));
+	havepowertweakagent = false;
+    }
 
     ////////////////////////////////////////////////////////////
     // Read the current architecture (no architecture depended modes yet
@@ -99,8 +119,10 @@
 
 	  if ( descr == nil || descr == "" )
 	      {
-		  descr = UI(_("<p></p>"))+
+		  descr = UI("<p></p>")+
+			// help text header - %1 is section name (e.g. Mail, Network,...)
 		      sformat(UI(_("<p><b>Subdialog for %1</b></p>")),key) +
+		      // section help text
 		      UI(_("<p>The configuration in this section is not yet organized.</p>"));
 	      }
 
@@ -127,8 +149,6 @@
 			       string value )                                    //  "10.10.0.12"
     ``{
 
-    y2internal("%1=%2", key, value);
-
 	list    path_list   = splitstring( "" + key, "." );                 // ["", "etc", "sysconfig", "network", "dhcpcd"]
 	string  variable    = select( path_list, size(path_list)-1, "");
 	path_list           = remove( path_list, size(path_list)-1);
@@ -149,15 +169,19 @@
 
 	    tmp = tmp + "/_" + path_string + ".scr";
 
-	    string scrfile = path_string + "\n" + "`ag_ini( SysConfigFile(\"" + path_slash + "\"))\n";
+	    // powertweak hack
+	    string agentdef = (select(path_list, 1, "") == "etc" && select(path_list, 2, "") == "powertweak" && select(path_list, 3, "") == "tweaks" && havepowertweakagent == true) ?
+		powertweakag : "`ag_ini( SysConfigFile(\"" + path_slash + "\"))\n";
 
+	    string scrfile = path_string + "\n" + agentdef;
 
 	    SCR::Write (.target.string, tmp, scrfile);
 	    SCR::RegisterAgent(path_path, tmp);
 	    registered_list = add( registered_list, path_path );
 	    y2debug("Registered: %1", registered_list );
 	}
-	y2internal("path=%1  value=%2", topath(path_string + "." + variable), value);
+
+	y2debug("Writing value %2 to %1", topath(path_string + "." + variable), value);
 	SCR::Write( topath(path_string + "." + variable), value);
     };
 
@@ -186,6 +210,41 @@
        tree_data_file    = "tree_data";
     }
 
+    // powertweak only mode
+    if (powertweak_only_mode == true)
+    {
+	// add powertweak only parameter
+	 rc_create_command = rc_create_command + " -p";
+    }
+
+    if (SCR::Read(.target.size, powertweakconfig) == -1 || (SCR::Read(.target.size, powertweakconfig) == 0 && powertweak_only_mode == true))
+    {
+	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") > 0)
+	{
+	    // popup dialog question
+	    if (UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.\nDo you want to create it and use powerteak?"), YesButtonLabel(), OKButtonLabel(), `focus_no) == true)
+	    {
+		// create powertweak config
+		integer exit = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
+
+		if (exit != 0)
+		{
+		    y2warning("Powertweak exit code: %1", exit);
+		    // warning popup message
+		    UI::WarningPopup(_("Powertweak failed: configuration file may be missing or broken"));
+		}
+	    }
+	    else
+	    {
+		// create empty file - next time user will not be asked to use powertweak
+		SCR::Write(.target.string, "/etc/powertweak/tweaks", "");
+	    }
+	}
+	else
+	{
+	    y2debug("Powertweak is not installed");
+	}
+    }
 
     // Execute the binary to create all neccesary data for the editor.
     SCR (`Execute(.target.bash, rc_create_command, $[]));
@@ -197,6 +256,9 @@
     map  rc_config_keys = $[];
     //rc_config_keys = ReadY2("rc_config_keys");
     rc_config_keys = SCR(`Read(.target.yast2, rc_config_file ));
+
+    // remove generated file
+    SCR::Execute(.target.remove, Directory::ydatadir + "/" + rc_config_file);
     //    SCR(`Write (.dumpto.tmp.rc_config_keys_1, rc_config_keys ));
 
     // show processing steps ...
@@ -205,6 +267,9 @@
     // the other output is the tree_data list.
     //list tree_data =  ReadY2("tree_data");
     list tree_data = SCR(`Read(.target.yast2, tree_data_file));
+
+    // remove generated file
+    SCR::Execute(.target.remove, Directory::ydatadir + "/" + tree_data_file);
 
     //    SCR(`Write (.dumpto.tmp.tree_data, tree_data ));
 
@@ -234,10 +299,17 @@
      // translator: Main window header
      if ( firewall_mode )
      {
+	 // main window header
         UI(`SetContents(_("Edit firewall configuration"), main_window, help_text, true, true ));
+     }
+     else if (powertweak_only_mode == true)
+     {
+	 // main window header
+	 UI::SetContents(_("Edit powertweak configuration"), main_window, help_text, true, true);
      }
      else
      {
+	 // main window header
 	 UI(`SetContents(_("Edit sysconfig variables"), main_window, help_text, true, true ));
      }
 
@@ -246,6 +318,7 @@
 
      if ( firewall_mode )
      {
+	 // defaul help text for firewall
         curr_dialog = getDirDialog( UI(_("<p><b>SuSEfirewall2</b> and <b>SuSEpersonal-firewall</b> are two independent packet filter
 concepts and implementations for SuSE Linux systems. Select the package
 that best suits your needs:</p>
@@ -259,15 +332,29 @@ requires the linux kernel 2.4 to run.</p>")));
      }
      else
      {
-	 curr_dialog = getDirDialog( UI(_("<p>With this editor, edit the variables in /etc/sysconfig configfiles.</p>
-")) + UI(_("<p>
+	 if (powertweak_only_mode == true)
+	 {
+	     // warning help text 1/2
+	     curr_dialog = getDirDialog(_("<p>Here you can tune hardware or kernel parameters.</p>")
+	        // warning help text 2/2
+		+ _("<p><b>WARNING: Setting wrong value can result in system lock or data loss!</b></p>")
+	     );
+	 }
+	 else
+	 {
+	     // default sysconfig help text - 1/2
+	    curr_dialog = getDirDialog( UI(_("<p>With this editor, edit the variables in /etc/sysconfig configfiles.</p>
+"))
+	     // default sysconfig help text - 2/2
+	     + UI(_("<p>
 Many of these variables are set by specialized YaST2
 configuration modules like the \"Network configuration\".</p>
 ")));
+	 }
      }
 
 
-
+    // button label
      UI( `ChangeWidget(  `id(`next), `Label,  _("S&ave") ) );
      UI( `ChangeWidget(  `id(`key),  `Tree,  tree_data));
      UI( `ReplaceWidget( `id(`rp),   curr_dialog ));
@@ -335,7 +422,8 @@ configuration modules like the \"Network configuration\".</p>
 
 		if ( size(entry_list) == 0)
 		{
-		    UI(`DisplayMessage(_("No entries found")));
+		    // search result message
+		    UI::MessagePopup(_("No entries found"));
 		}
 		else
 		{
@@ -370,7 +458,7 @@ configuration modules like the \"Network configuration\".</p>
 
 	    /////////////////////////////////////////////////////////////////
 	    // save Changes
-	    y2milestone( "TTTTTTTTT dialogtype: %1", dialogtype);
+	    y2milestone( "dialogtype: %1, key: %2", dialogtype, key);
 
 
             if ( dialogtype == "d1" ||  dialogtype == "d2" ||  dialogtype == "d3" ||
@@ -383,6 +471,21 @@ configuration modules like the \"Network configuration\".</p>
 	       {
 		  string new_val = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Value));
 		  string key     =  deletechars( UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Label)), "&");
+		  y2milestone("key: %1", key);
+
+		  // get key without '/' chars
+		  string new_key = "";
+		  foreach(`k, `v,  rc_config_keys,
+		      ``{
+			  if (get_last_path_elemnt(lookup(v, `path, .empty)) == key)
+			  {
+			      new_key = k;
+			  }
+		      }
+		    );
+
+		  key = new_key;
+		  y2milestone("key: %1", key);
 
 		  if ( lookup(lookup(rc_config_keys, key, $[]), `value, nil) != new_val )
 		  {
@@ -415,7 +518,7 @@ configuration modules like the \"Network configuration\".</p>
 
             entry_list               = filter(  `entry, entry_list, ``( lookup( entry, `parent, "" ) == key ));
 
-            y2debug("dialogtype: %1, curr_entry: %2 entry_list: %3", dialogtype, curr_entry, entry_list);
+            y2milestone("dialogtype: %1, curr_entry: %2 entry_list: %3 key: %4", dialogtype, curr_entry, entry_list, key);
 
             if ( dialogtype == "d1" )
             {
@@ -465,7 +568,7 @@ configuration modules like the \"Network configuration\".</p>
 	        list  changes_list = maplist( `linekey, `line, rc_config_keys,``( add(line, `linekey, linekey )));
 		changes_list       = filter(`entry, changes_list, ``( lookup(entry, `new, false) == true ));
 
-		any save_val = UI(`SaveDlg( changes_list));
+		any save_val = UI::SaveDlg(changes_list, powertweak_only_mode);
 
 	        if (save_val == `cancel)
 	        {
@@ -485,13 +588,40 @@ configuration modules like the \"Network configuration\".</p>
 		    // this list contains all rc_file paths, that must be saved before starting SuSEconfig
 		    list rc_file_list = [];
 
+		    boolean powertweak_changed = false;
+
 		    list ret_list = maplist( `entry, changes_list, ``{
-			write_value(lookup(entry, `path, nil), lookup(entry, `value, nil));
+			path writepath = lookup(entry, `path, nil);
+
+			string pathstr = "" + writepath;
+
+			if (substring(pathstr, 0, size(".etc.powertweak.tweaks")) == ".etc.powertweak.tweaks")
+			{
+			    // test if we have powertweak agent template to write powertweak settings
+			    if (havepowertweakagent == true)
+			    {
+				powertweak_changed = true;
+				y2debug("powertweak config changed: %1", writepath);
+				write_value(writepath, lookup(entry, `value, nil));
+			    }
+			}
+			else
+			{
+			    write_value(writepath, lookup(entry, `value, nil));
+			}
 		    });
 
 		    sync_sysconfig();
 		    y2milestone("Starting config scripts");
 
+		    // activate powertweak changes
+		    if (powertweak_changed == true)
+		    {
+			SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
+
+			// activate powertweak at startup
+			Runlevel::ServiceAdjust("powertweakd", "enable");
+		    }
 
 		    any ret = 0;
 		    if ( firewall_mode )
@@ -506,7 +636,8 @@ configuration modules like the \"Network configuration\".</p>
 		    else
 		    {
 			//UI(`WaitSuSEconfig());
-		        // TODO FIXME: uncomment this line WFM::CallFunction( `inst_suseconfig( false, false ) );
+			// run SuSEconfig
+		        WFM::CallFunction( `inst_suseconfig( false, false ) );
 			//ret = SCR(`Execute(.target.bash, "/sbin/SuSEconfig >/var/log/SuSEconfig.log 2>&1"));
 			//UI(`CloseDialog());
 		    }
@@ -517,6 +648,7 @@ configuration modules like the \"Network configuration\".</p>
 
             if ( ret == `back )
             {
+		// push button label
                  UI(`ChangeWidget(`id(`next), `Label,  _("&Next") ) );
             }
 

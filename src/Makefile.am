@@ -1,5 +1,5 @@
 #
-# Makefile.am for y2c_sysconfig/src
+# Makefile.am for sysconfig/src
 #
 
 client_DATA = sysconfig_step1.ycp sysconfig.ycp
@@ -7,9 +7,11 @@ client_DATA = sysconfig_step1.ycp sysconfig.ycp
 yncludedir = @yncludedir@/sysconfig
 ynclude_DATA = sys_dialogs.ycp
 
-config_DATA = sysconfig.y2cc
+config_DATA = sysconfig.y2cc	\
+	      powertweak.y2cc
 
-ydata_DATA = meta_sys.config
+ydata_DATA = meta_sys.config	\
+	    powertweak.agent 
 
 ybin_PROGRAMS = syscreate_data
 

@@ -138,7 +138,7 @@ void showList(const list<T>& v);
   This method saves the given list to a text file.
  */
 template<class T>
-void writeListToFile(const list<T>* rootPtr, const char* filename);
+void writeListToFile(const list<T>* rootPtr, const char* filename, bool def);
 
 
 //helperfunctions which were present in libg++ but not in libstdc++
@@ -363,9 +363,9 @@ int main(int argc, char* argv[])
   const int MAX_DIR_DEPTH     =    20;
 
   // variables for the file names
-  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/data/meta_sys.config";
-  char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/rc_config_keys";
-  char  tree_data_arr[FILENAME_LENGTH]       = "/usr/lib/YaST2/tree_data";
+  char  meta_rc_config_arr[FILENAME_LENGTH]  = "/usr/share/YaST2/data/meta_sys.config";
+  char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/share/YaST2/data/rc_config_keys";
+  char  tree_data_arr[FILENAME_LENGTH]       = "/usr/share/YaST2/data/tree_data";
   char *meta_rc_config                       = meta_rc_config_arr;
   char *rc_config_keys                       = rc_config_keys_arr;
   char *tree_data                            = tree_data_arr;
@@ -444,28 +444,39 @@ int main(int argc, char* argv[])
   string rest;
   string property;
   bool   firewall_mode = false;
+  bool powertweak_only = false;
 
   string powertweak = "Powertweak";
 
-  if ((argc == 2) && ( strcmp(argv[1], "-f" ) == 0 ))
+  if (argc >= 2)
   {
-     firewall_mode  = true;
-     meta_rc_config = "/usr/lib/YaST2/data/meta_fw.config";
-     rc_config_keys = "/usr/lib/YaST2/fw_config_keys";
-     tree_data      = "/usr/lib/YaST2/fw_tree_data";
-  }
-  else if  (argc == 1)
-  {
-     // normal mode
-  }
-  else
-  {
-     printf( "\n\n\nERROR wrong usage:  rc_create_date [-f]\n\n");
-     exit( 1 );
+      int ar = 1;
+      
+      while (ar < argc)
+      {
+	  if (strcmp(argv[ar], "-f" ) == 0)
+	  {
+	      firewall_mode  = true;
+	      meta_rc_config = "/usr/lib/YaST2/data/meta_fw.config";
+	      rc_config_keys = "/usr/lib/YaST2/fw_config_keys";
+	      tree_data      = "/usr/lib/YaST2/fw_tree_data";
+	  }
+	  else if (strcmp(argv[1], "-p" ) == 0)
+	  {
+	      powertweak_only = true;
+	  }
+	  else
+	  {
+	      printf( "\n\n\nERROR wrong usage:  rc_create_date [-f] [-p]\n\n");
+	      exit(1);
+	  }
+	    
+	  ar++;
+      }
   }
 
   // initially push directory /etc in the directory map
-  if ( !firewall_mode )
+  if ( !firewall_mode && !powertweak_only)
   {
      dirptr->setName("etc");
      dirptr->setBranch("/");
@@ -478,7 +489,7 @@ int main(int argc, char* argv[])
   *dirPath = (string)"/";
   DirectorySet.insert(*dirPath);
 
-  if (!firewall_mode )
+  if (!firewall_mode && !powertweak_only)
   {
      *dirPath = (string)"/etc";
      DirectorySet.insert(*dirPath);
@@ -511,6 +522,13 @@ int main(int argc, char* argv[])
   {
      //filename = globbuffer.gl_pathv[i];
      filename = *filenameit;
+
+     if (powertweak_only && filename != "/etc/powertweak/tweaks")
+     {
+	cout << "\n### File: " << filename << " skipped" << endl;
+	continue;
+     }
+
      cout << "\n### File: " << filename << endl;
 
      ifstream fin_filename(filename.c_str());
@@ -572,9 +590,22 @@ int main(int argc, char* argv[])
 	      // set branch, parent, path, ...
 	      varptr = new RCVariable;
 
-/// powertweak hack: some variables contain '/' char
 	      string pathname = varname;
+
+/*	      unsigned int br = 0;
+	      while((br = varname.find("/")) != string::npos)
+	      {
+		   varname.erase(br, 1);
+	      }*/
+
+	      // powertweak hack: some variables contain '/' char
 	      replace(varname.begin(), varname.end(), '/', 'I');
+
+	      // dirty hack: allow editing variables with only lowercase chars in name
+	      if (varname == downcase(varname))
+	      {
+		  varname += 'I';
+	      }
 	      
 	      varptr->setName(pathname/*varname*/);
 	      varptr->setBranch("/etc/" + downcase(varname));
@@ -596,8 +627,12 @@ int main(int argc, char* argv[])
 	   }
 	   value = stringLine.substr(stringLine.find("=")+1);
 
-///	   
-///	   value = trim(value);
+	    
+	    // Powertweak hack - remove whitespace around value
+	    if (filename == "/etc/powertweak/tweaks")
+	    {
+		value = trim(value);
+	    }
 	   
 	   if (value.find("#") != string::npos)
 	      value = value.substr(0,value.find("#"));
@@ -606,87 +641,87 @@ int main(int argc, char* argv[])
 	   varptr->setValue(value);
 	   varptr = NULL;
 
-// Powertweak hack
-if (filename == "/etc/powertweak/tweaks")
-{
-     // test if RCVariable "varname" exists in RCVariableMap
-     RCVariableMap::iterator it = RCVariables.find(varname);
+	    // Powertweak hack
+	    if (filename == "/etc/powertweak/tweaks")
+	    {
+		 // test if RCVariable "varname" exists in RCVariableMap
+		 RCVariableMap::iterator it = RCVariables.find(varname);
 
-     if (it != RCVariables.end())
-     {
-	// found: set values of found entry
-	varptr = &it->second;
-
-	value = "/" + powertweak;
-
-	// set branch of the RCVariable
-	{
-	   varptr->setBranch(value + "/" + downcase(varname));
-
-	   string rest_dir = value;
-	   string dirname = "";
-	   string lowleveldir = value.substr(value.rfind('/')+1);
-
-	   while (rest_dir.find('/') != string::npos)
-	   {
-	      dirname  = rest_dir.substr(rest_dir.find('/')+1);
-	      rest_dir = dirname;
-	      if (dirname.find('/')!=string::npos)
-		 dirname = dirname.substr(0,dirname.find('/'));
-
-	      // find dirname in RCDirectories
-	      if (dirname != "")
-	      {
-		 RCDirectoryMap::iterator dir_it = RCDirectories.find(dirname);
-
-		 if (dir_it == RCDirectories.end())
-		 {
-		    // not found: create new entry in map
-		    // RCDirectories
-		    dirptr = new RCDirectory;
-		    dirptr->setName(dirname);
-
-		    if (value.substr(0,value.find((string)"/" + dirname)).empty())
-		    {
-		       dirptr->setBranch("/");
-		    }
-		    else
-		    {
-		       dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
-		       *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
-		       //if (*dirPath != "")
-		       //DirectorySet.insert(*dirPath);
-		    }
-		    RCDirectories[dirname] = *dirptr;
-		    dirptr = NULL;
-		 }
-		 else
+		 if (it != RCVariables.end())
 		 {
 		    // found: set values of found entry
-		    dirptr = &dir_it->second;
-		    dirptr = NULL;
+		    varptr = &it->second;
+
+		    value = "/" + powertweak;
+
+		    // set branch of the RCVariable
+		    {
+		       varptr->setBranch(value + "/" + downcase(varname));
+
+		       string rest_dir = value;
+		       string dirname = "";
+		       string lowleveldir = value.substr(value.rfind('/')+1);
+
+		       while (rest_dir.find('/') != string::npos)
+		       {
+			  dirname  = rest_dir.substr(rest_dir.find('/')+1);
+			  rest_dir = dirname;
+			  if (dirname.find('/')!=string::npos)
+			     dirname = dirname.substr(0,dirname.find('/'));
+
+			  // find dirname in RCDirectories
+			  if (dirname != "")
+			  {
+			     RCDirectoryMap::iterator dir_it = RCDirectories.find(dirname);
+
+			     if (dir_it == RCDirectories.end())
+			     {
+				// not found: create new entry in map
+				// RCDirectories
+				dirptr = new RCDirectory;
+				dirptr->setName(dirname);
+
+				if (value.substr(0,value.find((string)"/" + dirname)).empty())
+				{
+				   dirptr->setBranch("/");
+				}
+				else
+				{
+				   dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
+				   *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
+				   //if (*dirPath != "")
+				   //DirectorySet.insert(*dirPath);
+				}
+				RCDirectories[dirname] = *dirptr;
+				dirptr = NULL;
+			     }
+			     else
+			     {
+				// found: set values of found entry
+				dirptr = &dir_it->second;
+				dirptr = NULL;
+			     }
+			  }
+		       }
+		       RCDirectoryMap::iterator dir_it = RCDirectories.find(lowleveldir);
+
+		       if (dir_it != RCDirectories.end())
+		       {
+			  // found: add variable name to current lowlevel
+			  // directory
+			  dirptr = &dir_it->second;
+			  dirptr->addVariable(varname);
+			  dirptr = NULL;
+		       }
+		    }
+
+		    // set datatype of the RCVariable
+		    varptr->setDatatype("integer");
+
+		    // set the typedef of the RCVariable
+		    varptr->setTypedef("not_strict");
 		 }
-	      }
-	   }
-	   RCDirectoryMap::iterator dir_it = RCDirectories.find(lowleveldir);
-
-	   if (dir_it != RCDirectories.end())
-	   {
-	      // found: add variable name to current lowlevel
-	      // directory
-	      dirptr = &dir_it->second;
-	      dirptr->addVariable(varname);
-	      dirptr = NULL;
-	   }
-	}
-
-	// set datatype of the RCVariable
-	varptr->setDatatype("integer");
-
-	// set the typedef of the RCVariable
-	varptr->setTypedef("not_strict");
-     }
-}
+	    }
 	   
 	}
      }
@@ -1102,7 +1137,7 @@ if (filename == "/etc/powertweak/tweaks")
   rootPtr->push_back("];");
 
   // Write directory tree to file
-  writeListToFile(rootPtr, tree_data);
+  writeListToFile(rootPtr, tree_data, powertweak_only);
 
   return 0;
 }
@@ -1141,13 +1176,15 @@ void showList(const list<T>& v)
 }
 
 template<class T>
-void writeListToFile(const list<T>* rootPtr, const char* filename)
+void writeListToFile(const list<T>* rootPtr, const char* filename, bool def = false)
 {
   ofstream fout(filename);
   if(!fout)
     cout << "Unable to open file \'"
 	 << filename
 	 << " \' for writing.\n";
+
+  string value = (def) ? "true" : "false";
 
   for (StringList::const_iterator ci = rootPtr->begin();
        ci != rootPtr->end();
@@ -1172,19 +1209,19 @@ void writeListToFile(const list<T>* rootPtr, const char* filename)
 	     << (string)*ci
 	     << "\"), \""
 	     << (string)*ci
-	     << "\", false, ";
+	     << "\", " << value << ", ";
       else if ((string)*ci_next == "]" || (string)*ci_next == "];" )
 	fout << " `item(`id(\""
 	     << (string)*ci
 	     << "\"), \""
 	     << (string)*ci
-	     << "\", false) ";
+	     << "\", " << value << ") ";
       else
 	fout << " `item(`id(\""
 	     << (string)*ci
 	     << "\"), \""
 	     << (string)*ci
-	     << "\", false), ";
+	     << "\", " << value << "), ";
     }
   fout.close();
 }
