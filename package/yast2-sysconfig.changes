@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb 27 15:26:39 CET 2003 - lslezak@suse.de
+
+- ignore header in config file (#23876)
+- updated testsuite
+- version 2.7.9
+
+-------------------------------------------------------------------
 Tue Feb 25 13:12:54 CET 2003 - lslezak@suse.de
 
 - don't change comment formatting (#24205)
