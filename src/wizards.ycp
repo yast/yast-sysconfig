@@ -22,6 +22,43 @@ include "sysconfig/complex.ycp";
 include "sysconfig/dialogs.ycp";
 
 /**
+ * Main workflow of the sysconfig configuration
+ * @return sequence result
+ */
+global define symbol MainSequence() ``{
+
+    map aliases = $[
+	"main"	:   ``(MainDialog())
+    ];
+
+    map sequence = $[
+	"ws_start" : "main",
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    symbol ret = WizardSequencer(aliases, sequence);
+
+    return ret;
+}
+
+/**
+ * Whole configuration of sysconfig but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+global define symbol SysconfigAutoSequence() ``{
+    Wizard::CreateDialog();
+
+    symbol ret = MainSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
  * Whole configuration of sysconfig
  * @return sequence result
  */
@@ -56,43 +93,6 @@ global define boolean SysconfigSequence() ``{
     UI::CloseDialog();
 
     return ret == `next;
-}
-
-/**
- * Whole configuration of sysconfig but without reading and writing.
- * For use with autoinstallation.
- * @return sequence result
- */
-global define symbol SysconfigAutoSequence() ``{
-    Wizard::CreateDialog();
-
-    any ret = MainSequence();
-
-    UI::CloseDialog();
-    return ret;
-}
-
-/**
- * Main workflow of the sysconfig configuration
- * @return sequence result
- */
-global define symbol MainSequence() ``{
-
-    map aliases = $[
-	"main"	:   ``(MainDialog())
-    ];
-
-    map sequence = $[
-	"ws_start" : "main",
-	"main" : $[
-	    `abort	: `abort,
-	    `next	: `next
-	]
-    ];
-
-    any ret = WizardSequencer(aliases, sequence);
-
-    return ret;
 }
 
 

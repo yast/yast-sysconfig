@@ -89,7 +89,7 @@ Press OK to exit.
 
 	y2debug("Installed packages: just_installed=%1", just_installed);
 
-	if (SCR::Read(.target.size, powertweakconfig) == -1 || SCR::Read(.target.size, powertweakconfig) == 0)
+	if (SCR::Read(.target.size, Sysconfig::powertweakconfig) == -1 || SCR::Read(.target.size, Sysconfig::powertweakconfig) == 0)
 	{
 	    // popup dialog question
 	    if (just_installed == true || Popup::AnyQuestion("", _("Powertweak configuration file does not exist.
@@ -97,7 +97,7 @@ Create it and use powerteak?
 "), Label::YesButton(), Label::NoButton(), `focus_no) == true)
 	    {
 		// create powertweak config
-		integer exit = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
+		integer exit = (integer)SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
 
 		if (exit != 0)
 		{
@@ -144,6 +144,116 @@ global define symbol WriteDialog() ``{
     }
 
     return `next;
+}
+
+/**
+ * Get string representation of type definition. Used at richtext description.
+ * @param description Variable description
+ * @param richtext result is rich/plain text
+ * @return string Textual description of the type
+ */
+global define string possible_values(map description, boolean richtext) ``{
+    string ret = "";
+
+    string type = description["Type"]:"";
+
+    if  (type == "")
+    {
+	return ret;
+    }
+    else if (type == "yesno")
+    {
+	ret = ret + "yes,no";
+    }
+    else if (type == "boolean")
+    {
+	ret = "true,false";
+    }
+    else if (regexpmatch(type, "^list\\(.*\\)"))
+    {
+	list spaces = [];
+	list values = String::ParseOptions(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+
+	foreach(string value, values, ``{
+		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
+	    }
+	);
+
+	ret = mergestring(spaces, ", ");
+    }
+    else if (regexpmatch(type, "^string\\(.*\\)"))
+    {
+	list spaces = [];
+	list values = String::ParseOptions(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+
+	foreach(string value, values, ``{
+		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
+	    }
+	);
+
+	// suffix added to the allowed (predefined) values
+	ret = mergestring(spaces, ", ") + (richtext?" <I>":" ") + _("or any value") + (richtext?"</I>":"");
+    }
+    else if (regexpmatch(type, "^regexp\\(.*\\)"))
+    {
+	string regex = regexpsub(type, "^regexp\\((.*)\\)", "\\1");
+	// Translation: description of possible values, regular expression string is added after the text
+	ret = (richtext?"<I>":"") + _("Value Matching Regular Expression:") + (richtext?"</I>":"") + regex;
+    }
+    else if (type == "integer")
+    {
+	// allowed value description
+	ret = (richtext?"<I>":"") + _("Any integer value") + (richtext?"</I>":"");
+    }
+    else if (regexpmatch(type, "^integer\\(.*:.*\\)"))
+    {
+	string min = regexpsub(type, "^integer\\((.*):.*\\)", "\\1");
+	string max = regexpsub(type, "^integer\\(.*:(.*)\\)", "\\1");
+
+	y2milestone("min: %1, max: %2", min, max);
+
+	if (max == "" && min != "")
+	{
+	    // allowed value description
+	    ret = (richtext?"<I>":"") + sformat(_("Integer value greater or equal to %1"), min) + (richtext?"</I>":"");
+	}
+	else if (min == "" && max != "")
+	{
+	    // allowed value description
+	    ret = (richtext?"<I>":"") + sformat(_("Integer value less or equal to %1"), max) + (richtext?"</I>":"");
+	}
+	else
+	{
+	    // Translation: allowed value description, %1 is minimum value, %2 is maximum integer value
+	    ret = (richtext?"<I>":"") + sformat(_("Any integer value from %1 to %2"), min, max) + (richtext?"</I>":"");
+	}
+    }
+    else if (type == "string")
+    {
+	// allowed value description - any value is allowed
+	ret = (richtext?"<I>":"") + _("Any value") + (richtext?"</I>":"");
+    }
+    else if (type == "ip")
+    {
+	// allowed value description - IP adress
+	ret = (richtext?"<I>":"") + _("IPv4 or IPv6 address") + (richtext?"</I>":"");
+    }
+    else if (type == "ip4")
+    {
+	// allowed value description - IPv4 adress
+	ret = (richtext?"<I>":"") + _("IPv4 address") + (richtext?"</I>":"");
+    }
+    else if (type == "ip6")
+    {
+	// allowed value description - IPv6 adress
+	ret = (richtext?"<I>":"") + _("IPv6 address") + (richtext?"</I>":"");
+    }
+    else
+    {
+	y2warning("Unknown type definition: %1", type);
+    }
+
+    return ret;
 }
 
 /**
@@ -426,7 +536,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-	list(string) parsed = String::ParseOptions(values_string, Sysconfig::parse_param);
+	list<string> parsed = String::ParseOptions(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -438,7 +548,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	list(string) parsed = String::ParseOptions(values_string, Sysconfig::parse_param);
+	list<string> parsed = String::ParseOptions(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -458,116 +568,6 @@ global define list combo_list(map description, boolean set_default) ``{
     }
 
     y2debug("combo list: %1", ret);
-
-    return ret;
-}
-
-/**
- * Get string representation of type definition. Used at richtext description.
- * @param description Variable description
- * @param richtext result is rich/plain text
- * @return string Textual description of the type
- */
-global define string possible_values(map description, boolean richtext) ``{
-    string ret = "";
-
-    string type = description["Type"]:"";
-
-    if  (type == "")
-    {
-	return ret;
-    }
-    else if (type == "yesno")
-    {
-	ret = ret + "yes,no";
-    }
-    else if (type == "boolean")
-    {
-	ret = "true,false";
-    }
-    else if (regexpmatch(type, "^list\\(.*\\)"))
-    {
-	list spaces = [];
-	list values = String::ParseOptions(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
-
-	foreach(string value, values, ``{
-		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
-	    }
-	);
-
-	ret = mergestring(spaces, ", ");
-    }
-    else if (regexpmatch(type, "^string\\(.*\\)"))
-    {
-	list spaces = [];
-	list values = String::ParseOptions(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
-
-	foreach(string value, values, ``{
-		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
-	    }
-	);
-
-	// suffix added to the allowed (predefined) values
-	ret = mergestring(spaces, ", ") + (richtext?" <I>":" ") + _("or any value") + (richtext?"</I>":"");
-    }
-    else if (regexpmatch(type, "^regexp\\(.*\\)"))
-    {
-	string regex = regexpsub(type, "^regexp\\((.*)\\)", "\\1");
-	// Translation: description of possible values, regular expression string is added after the text
-	ret = (richtext?"<I>":"") + _("Value Matching Regular Expression:") + (richtext?"</I>":"") + regex;
-    }
-    else if (type == "integer")
-    {
-	// allowed value description
-	ret = (richtext?"<I>":"") + _("Any integer value") + (richtext?"</I>":"");
-    }
-    else if (regexpmatch(type, "^integer\\(.*:.*\\)"))
-    {
-	string min = regexpsub(type, "^integer\\((.*):.*\\)", "\\1");
-	string max = regexpsub(type, "^integer\\(.*:(.*)\\)", "\\1");
-
-	y2milestone("min: %1, max: %2", min, max);
-
-	if (max == "" && min != "")
-	{
-	    // allowed value description
-	    ret = (richtext?"<I>":"") + sformat(_("Integer value greater or equal to %1"), min) + (richtext?"</I>":"");
-	}
-	else if (min == "" && max != "")
-	{
-	    // allowed value description
-	    ret = (richtext?"<I>":"") + sformat(_("Integer value less or equal to %1"), max) + (richtext?"</I>":"");
-	}
-	else
-	{
-	    // Translation: allowed value description, %1 is minimum value, %2 is maximum integer value
-	    ret = (richtext?"<I>":"") + sformat(_("Any integer value from %1 to %2"), min, max) + (richtext?"</I>":"");
-	}
-    }
-    else if (type == "string")
-    {
-	// allowed value description - any value is allowed
-	ret = (richtext?"<I>":"") + _("Any value") + (richtext?"</I>":"");
-    }
-    else if (type == "ip")
-    {
-	// allowed value description - IP adress
-	ret = (richtext?"<I>":"") + _("IPv4 or IPv6 address") + (richtext?"</I>":"");
-    }
-    else if (type == "ip4")
-    {
-	// allowed value description - IPv4 adress
-	ret = (richtext?"<I>":"") + _("IPv4 address") + (richtext?"</I>":"");
-    }
-    else if (type == "ip6")
-    {
-	// allowed value description - IPv6 adress
-	ret = (richtext?"<I>":"") + _("IPv6 address") + (richtext?"</I>":"");
-    }
-    else
-    {
-	y2warning("Unknown type definition: %1", type);
-    }
 
     return ret;
 }
@@ -654,7 +654,7 @@ global define void check_set_current_value(boolean force_change)
     // check current value
     if (selected_variable != "")
     {
-	string new_value = backslash_add(UI::QueryWidget(`id(`combo), `Value));
+	string new_value = backslash_add((string)UI::QueryWidget(`id(`combo), `Value));
 
 	if (Sysconfig::get_name_from_id(selected_variable) != "")
 	{
@@ -785,7 +785,7 @@ global define symbol MainDialog() ``{
 
     while(ret != `cancel && ret != `abort && ret != `next && ret != `back)
     {
-	ret = UI::UserInput();
+	ret = (symbol)UI::UserInput();
 
 	// "Default" button
 	if (ret == `def)
@@ -952,7 +952,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 	{
 	    check_set_current_value(false);
 
-	    string selected = UI::QueryWidget(`id(`tree), `CurrentItem);
+	    string selected = (string)UI::QueryWidget(`id(`tree), `CurrentItem);
 	    selected_variable = selected;
 	    y2milestone("Selected: %1", selected);
 
