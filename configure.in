@@ -23,12 +23,24 @@ dnl Checks for programs.
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_PROG_CXX
 
 dnl Allow conditionals in .am files
 AM_CONDITIONAL(ISIX86, [case `uname -m` in i*86) true;; *) false;; esac])
 AM_CONDITIONAL(ISALPHA, test `uname -m` = alpha)
 AM_CONDITIONAL(ISSPARC, test `uname -m` = sparc)
 AM_CONDITIONAL(ISPPC, test `uname -m` = ppc)
+
+CFLAGS="${CFLAGS} -Wall -Wmissing-prototypes -Wformat -O2  "
+CXXFLAGS="${CXXFLAGS} -Wall -Wmissing-prototypes -Wformat -O2 "
+
+dnl Force chars to be signed on ppc, it's the default on intel and alpha
+if test "`uname -m`" = "ppc"; then
+CFLAGS="${CFLAGS} -fsigned-char"
+CXXFLAGS="${CXXFLAGS} -fsigned-char"
+AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
+fi
 
 AC_OUTPUT(Makefile
 	package/y2c_rc_config.spec:y2c_rc_config.spec.in

@@ -88,11 +88,7 @@
 
 {
     UI(`ChangeWidget(`id(`package),   `Value, 20));
-    include "rc_process_db.ycp";
     include "rc_dialogs.ycp";
- 
-    //Include (`rc_process_db() );
-    //Include (`rc_dialogs()    );
   
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
@@ -104,7 +100,6 @@
     ////////////////////////////////////////////////////////////
     // Read the current architecture (no architecture depended modes yet
     // string architecture = lookup( user_settings, "architecture", default_architecture);
-
 
     
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,59 +115,35 @@
 
 	  return( descr );
       };
-
+    
     
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     //////                                       STATIC DATA                                       //////
     /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // show processing steps ...
+    UI(`ChangeWidget(`id(`package),   `Value, 50));
  
-    list rc_config_eddb =
-    [
-      $[ `key:"base",              `property:"path",        `value:"/" ]
-    ];
-
+    // Execute the binary to create all neccesary data for the editor.
+    SCR (`Execute(.target.bash, "/usr/lib/YaST2/bin/rc_create_data", $[]));
 
     // show processing steps ...
+    UI(`ChangeWidget(`id(`package),   `Value, 70));
 
-    y2debug ( "vor read eddb");
-    list rc_config_eddb_raw = SCR( `Read( .suseconfig.meta_rc_config ));
-    y2debug ( "nach read eddb");
-    
+    // One output of the binary is the rc_config_keys map,
+    map  rc_config_keys = $[];
+    rc_config_keys = ReadY2("rc_config_keys");
+    //    SCR(`Write (.dumpto.tmp.rc_config_keys_1, rc_config_keys ));
+
     // show processing steps ...
-    UI(`ChangeWidget(`id(`package),   `Value, 35));
+    UI(`ChangeWidget(`id(`package),   `Value, 90));
 
-    if ( rc_config_eddb_raw != "" )
-    {
-	 rc_config_eddb = maplist( `entry, rc_config_eddb_raw, 
-				   ``{
-				       if (lookup( entry, "error") != nil)
-				       {
-					   y2error( "Error at: %1", entry);
-				       }
-				       
-				       string|void enum_list = lookup( entry, "list", nil );
-				       if ( enum_list == nil )
-				       {
-					   return( $[
-						     `key     :lookup(entry, "key"),
-						     `property:lookup(entry, "property"),
-						     `value   :lookup(entry,"value")
-					   ]);
-				       }
-				       else
-				       {
-					   return( $[
-						     `key     :lookup(entry, "key"),
-						     `property:lookup(entry, "property"),
-						     `value   :lookup(entry,"value"),
-						     `list    :splitstring(enum_list, ",") 
-					   ]);
-				       }
-				   });
-    }
-    y2debug ( "nach ma eddb");
-    
-	     
+    // the other output is the tree_data list.
+    list tree_data =  ReadY2("tree_data");
+    //    SCR(`Write (.dumpto.tmp.tree_data, tree_data ));
+
+    // show processing steps ...
+    UI(`ChangeWidget(`id(`package),   `Value, 100));
    
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    // Main helptext                                                                                 //
@@ -187,52 +158,10 @@
     //////                                       M A I N                                           //////
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    
-    /////////////////////////////////////////////////////////////////
-    //  Read the list of all rc_config variables
-    //  get the data of all varaiables and put them into the table
-    ///////////////////////////////////////////////////////////////// 
-
-
-     map  rc_config_keys = $[];
-     list rc_dir         = SCR( `Dir( .rc ));
-
-     y2debug ( "SCRRead");
- 
-     foreach( `dir, rc_dir,
-     ``{
-	 list rc_variables = SCR(`Dir(topath(sformat(".rc.%1", dir))));
-	 
-	 integer i=0;
-	 while(  i < size(rc_variables) )
-	 {
-	     string key   = select( rc_variables, i);
-	     string paths = sformat(".rc.%1.%2", dir, key);
-	     
-	     string descr = SCR( `Read(topath(sformat("%1.comment", paths))));
-	     string value = SCR( `Read(topath(paths) ));
-	     
-	     change( rc_config_keys, key, $[`value:value,
-					   `descr: descr,
-					   `path:topath(sformat(".rc.%1.%2", dir, key))
-	                                   ]
-		    );
-	     i=i+1; 
-	 }
-     });
-
+    //////////////////////////////////////////////////////////////////////////////////
+    // Lets build the main window ...
+    //////////////////////////////////////////////////////////////////////////////////
      
-    
-     //////////////////////////////////////////////////////////////////////////////////
-     // Lets build the main window ...
-     //////////////////////////////////////////////////////////////////////////////////
-     
-     y2debug ( "vor  Merge");
-     list tree_data =  process_eddb_create_widgettree_and_fill_rcconfigkeys();
-     y2debug(  "nach Merge" );
-
-     rc_config_keys = rc_config_keys; 
-
      // Setting up the main window
      term main_window = getMainWindowTerm( tree_data );
     
@@ -365,7 +294,7 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 		     curr_key     = add( curr_key, `value, new_val);
 		     curr_key     = add( curr_key, `new,   true);
 
-		     rc_config_keys = add( rc_config_keys, key, curr_key);
+		     //rc_config_keys = add( rc_config_keys, key, curr_key);
 		  }
 		  
 		  // y2log( .milestone, 1, "ttt", "TTTTTTTTTBB", new_val); 
@@ -493,6 +422,3 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
    return ret;
 
 }
-
-
-

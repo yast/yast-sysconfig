@@ -20,3 +20,27 @@ info_DATA = meta_rc.config
 
 
 EXTRA_DIST = $(modules_DATA) $(menu_DATA) $(info_DATA) 
+
+
+
+bin_PROGRAMS = rc_create_data
+rc_create_data_SOURCES = \
+	RCDirectory.cpp	 \
+	RCDirectory.h	 \
+	RCVariable.cpp	 \
+	RCVariable.h	 \
+	TreeNode.cpp	 \
+	TreeNode.h	 \
+	main.cpp	 
+
+
+rc_create_data_LDADD   = -lg++
+# $(LIBSOCKET)
+
+
+# the library search path. 
+rc_create_data_LDFLAGS = $(all_libraries) 
+
+# them while "make clean", use CLEANFILES
+#DISTCLEANFILES = $(rc_create_data_METASOURCES)
+
