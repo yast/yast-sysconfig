@@ -14,8 +14,8 @@ textdomain "sysconfig";
 import "Wizard";
 import "Sysconfig";
 
-include "ui/common_popups.ycp";
-include "ui/common_messages.ycp";
+import "Popup";
+import "Label";
 include "wizard/sequencer.ycp";
 
 include "sysconfig/complex.ycp";
@@ -56,7 +56,7 @@ global define symbol SysconfigSequence() ``{
 
     Wizard::CreateDialog();
     Wizard::SetContentsButtons(caption, contents, "",
-	    BackButtonLabel(), NextButtonLabel());
+	    Label::BackButton(), Label::NextButton());
 
     any ret = WizardSequencer(aliases, sequence);
 
@@ -78,7 +78,7 @@ global define symbol SysconfigAutoSequence() ``{
 
     Wizard::CreateDialog();
     Wizard::SetContentsButtons(caption, contents, "",
-	    BackButtonLabel(), NextButtonLabel());
+	    Label::BackButton(), Label::NextButton());
 
     any ret = MainSequence();
 

@@ -17,8 +17,8 @@ import "Runlevel";
 import "Directory";
 import "Mode";
 
-include "ui/common_popups.ycp";
-include "ui/common_messages.ycp";
+import "Popup";
+import "Label";
 
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
@@ -83,7 +83,7 @@ global define symbol ReadDialog() ``{
 
 	    if (just_installed == false)
 	    {
-		UI::ErrorPopup(_("Package installation failed\nPress OK to exit"));
+		Popup::Error(_("Package installation failed\nPress OK to exit"));
 		return `abort;
 	    }
 	}
@@ -93,9 +93,9 @@ global define symbol ReadDialog() ``{
 	if (SCR::Read(.target.size, powertweakconfig) == -1 || SCR::Read(.target.size, powertweakconfig) == 0)
 	{
 	    // popup dialog question
-	    if (just_installed == true || UI::AnyQuestionPopup("", _("Powertweak configuration file does not exist.
+	    if (just_installed == true || Popup::AnyQuestion("", _("Powertweak configuration file does not exist.
 Create it and use powerteak?
-"), YesButtonLabel(), NoButtonLabel(), `focus_no) == true)
+"), Label::YesButton(), Label::NoButton(), `focus_no) == true)
 	    {
 		// create powertweak config
 		integer exit = SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
@@ -104,7 +104,7 @@ Create it and use powerteak?
 		{
 		    y2warning("Powertweak exit code: %1", exit);
 		    // warning popup message
-		    UI::WarningPopup(_("Powertweak failed: configuration file may be missing or broken"));
+		    Popup::Warning(_("Powertweak failed: configuration file may be missing or broken"));
 		}
 	    }
 	    else
@@ -115,14 +115,14 @@ Create it and use powerteak?
     }
 
     // read only powerteak config or all sysconfig files
-   if (Sysconfig::powertweak_mode == true)
-   {
+    if (Sysconfig::powertweak_mode == true)
+    {
        Sysconfig::Read([powertweakconfig]);
-   }
-   else
-   {
+    }
+    else
+    {
        Sysconfig::Read(Sysconfig::configfiles);
-   }
+    }
 
     return `next;
 }
@@ -138,8 +138,18 @@ global define symbol WriteDialog() ``{
 
     if (Sysconfig::Modified() == true)
     {
+	y2milestone("Changes will be written.");
 	// write and activate changes
-	Sysconfig::Write();
+	if (Sysconfig::Write() == false)
+	{
+	    // error popup message
+	    Popup::Error(_("An error occured during saving and activating the changes."));
+	}
+	else
+	{
+	    sleep(500);	// small delay, user should see 100% progress
+	}
+	    //Popup::Message(_("The changes were saved and successfully activated."));
     }
 
     return `next;
@@ -195,6 +205,44 @@ global define string create_richtext_description(map description) ``{
 	}
 	// rich text value
 	result = result + "<P><B>" + _("Original Value: ") + "</B> " + original + "</P>";
+    }
+
+    if (haskey(description, "actions"))
+    {
+	// display specified action command
+	string conf_modules = description["actions", "Cfg"]:nil;
+	string restart = description["actions", "Rest"]:nil;
+	string reload = description["actions", "Reld"]:nil;
+	string command = description["actions", "Cmd"]:nil;
+
+	// check whether action is defined
+	if (conf_modules != nil)
+	{
+	    // parse string with options, then add them to the rich text
+	    list conf = Sysconfig::ParseString(conf_modules, Sysconfig::parse_param);
+	    // header in the variable description text, SuSEconfig/ULconfig module names are appended
+	    result = result + "<P><B>" + _("Configuration script: ") + "</B> " + mergestring(conf, ", ") + "</P>";
+	}
+
+	if (reload != nil)
+	{
+	    list services = Sysconfig::ParseString(reload, Sysconfig::parse_param);
+	    // header in the variable description text, service names (e.g. "apache") are appended
+	    result = result + "<P><B>" + _("Service to reload: ") + "</B> " + mergestring(services, ", ") + "</P>";
+	}
+
+	if (restart != nil)
+	{
+	    list services = Sysconfig::ParseString(restart, Sysconfig::parse_param);
+	    // header in the variable description text, service names (e.g. "apache") are appended
+	    result = result + "<P><B>" + _("Service to restart: ") + "</B> " + mergestring(services, ", ") + "</P>";
+	}
+
+	if (command != nil)
+	{
+	    // header in the variable description text, bash command is appended
+	    result = result + "<P><B>" + _("Activation command: ") + "</B> " + command + "</P>";
+	}
     }
 
     if (comment != "" && comment != nil)
@@ -602,11 +650,11 @@ global define void check_set_current_value(boolean force_change)
 		string t = d["Type"]:"string";
 
 		// popup question dialog: variable value does not match defined type - ask user to set value (%1 is value entered by user, %2 is allowed type - e.g. integer
-		if (UI::AnyQuestionPopup(WarningMsg(), sformat(_("Value '%1'
+		if (Popup::AnyQuestion(Label::WarningMsg(), sformat(_("Value '%1'
 does not match type '%2'.
 
 Really set this value?
-"), new_value, t), UI::YesButtonLabel(), UI::NoButtonLabel(), `focus_no) == true)
+"), new_value, t), Label::YesButton(), Label::NoButton(), `focus_no) == true)
 		{
 		    // force setting of value
 		    Sysconfig::set_value(selected_variable, new_value, true, force_change);
@@ -701,14 +749,14 @@ global define symbol MainDialog() ``{
 
 		   `HBox(
 			 // back pushbutton: the user input is ignored and the last dialog is called
-			 `PushButton(`id(`abort), `opt(`key_F9), AbortButtonLabel()),
+			 `PushButton(`id(`abort), `opt(`key_F9), Label::AbortButton()),
 			 `HStretch(),
-			 `PushButton(`id(`help), `opt(`key_F1), HelpButtonLabel()),
+			 `PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()),
 			 `HStretch(),
 			  // Translation: push button label
 			 `PushButton(`id(`search), _("&Search")),
 			 `HStretch(),
-			 `PushButton(`id(`next), `opt(`key_F10), FinishButtonLabel())
+			 `PushButton(`id(`next), `opt(`key_F10), Label::FinishButton())
 			 )
 		    )
 		)
@@ -771,7 +819,7 @@ global define symbol MainDialog() ``{
 _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
-"),			create_table_content(modified), UI::OKButtonLabel(), UI::CancelButtonLabel(), _("Confirm each activation command"), false);
+"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), _("Confirm each activation command"), false);
 
 		if (result["ui"]:`dummy == `cancel)
 		{
@@ -797,7 +845,7 @@ Choose \"Cancel\" to edit the values again.
 			// help text in popup dialog
 			_("The search results are displayed here. If you see the item you want, select it then click \"Go to\". Otherwise, click \"Cancel\" to close this dialog."), create_table_content(found),
 			// push button label
-			 _("&Go to"), UI::CancelButtonLabel(), "", nil);
+			 _("&Go to"), Label::CancelButton(), "", nil);
 
 		    if (input["ui"]:`dummy == `cancel)
 		    {
@@ -815,7 +863,7 @@ Choose \"Cancel\" to edit the values again.
 		else
 		{
 		    // popup message - search result message
-		    UI::MessagePopup(_("No entries found"));
+		    Popup::Message(_("No entries found"));
 		}
 	    }
 	}
@@ -848,7 +896,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 			   `RichText(helptext),
 			   `VSpacing(1.5),
 			    // push button label
-			   `PushButton(`id(`ok), `opt(`default, `key_F10), OKButtonLabel())
+			   `PushButton(`id(`ok), `opt(`default, `key_F10), Label::OKButton())
 			   )
 		    )
             );
