@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jun 11 12:52:57 CEST 2004 - lslezak@suse.cz
+
+- read also files from /etc/sysconfig/uml/ (UML config. directory)
+- version 2.10.0
+
+-------------------------------------------------------------------
 Tue May  4 14:42:30 CEST 2004 - lslezak@suse.cz
 
 - merged proofread texts
