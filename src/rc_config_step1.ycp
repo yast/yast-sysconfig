@@ -243,8 +243,8 @@
 
      // Initial Settings:
      term curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
-the central configuration file of your SuSE Linux<\p>")) + UI(_("<p>Please notice, that many of this variables are
-set by specialized YaST2 configuration modules like the \"Network configuration\"<\p>")));
+the central configuration file of your SuSE Linux</p>")) + UI(_("<p>Please notice, that many of this variables are
+set by specialized YaST2 configuration modules like the \"Network configuration\"</p>")));
      
      UI( `ChangeWidget(  `id(`next), `Label,  _("&Save") ) );
      UI( `ChangeWidget(  `id(`key),  `Tree,  tree_data));

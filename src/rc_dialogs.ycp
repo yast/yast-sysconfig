@@ -31,6 +31,50 @@
     //////////////////////////////////////////////////////////////////////////////////////
 
   
+    //////////////////////////////////////////////////////////////////////////////////////
+    //  Helptext                                                                        //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    UI(``{  define HelpMsgStart()``{
+	return( // helptext for popup 
+	        _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
+the central configuration file</b> of your SuSE Linux</p>"));
+    }});
+    
+
+    
+    //////////////////////////////////////////////////////////////////////////////////////
+    //  Helptext                                                                        //
+    //////////////////////////////////////////////////////////////////////////////////////
+    
+    UI(``{ define HelpMsgBody() ``{
+	return(  // helptext for popup 
+_("<p>After you save your changes, this editor changes the variables in the
+corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/ *. Then it runs
+SuSEconfig, which changes the underlying configuration files, resp. stops/starts deamons,
+runs  low level configuration tools, so that your configuration in rc.config take affect.</p>") +
+ 
+_("<p><b>Important:</b> You still can edit each individual configuration file manually.") +
+
+_("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if you have manually changed any of them.  If you have changed a configuration file manually, it will not touch it.</p>") +
+ 
+_("<p> This concept was choosen, because:
+<ul><li>now you have your basic configuration in \"one\" central file, which is easy to read and to edit.</li>
+<li>you can easily copy the rc.config to another computer, run SuSEconfig and this system is nearly ready to work, without having to edit up to twenty individual configuration files manually.</li></ul></p>"));
+    }});
+
+
+    
+    //////////////////////////////////////////////////////////////////////////////////////
+    //  Helptext                                                                        //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    UI(``{ define HelpMsgNotice()``{
+	return( // helptext for popup 
+_("<p>Please notice, that many of this variables are set by specialized YaST2 configuration modules like the \"Network configuration</p>"));
+    }});
+
+  
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    // getComboList                                                                                  //
    //-----------------------------------------------------------------------------------------------//
@@ -52,7 +96,8 @@
 	  // second:
 	  entry_opts = add( entry_opts, entry_value );
 
-	  // now, make from [ "tcp", "dgram" ] ->  [ `item( `id("tcp"), "tcp", false ), `item( `id("dgram"), "dgram", true ) ]
+	  // now, make from [ "tcp", "dgram" ] ->
+	  //                  [ `item( `id("tcp"), "tcp", false ), `item( `id("dgram"), "dgram", true ) ]
 	  //
 	  entry_opts = maplist( `entry, entry_opts, ``( `item( `id(entry), entry, entry == entry_value )));
 
@@ -538,34 +583,32 @@
     UI(``{
     define HelpDlg()
     ``{
-	  // helptext for popup create partition line
-	  string helptextCR = 
-		_("<p>With this Editor, you can edit the variables in /etc/rc.config,
-the central configuration file of your SuSE Linux</p>") +
-		_("<p>Please notice, that many of this variables are
-set by specialized YaST2 configuration modules like the \"Network configuration\"</p>"); 
+	string helptextCR  = "";
+	string helptextCR += HelpMsgStart();
+	string helptextCR += HelpMsgBody();
+	string helptextCR += HelpMsgStart();
 
-	      OpenDialog( `opt(`decorated ),
-			  `HBox( `VSpacing(16),
-				 `VBox(
-				       `HSpacing(60),
-				       `Heading(_("Help")),
-				       `VSpacing(0.5),
-				       `RichText( helptextCR ),
-				       `VSpacing(1.5),
+	OpenDialog( `opt(`decorated ),
+		    `HBox( `VSpacing(16),
+			   `VBox(
+				 `HSpacing(60),
+				 `Heading(_("Help")),
+				 `VSpacing(0.5),
+				 `RichText( helptextCR ),
+				 `VSpacing(1.5),
 				// popup create partition:
-				       `PushButton(`id(`ok), `opt(`default),    _("&OK"))
-				       )
+				 `PushButton(`id(`ok), `opt(`default),    _("&OK"))
 				 )
-			  );
+			   )
+		    );
 	    
-	      SetFocus(`id(`ok));
+	SetFocus(`id(`ok));
+	
+	UserInput();
+	//
+	CloseDialog();
 
-	      UserInput();
-	      //
-	      CloseDialog();
-
-	     return;
+	return;
     
     }; });
 

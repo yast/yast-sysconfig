@@ -23,20 +23,6 @@
   //  set "rc_config_status" `off
   user_settings = add(user_settings, "rc_config_status", `off);
    
-  // Menuentry for the YaST2 menu
-  if (Args() == [ "get_menuentry" ]) 
-    return [ "rc_config", $[
-			`menuentry    : UI(_("RC-Config Editor")),
-			`arguments    : [ ],
-			`widget       : `RichText(
-				// 
-				UI(_("Launch this module to configure rc_config."))
-				+
-				UI(_("<p>You need to be logged in as <i>root</i> in order to do this.</p>"))), 
-			`codefragment : nil ]
-    ];
-
-       
     UI(``{
 	   define ImageOpenDialog()
 	      ``{
