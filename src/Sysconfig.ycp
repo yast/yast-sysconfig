@@ -1083,7 +1083,7 @@ global define boolean Write() ``{
     string caption = (powertweak_mode == true) ? _("Saving Powertweak Configuration") : _("Saving sysconfig Configuration");
 
     // set the right number of stages
-    integer steps = (powertweak_mode == false) ? size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + ((CompleteSuSEconfig) ? 1 : size(Configmodules)) + 1 /* flush*/ + 3 /* 3 stages */ : size(modified_variables) + 2 /* 2 stages */;
+    integer steps = (powertweak_mode == false) ? size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + ((CompleteSuSEconfig) ? 1 : size(Configmodules)) + 1 /* flush*/ + 3 /* 3 stages */ : (size(modified_variables) + 2) /* 2 stages */;
 
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
