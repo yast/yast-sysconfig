@@ -36,8 +36,8 @@
     //////////////////////////////////////////////////////////////////////////////////////
 
     UI(``{  define HelpMsgStart()``{
-	  return( // helptext for popup 
-		  _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
+	return( // helptext for popup 
+	    _("<p>With this Editor, you can edit the variables in <b>/etc/rc.config,
 the central configuration file</b> of your SuSE Linux</p>"));
     }});
     
@@ -48,17 +48,17 @@ the central configuration file</b> of your SuSE Linux</p>"));
     //////////////////////////////////////////////////////////////////////////////////////
     
     UI(``{ define HelpMsgBody() ``{
-	  return(  // helptext for popup 
-_("<p>After you save your changes, this editor changes the variables in the
+	return(  // helptext for popup 
+	    _("<p>After you save your changes, this editor changes the variables in the
 corresponding  rc.config file, in /etc/rc.config or /etc/rc.config.d/ *. Then it runs
 SuSEconfig, which changes the underlying configuration files, resp. stops/starts deamons,
 runs  low level configuration tools, so that your configuration in rc.config take affect.</p>") +
  
-_("<p><b>Important:</b> You still can edit each individual configuration file manually.") +
+	    _("<p><b>Important:</b> You still can edit each individual configuration file manually.") +
 
-_("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if you have manually changed any of them.  If you have changed a configuration file manually, it will not touch it.</p>") +
+	    _("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if you have manually changed any of them.  If you have changed a configuration file manually, it will not touch it.</p>") +
  
-_("<p> This concept was choosen, because:
+	    _("<p> This concept was choosen, because:
 <ul><li>now you have your basic configuration in \"one\" central file, which is easy to read and to edit.</li>
 <li>you can easily copy the rc.config to another computer, run SuSEconfig and this system is nearly ready to work, without having to edit up to twenty individual configuration files manually.</li></ul></p>"));
     }});
@@ -70,79 +70,79 @@ _("<p> This concept was choosen, because:
     //////////////////////////////////////////////////////////////////////////////////////
 
     UI(``{ define HelpMsgNotice()``{
-	  return( // helptext for popup 
-_("<p>Please notice, that many of this variables are set by specialized YaST2 configuration modules like the \"Network configuration</p>"));
+	return( // helptext for popup 
+	    _("<p>Please notice, that many of these variables are set by specialized YaST2 configuration modules like the \"Network configuration</p>"));
     }});
 
   
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // getComboList                                                                                  //
-   //-----------------------------------------------------------------------------------------------//
-   // read the possible entrys of combobox, and mark the real value, so that it is shown as default //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // getComboList                                                                                  //
+    //-----------------------------------------------------------------------------------------------//
+    // read the possible entrys of combobox, and mark the real value, so that it is shown as default //
+    //-----------------------------------------------------------------------------------------------//
     
     define getComboList( string key, map entry_map )
-   ``{
-	  // get real value of the entry
-	  map    key_map      = lookup( rc_config_keys, key, $[] );
-	  string entry_value  = lookup(key_map, `value, "");
+	``{
+	// get real value of the entry
+	map    key_map      = lookup( rc_config_keys, key, $[] );
+	string entry_value  = lookup(key_map, `value, "");
 
-	  // produce now a optionlist with the real entry, therefor
-	  // - first:  delete the real entry from the list, if it is in there
-	  // - second: add the real value
+	// produce now a optionlist with the real entry, therefor
+	// - first:  delete the real entry from the list, if it is in there
+	// - second: add the real value
 
-	  // first: 
-	  list   entry_opts   = filter( `item, lookup( entry_map, `options, []), ``( item != entry_value ));
-	  // second:
-	  entry_opts = add( entry_opts, entry_value );
+	// first: 
+	list   entry_opts   = filter( `item, lookup( entry_map, `options, []), ``( item != entry_value ));
+	// second:
+	entry_opts = add( entry_opts, entry_value );
 
-	  // now, make from [ "tcp", "dgram" ] ->
-	  //                  [ `item( `id("tcp"), "tcp", false ), `item( `id("dgram"), "dgram", true ) ]
-	  //
-	  entry_opts = maplist( `entry, entry_opts, ``( `item( `id(entry), entry, entry == entry_value )));
+	// now, make from [ "tcp", "dgram" ] ->
+	//                  [ `item( `id("tcp"), "tcp", false ), `item( `id("dgram"), "dgram", true ) ]
+	//
+	entry_opts = maplist( `entry, entry_opts, ``( `item( `id(entry), entry, entry == entry_value )));
 
-	  return( entry_opts );
+	return( entry_opts );
     }
 	 
 						     
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // getDescr()                                                                                    //
-   //-----------------------------------------------------------------------------------------------//
-   // Read the description                                                                          //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // getDescr()                                                                                    //
+    //-----------------------------------------------------------------------------------------------//
+    // Read the description                                                                          //
+    //-----------------------------------------------------------------------------------------------//
     
     define getDescr( string key )
-    ``{
-             map key_map          = lookup( rc_config_keys, key, $[] );
-             any descr            = lookup(key_map, `descr, nil);
+	``{
+	map key_map          = lookup( rc_config_keys, key, $[] );
+	any descr            = lookup(key_map, `descr, nil);
 
-	     if ( descr == nil )
-	     {
+	if ( descr == nil )
+	    {
 		descr = "";
 
 	     	// save it
 	     	key_map        = add( key_map, `descr, descr);
 	     	rc_config_keys = add( rc_config_keys, key, key_map );
-	     }
+	    }
 
 
-	     // I4l_XXX_3 has no comment, but I4L_XXX_0 has!!!
-	     if ( descr == "" )
-	     {
-		 if ( substring( key, size(key)-2, 1 ) == "_" )
-		 {
-		     string  comment_key = substring( key, 0, size(key)-2 ) + "_0";
+	// I4l_XXX_3 has no comment, but I4L_XXX_0 has!!!
+	if ( descr == "" )
+	    {
+		if ( substring( key, size(key)-2, 1 ) == "_" )
+		    {
+			string  comment_key = substring( key, 0, size(key)-2 ) + "_0";
 		     
-		     map comment_key_map          = lookup( rc_config_keys, comment_key, $[] );
-		     descr                        = lookup( comment_key_map, `descr, nil);
+			map comment_key_map          = lookup( rc_config_keys, comment_key, $[] );
+			descr                        = lookup( comment_key_map, `descr, nil);
 
-		     if ( descr == nil ) descr = "";
-		 }
-	     }
+			if ( descr == nil ) descr = "";
+		    }
+	    }
 	     
-	     // delete all "#"
-	     descr = mergestring(splitstring( descr, "#"),"");
-	     return( descr );
+	// delete all "#"
+	descr = mergestring(splitstring( descr, "#"),"");
+	return( descr );
     };
 
     
@@ -150,250 +150,250 @@ _("<p>Please notice, that many of this variables are set by specialized YaST2 co
     //                              D I A L O G   D E F I N E S                                     //
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog DisplayLogFile                                                                         //
-   //-----------------------------------------------------------------------------------------------//
-   // Displays a message to the user in a small dialog with an OK                                   //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog DisplayLogFile                                                                         //
+    //-----------------------------------------------------------------------------------------------//
+    // Displays a message to the user in a small dialog with an OK                                   //
+    //-----------------------------------------------------------------------------------------------//
 
-   UI( ``{
-       define ErrorMessage() ``{
-	  // ok pushbutton: confirm the dialog
-	  OpenDialog(
-		     `opt(`decorated),
-		     `HBox(
-			   `HSpacing(1),
-			   `VBox(
-				 `VSpacing(0.2),
-				 `Heading( _("Error" )),
-				 `VSpacing(0.2),
-				 `Label(_("An error occured, during execution SuSEconfig\nProbably \"/sbin/SuSEconfig\" is missing or the module has no root permission")),
-				 `PushButton(`opt(`default), _("&OK and Exit")),
-				 `VSpacing(0.2)
-				 ),
-			   `HSpacing(1)
+    UI( ``{
+	define ErrorMessage() ``{
+	    // ok pushbutton: confirm the dialog
+	    OpenDialog(
+		`opt(`decorated),
+		`HBox(
+		    `HSpacing(1),
+		    `VBox(
+			`VSpacing(0.2),
+			`Heading( _("Error" )),
+			`VSpacing(0.2),
+			`Label(_("An error occured, during execution SuSEconfig\nProbably \"/sbin/SuSEconfig\" is missing or the module has no root permission")),
+			`PushButton(`opt(`default), _("&OK and Exit")),
+			`VSpacing(0.2)
+			),
+		    `HSpacing(1)
+		    )
+		);
+	    UserInput();
+	    CloseDialog();
+	};
+    });
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog DisplayLogFile                                                                         //
+    //-----------------------------------------------------------------------------------------------//
+    // Display Suseconfig logfile                                                                    //
+    //-----------------------------------------------------------------------------------------------//
+    
+    UI( ``{
+	define DisplayLogFile( string msg_text ) ``{
+	    term text = `RichText( `opt(`plainText), msg_text );	  
+	    OpenDialog(`opt ( `decorated ),
+		       `VBox (`HSpacing(75),
+			      `Heading( _("SuSEConfig Logging" )),
+			      text,	// e.g. `Richtext()
+			      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
 			   )
-		     );
-	  UserInput();
-	  CloseDialog();
-      };
-   });
-    
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog DisplayLogFile                                                                         //
-   //-----------------------------------------------------------------------------------------------//
-   // Display Suseconfig logfile                                                                    //
-   //-----------------------------------------------------------------------------------------------//
-    
-   UI( ``{
-      define DisplayLogFile( string msg_text ) ``{
-	  term text = `RichText( `opt(`plainText), msg_text );	  
-	  OpenDialog(`opt ( `decorated ),
-		     `VBox (`HSpacing(75),
-			    `Heading( _("SuSEConfig Logging" )),
-				      text,	// e.g. `Richtext()
-				      `PushButton( `id(`ok_help), `opt(`default), _("OK and Exit") )
-				)
-			 ); 
+		); 
 
-	  SetFocus(`id(`ok_help) );
+	    SetFocus(`id(`ok_help) );
 	  
-	  any r = UserInput();
-	  CloseDialog();
-	  return (r);
-      };
-   });      
+	    any r = UserInput();
+	    CloseDialog();
+	    return (r);
+	};
+    });      
 
   
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog AskShowLog                                                                             //
-   //-----------------------------------------------------------------------------------------------//
-   // Ask the User, if he wants to show the SuSEConfig logfile                                      //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog AskShowLog                                                                             //
+    //-----------------------------------------------------------------------------------------------//
+    // Ask the User, if he wants to show the SuSEConfig logfile                                      //
+    //-----------------------------------------------------------------------------------------------//
 
-   UI( ``{
-     define AskShowLog( ) ``{
-	 OpenDialog(`opt(`decorated), 
-		     `VBox( `Heading( _("SuSEConfig Logging" )) ,
-			    `VBox( `Label( _("Your changes are set, and SuSEconfig was run.\nWould now you like to see the logging of SuSEConfig?" )),
-				   `HBox( 
+    UI( ``{
+	define AskShowLog( ) ``{
+	    OpenDialog(`opt(`decorated), 
+		       `VBox( `Heading( _("SuSEConfig Logging" )) ,
+			      `VBox( `Label( _("Your changes are set, and SuSEconfig was run.\nWould now you like to see the logging of SuSEConfig?" )),
+				     `HBox( 
 					 `PushButton( `id(`log),  _("Show Logfile") ),
 					 `PushButton( `id(`no_log), `opt(`default), _("Don't show logfile and exit") )
 					 )
-				   )
-			    )
-		     );
-	      any r = UserInput();
-	      CloseDialog();
+				  )
+			   )
+		);
+	    any r = UserInput();
+	    CloseDialog();
 
 	     
-	      return (r);
-      };
+	    return (r);
+	};
     });
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog WaitSuSEconfig                                                                             //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog WaitSuSEconfig                                                                             //
+    //-----------------------------------------------------------------------------------------------//
 
-   UI( ``{
-     define WaitSuSEconfig( ) ``{
-	 OpenDialog(`opt(`decorated), 
-		     `VBox( `Heading( _("SuSEConfig is running ..." )) ,
-			    `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time." ))
-			 )
-		     );
-      };
+    UI( ``{
+	define WaitSuSEconfig( ) ``{
+	    OpenDialog(`opt(`decorated), 
+		       `VBox( `Heading( _("SuSEConfig is running ..." )) ,
+			      `Label( _("Depending on  the CPU and the amount of memory,\nthis procedure can take some time." ))
+			   )
+		);
+	};
     });
 
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d5                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 5 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog d5                                                                                     //
+    //-----------------------------------------------------------------------------------------------//
+    // Predefined standard dialog for 5 entries                                                      //
+    //-----------------------------------------------------------------------------------------------//
 
     define getD5Dialog( list entry_list )
-   ``{
+	``{
 
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	  map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-	  map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
-	  map l5 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 5 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
+	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
+	map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
+	map l5 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 5 )), 0 );
 
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-	  if (l3 == nil) l3 = $[];
-	  if (l4 == nil) l4 = $[];
-	  if (l5 == nil) l5 = $[];
+	if (l1 == nil) l1 = $[];
+	if (l2 == nil) l2 = $[];
+	if (l3 == nil) l3 = $[];
+	if (l4 == nil) l4 = $[];
+	if (l5 == nil) l5 = $[];
 
-	  string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  string l3_key =  lookup( l3, `linekey, "");
-	  string l4_key =  lookup( l4, `linekey, "");
-	  string l5_key =  lookup( l5, `linekey, "");
+	string l1_key =  lookup( l1, `linekey, "");
+	string l2_key =  lookup( l2, `linekey, "");
+	string l3_key =  lookup( l3, `linekey, "");
+	string l4_key =  lookup( l4, `linekey, "");
+	string l5_key =  lookup( l5, `linekey, "");
 	  
-	  string help_text = "";
+	string help_text = "";
 	  
-	  help_text = sformat( "<b>%1:</b><p>%2<p><b>%3:</b><p>%4</p><p><b>%5:</b><p>%6</p>",
-			       l1_key, getDescr(l1_key),
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key),
-			       l3_key, getDescr(l3_key)   );
+	help_text = sformat( "<b>%1:</b><p>%2<p><b>%3:</b><p>%4</p><p><b>%5:</b><p>%6</p>",
+			     l1_key, getDescr(l1_key),
+			     l1_key, getDescr(l1_key),
+			     l2_key, getDescr(l2_key),
+			     l3_key, getDescr(l3_key)   );
 			       
-	  help_text = sformat( "%1<p><b>%2:</b><p>%3</p><p><b>%4:</b><p>%5</p>", help_text,
-			       l4_key, getDescr(l4_key),
-			       l5_key, getDescr(l5_key));
+	help_text = sformat( "%1<p><b>%2:</b><p>%3</p><p><b>%4:</b><p>%5</p>", help_text,
+			     l4_key, getDescr(l4_key),
+			     l5_key, getDescr(l5_key));
 
-	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
-		 `HBox(
-		       `VBox( `Top(`ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-			      `Top(`ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-			      `Top(`ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-			      `Top(`ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-			      `Top(`ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
-			      `HStretch()
+	return(`VBox( `HSpacing(60),`VSpacing(1.2), 
+		      `HBox(
+			  `VBox( `Top(`ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+				 `Top(`ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+				 `Top(`ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+				 `Top(`ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
+				 `Top(`ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
+				 `HStretch()
 			      ),
-		       `HSpacing(1),
-		       `HWeight(100,`RichText( help_text)), 
-		       `HSpacing(1)
-		       )));
+			  `HSpacing(1),
+			  `HWeight(100,`RichText( help_text)), 
+			  `HSpacing(1)
+			  )));
     };
 
 			     
 	  
    
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d4                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 4 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog d4                                                                                     //
+    //-----------------------------------------------------------------------------------------------//
+    // Predefined standard dialog for 4 entries                                                      //
+    //-----------------------------------------------------------------------------------------------//
 
-   define getD4Dialog( list entry_list )
-   ``{
+    define getD4Dialog( list entry_list )
+	``{
 
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	  map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-	  map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
+	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
+	map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
 
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-	  if (l3 == nil) l3 = $[];
-	  if (l4 == nil) l4 = $[];
+	if (l1 == nil) l1 = $[];
+	if (l2 == nil) l2 = $[];
+	if (l3 == nil) l3 = $[];
+	if (l4 == nil) l4 = $[];
 	  
-          string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  string l3_key =  lookup( l3, `linekey, "");
-	  string l4_key =  lookup( l4, `linekey, "");
+	string l1_key =  lookup( l1, `linekey, "");
+	string l2_key =  lookup( l2, `linekey, "");
+	string l3_key =  lookup( l3, `linekey, "");
+	string l4_key =  lookup( l4, `linekey, "");
 	  
-	  string help_text = "";
+	string help_text = "";
 	  
-	  help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key),
-			       l3_key, getDescr(l3_key)   );
+	help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
+			     l1_key, getDescr(l1_key),
+			     l2_key, getDescr(l2_key),
+			     l3_key, getDescr(l3_key)   );
 			       
-	  help_text = sformat( "%1<p><b>%2:</b><br>%3</p>", help_text,
-			       l4_key, getDescr(l4_key));
+	help_text = sformat( "%1<p><b>%2:</b><br>%3</p>", help_text,
+			     l4_key, getDescr(l4_key));
 	  
-	  return(`VBox( `HSpacing(60),
-			`VSpacing(1.2), 
-			`HBox(
-			      `VBox( `Top(`ComboBox ( `id("d4_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-				     `Top(`ComboBox ( `id("d4_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-				     `Top(`ComboBox ( `id("d4_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-				     `Top(`ComboBox ( `id("d4_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-				     `HStretch()
-				     ),
-			      `HSpacing(1),
-			      `HWeight(100,`RichText( help_text)),
-			      `HSpacing(1)
-			      ) )
-		 );
+	return(`VBox( `HSpacing(60),
+		      `VSpacing(1.2), 
+		      `HBox(
+			  `VBox( `Top(`ComboBox ( `id("d4_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+				 `Top(`ComboBox ( `id("d4_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+				 `Top(`ComboBox ( `id("d4_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+				 `Top(`ComboBox ( `id("d4_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
+				 `HStretch()
+			      ),
+			  `HSpacing(1),
+			  `HWeight(100,`RichText( help_text)),
+			  `HSpacing(1)
+			  ) )
+	    );
     };
 
    
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d3                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 3 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog d3                                                                                     //
+    //-----------------------------------------------------------------------------------------------//
+    // Predefined standard dialog for 3 entries                                                      //
+    //-----------------------------------------------------------------------------------------------//
 
-   define getD3Dialog( list entry_list )
-   ``{
+    define getD3Dialog( list entry_list )
+	``{
 
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	  map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
+	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
 
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-	  if (l3 == nil) l3 = $[];
+	if (l1 == nil) l1 = $[];
+	if (l2 == nil) l2 = $[];
+	if (l3 == nil) l3 = $[];
 
-          string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  string l3_key =  lookup( l3, `linekey, "");
+	string l1_key =  lookup( l1, `linekey, "");
+	string l2_key =  lookup( l2, `linekey, "");
+	string l3_key =  lookup( l3, `linekey, "");
 	  
-	  string help_text = "";
+	string help_text = "";
 	  
-	  help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key),
-			       l3_key, getDescr(l3_key)   );
+	help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p><b>%5:</b><br>%6</p>",
+			     l1_key, getDescr(l1_key),
+			     l2_key, getDescr(l2_key),
+			     l3_key, getDescr(l3_key)   );
 			       
 
-	  return(`VBox( `HSpacing(60),`VSpacing(1.2), 
-		 `HBox(
-		       `VBox( `Top( `ComboBox ( `id("d3_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-			      `Top( `ComboBox ( `id("d3_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-			      `Top( `ComboBox ( `id("d3_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-			      `VStretch()
+	return(`VBox( `HSpacing(60),`VSpacing(1.2), 
+		      `HBox(
+			  `VBox( `Top( `ComboBox ( `id("d3_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
+				 `Top( `ComboBox ( `id("d3_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
+				 `Top( `ComboBox ( `id("d3_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
+				 `VStretch()
 			      ),
-		       `HSpacing(1),
-		       `HWeight(100,`RichText( help_text)),
-		       `HSpacing(1) )));
+			  `HSpacing(1),
+			  `HWeight(100,`RichText( help_text)),
+			  `HSpacing(1) )));
 	
 //	  return( 
 //	    `VBox(`HSpacing(60),`VSpacing(1.2),
@@ -406,120 +406,120 @@ _("<p>Please notice, that many of this variables are set by specialized YaST2 co
 
 
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d2                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 2 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog d2                                                                                     //
+    //-----------------------------------------------------------------------------------------------//
+    // Predefined standard dialog for 2 entries                                                      //
+    //-----------------------------------------------------------------------------------------------//
 
-   define getD2Dialog( list entry_list )
-   ``{
+    define getD2Dialog( list entry_list )
+	``{
 
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
 
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
+	if (l1 == nil) l1 = $[];
+	if (l2 == nil) l2 = $[];
 
-          string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
+	string l1_key =  lookup( l1, `linekey, "");
+	string l2_key =  lookup( l2, `linekey, "");
 	  
-	  string help_text = "";
+	string help_text = "";
 	  
-	  help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p>",
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key)   );
+	help_text = sformat( "<b>%1:</b><br>%2<p><b>%3:</b><br>%4</p><p>",
+			     l1_key, getDescr(l1_key),
+			     l2_key, getDescr(l2_key)   );
 			       
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
+	return( 
+	    `VBox(`HSpacing(60),`VSpacing(1.2),
 		  `Left( `ComboBox ( `id("d2_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
 		  `Left( `ComboBox ( `id("d2_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		`VSpacing(1),
-		`RichText( help_text) ));
+		  `VSpacing(1),
+		  `RichText( help_text) ));
     };
 
    
    
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d1                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for one entrie                                                     //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog d1                                                                                     //
+    //-----------------------------------------------------------------------------------------------//
+    // Predefined standard dialog for one entrie                                                     //
+    //-----------------------------------------------------------------------------------------------//
    
-   define getD1Dialog( list entry_list )
-   ``{
+    define getD1Dialog( list entry_list )
+	``{
 
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
 
-	  if (l1 == nil) l1 = $[];
+	if (l1 == nil) l1 = $[];
 	  
-          string l1_key =  lookup( l1, `linekey, "");
+	string l1_key =  lookup( l1, `linekey, "");
 	  
-	  string help_text = "";
+	string help_text = "";
 	  
-	  help_text = sformat( "<b>%1:</b><br>%2", l1_key, getDescr(l1_key)   );
+	help_text = sformat( "<b>%1:</b><br>%2", l1_key, getDescr(l1_key)   );
 			       
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
+	return( 
+	    `VBox(`HSpacing(60),`VSpacing(1.2),
 		  `Left(`ComboBox ( `id("d1_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		`VSpacing(1),
-		`RichText( help_text) ));
+		  `VSpacing(1),
+		  `RichText( help_text) ));
     };
 
    
    
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog dir                                                                                    //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for displaying only a message                                      //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dialog dir                                                                                    //
+    //-----------------------------------------------------------------------------------------------//
+    // Predefined standard dialog for displaying only a message                                      //
+    //-----------------------------------------------------------------------------------------------//
    
     define getDirDialog( string curr_text )
-    ``{
-	  return( `VBox(`HSpacing(60),`VSpacing(1), `RichText( curr_text) ));
+	``{
+	return( `VBox(`HSpacing(60),`VSpacing(1), `RichText( curr_text) ));
     };
 
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Layout Mainwindow                                                                             //
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Layout Mainwindow                                                                             //
+    //-----------------------------------------------------------------------------------------------//
 
     define getMainWindowTerm( list tree_data )
-    ``{
-	  return(
-	  // Main dialog edit rc_config 
-	  `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("Config options"), tree_data )),
-		`HSpacing(1),
-		`HWeight( 65, `VBox(`VSpacing(0.2), 
-				    `ReplacePoint(`id(`rp),
-						  `Label("This is a label")  )
-				    )
-			  )
+	``{
+	return(
+	    // Main dialog edit rc_config 
+	    `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("Config options"), tree_data )),
+		  `HSpacing(1),
+		  `HWeight( 65, `VBox(`VSpacing(0.2), 
+				      `ReplacePoint(`id(`rp),
+						    `Label("This is a label")  )
+		      )
+		      )
 		));
     };
 
 
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Search dialog                                                                                 //
-   //-----------------------------------------------------------------------------------------------//
-   //-----------------------------------------------------------------------------------------------//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Search dialog                                                                                 //
+    //-----------------------------------------------------------------------------------------------//
+    //-----------------------------------------------------------------------------------------------//
 
     
     UI(``{
-    define SearchDlg()
-    ``{
-	  // helptext for popup search
-	  string helptextCR = _("Type the word related to the information you are looking for"); 
+	define SearchDlg()
+	    ``{
+	    // helptext for popup search
+	    string helptextCR = _("Type the word related to the information you are looking for"); 
 
-	  OpenDialog( `opt(`decorated ),
-		      `VBox(`HSpacing(60),
-			    `Heading(_("Search for a rc.config variable")),
-			    `VSpacing(0.5),
-			    `HBox(`VSpacing(10),
-				  `RichText( helptextCR ),
-				  `HSpacing(2),
-				  `VBox(
+	    OpenDialog( `opt(`decorated ),
+			`VBox(`HSpacing(60),
+			      `Heading(_("Search for a rc.config variable")),
+			      `VSpacing(0.5),
+			      `HBox(`VSpacing(10),
+				    `RichText( helptextCR ),
+				    `HSpacing(2),
+				    `VBox(
 					`VSpacing(1),
 					`TextEntry(`id(`search_entry), _("&Search for:")),
 					`VSpacing(1),
@@ -529,116 +529,116 @@ _("<p>Please notice, that many of this variables are set by specialized YaST2 co
 					`Left(`CheckBox(`id(`nvalue), _("Search value"),       false)),
 					`VSpacing(1)
 					),
-				  `HSpacing(2)
+				    `HSpacing(2)
 				  ),
-			    `VSpacing(0.5),
-			    `HBox(
+			      `VSpacing(0.5),
+			      `HBox(
 				  // popup create partition:
 				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
 				  // popup create partition:
 				  `PushButton(`id(`cancel), _("&Cancel"))
 				  )
 			    )
-		      );
+		);
 	  
-	   SetFocus(`id(`search_entry));
-	   symbol  doit            = `cancel;
+	    SetFocus(`id(`search_entry));
+	    symbol  doit            = `cancel;
 
-	   repeat
-	   {
-		   //-------------------------------
-		   // Check the User input / change popup ...
-		   //-------------------------------
-		   doit = UserInput();
+	    repeat
+		{
+		    //-------------------------------
+		    // Check the User input / change popup ...
+		    //-------------------------------
+		    doit = UserInput();
 		   
-	   } until (doit == `ok  ||  doit == `cancel );
+		} until (doit == `ok  ||  doit == `cancel );
 
-	   map answer = $[];
-	   answer = add( answer, "search", QueryWidget(`id(`search_entry),   `Value));
-	   answer = add( answer, "ignore", QueryWidget(`id(`ignore), `Value));
-	   answer = add( answer, "nkey",   QueryWidget(`id(`nkey),   `Value));
-	   answer = add( answer, "nvalue", QueryWidget(`id(`nvalue), `Value));
-	   answer = add( answer, "ndescr", QueryWidget(`id(`ndescr), `Value));
+	    map answer = $[];
+	    answer = add( answer, "search", QueryWidget(`id(`search_entry),   `Value));
+	    answer = add( answer, "ignore", QueryWidget(`id(`ignore), `Value));
+	    answer = add( answer, "nkey",   QueryWidget(`id(`nkey),   `Value));
+	    answer = add( answer, "nvalue", QueryWidget(`id(`nvalue), `Value));
+	    answer = add( answer, "ndescr", QueryWidget(`id(`ndescr), `Value));
     
 
-	  CloseDialog();
+	    CloseDialog();
 
-	   if ( doit == `cancel )
-	   {
-	       return( nil );
-	   }
-	   else
-	   {
-	       return( answer );
-	   }
-    }; });
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Search dialog                                                                                 //
-   //-----------------------------------------------------------------------------------------------//
-   //-----------------------------------------------------------------------------------------------//
-
-    
-    UI(``{
-    define HelpDlg()
-    ``{
-	string helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
-
-	OpenDialog( `opt(`decorated ),
-		    `HBox( `VSpacing(16),
-			   `VBox(
-				 `HSpacing(60),
-				 `Heading(_("Help")),
-				 `VSpacing(0.5),
-				 `RichText( helptextCR ),
-				 `VSpacing(1.5),
-				// popup create partition:
-				 `PushButton(`id(`ok), `opt(`default),    _("&OK"))
-				 )
-			   )
-		    );
-	    
-	SetFocus(`id(`ok));
-	
-	UserInput();
-	//
-	CloseDialog();
-
-	return;
-    
-    }; });
+	    if ( doit == `cancel )
+		{
+		    return( nil );
+		}
+	    else
+		{
+		    return( answer );
+		}
+	}; });
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Save dialog                       							     //
-   //------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------//
+    // Search dialog                                                                                 //
+    //-----------------------------------------------------------------------------------------------//
+    //-----------------------------------------------------------------------------------------------//
 
     
     UI(``{
-    define SaveDlg( list entry_list )
-    ``{
-	  // helptext for popup create partition line 1 of 6
-	  string helptextCR = _("Here you see the values, YaST2 will change.
+	define HelpDlg()
+	    ``{
+	    string helptextCR = HelpMsgStart()  + HelpMsgBody()  + HelpMsgNotice();
+
+	    OpenDialog( `opt(`decorated ),
+			`HBox( `VSpacing(16),
+			       `VBox(
+				   `HSpacing(60),
+				   `Heading(_("Help")),
+				   `VSpacing(0.5),
+				   `RichText( helptextCR ),
+				   `VSpacing(1.5),
+				// popup create partition:
+				   `PushButton(`id(`ok), `opt(`default),    _("&OK"))
+				   )
+			    )
+		);
+	    
+	    SetFocus(`id(`ok));
+	
+	    UserInput();
+	    //
+	    CloseDialog();
+
+	    return;
+    
+	}; });
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Save dialog                       							     //
+    //------------------------------------------------------------------------------------------------//
+    //------------------------------------------------------------------------------------------------//
+
+    
+    UI(``{
+	define SaveDlg( list entry_list )
+	    ``{
+	    // helptext for popup create partition line 1 of 6
+	    string helptextCR = _("Here you see the values, YaST2 will change.
 Choose \"OK\" and YaST2 will save these changes.
 Choose \"Cancel\" to edit the values again"); 
 
-	  list table_list = maplist( `entry, entry_list,
-				  ``{
-				      string descr = lookup( entry, `descr,   "");
+	    list table_list = maplist( `entry, entry_list,
+				       ``{
+					   string descr = lookup( entry, `descr,   "");
 
-                                      // delete # from description
-				      descr = mergestring(splitstring(descr, "#"),"");
+					   // delete # from description
+					   descr = mergestring(splitstring(descr, "#"),"");
 				      
-				      // delete \n from description
-				      descr = mergestring(splitstring(descr, "\n"),"");
+					   // delete \n from description
+					   descr = mergestring(splitstring(descr, "\n"),"");
 				      
-				      return (`item( `id(lookup( entry, `linekey, "x")),
-					     lookup( entry, `linekey, ""),
-					     lookup( entry, `value,   ""),
-					     substring( descr, 0, 70)));
-				   });
+					   return (`item( `id(lookup( entry, `linekey, "x")),
+							  lookup( entry, `linekey, ""),
+							  lookup( entry, `value,   ""),
+							  substring( descr, 0, 70)));
+				       });
 			              		 
 
   	    OpenDialog( `opt(`decorated ),
@@ -651,118 +651,118 @@ Choose \"Cancel\" to edit the values again");
 				     `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description") ), table_list ),
 				     `VSpacing(0.5),
 				     `HBox(
-					   // popup create partition:
-					   `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-					   // popup create partition:
-					   `PushButton(`id(`cancel), _("&Cancel"))
-					   )
-				     )
-			       )
-			);
+					 // popup create partition:
+					 `PushButton(`id(`ok), `opt(`default),    _("&OK")),
+					 // popup create partition:
+					 `PushButton(`id(`cancel), _("&Cancel"))
+					 )
+				   )
+			    )
+		);
 	  
-	   SetFocus(`id(`table));
-	   symbol  doit            = `cancel;
+	    SetFocus(`id(`table));
+	    symbol  doit            = `cancel;
 
-	   repeat
-	   {
-		   //-------------------------------
-		   // Check the User input / change popup ...
-		   //-------------------------------
-		   doit = UserInput();
+	    repeat
+		{
+		    //-------------------------------
+		    // Check the User input / change popup ...
+		    //-------------------------------
+		    doit = UserInput();
 		   
-	   } until (doit == `ok  ||  doit == `cancel );
+		} until (doit == `ok  ||  doit == `cancel );
 
-	   any ret = QueryWidget(`id(`table), `CurrentItem);
+	    any ret = QueryWidget(`id(`table), `CurrentItem);
 
-	   CloseDialog();
+	    CloseDialog();
 
 	   
-	   if ( doit == `cancel )
-	   {
-	       return( nil );
-	   }
-	   else
-	   {
-	       return( ret );
-	   }
-    }; });
+	    if ( doit == `cancel )
+		{
+		    return( nil );
+		}
+	    else
+		{
+		    return( ret );
+		}
+	}; });
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Goto dialog, wich appeas after a search 							     //
-   //------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------//
+    // Goto dialog, wich appeas after a search 							     //
+    //------------------------------------------------------------------------------------------------//
+    //------------------------------------------------------------------------------------------------//
 
     
     UI(``{
-    define GotoDlg( list entry_list )
-    ``{
-	  // helptext for popup create partition line 1 of 6
-	  string helptextCR = _("Here you see the results of your search. If you see your item you have searched for, click at this item and then click \"OK\", else click \"Cancel\" to quit the search."); 
+	define GotoDlg( list entry_list )
+	    ``{
+	    // helptext for popup create partition line 1 of 6
+	    string helptextCR = _("Here you see the results of your search. If you see your item you have searched for, click at this item and then click \"OK\", else click \"Cancel\" to quit the search."); 
 
-	  list table_list = maplist( `entry, entry_list,
-				  ``{
-				      string descr = lookup( entry, `descr,   "");
+	    list table_list = maplist( `entry, entry_list,
+				       ``{
+					   string descr = lookup( entry, `descr,   "");
 
-                                      // delete # from description
-				      descr = mergestring(splitstring(descr, "#"),"");
+					   // delete # from description
+					   descr = mergestring(splitstring(descr, "#"),"");
 				      
-				      // delete \n from description
-				      descr = mergestring(splitstring(descr, "\n"),"");
+					   // delete \n from description
+					   descr = mergestring(splitstring(descr, "\n"),"");
 				      
-				      return (`item( `id(lookup( entry, `linekey, "x")),
-					     lookup( entry, `linekey, ""),
-					     lookup( entry, `value,   ""),
-					     substring( descr, 0, 70)));
-				   });
+					   return (`item( `id(lookup( entry, `linekey, "x")),
+							  lookup( entry, `linekey, ""),
+							  lookup( entry, `value,   ""),
+							  substring( descr, 0, 70)));
+				       });
 			              		 
 				      
-	  OpenDialog( `opt(`decorated ),
-		      `VBox(`HSpacing(80),
-			    //heading of popup
-			    `Heading(_("Search for a rc.config variable")),
-			    `VSpacing(0.5),
-			    `HBox(`VSpacing(10),
-				  `HWeight(30,`RichText( helptextCR )),
-				  `HSpacing(2),
-				  // Column header
-				  `HWeight(70,`Table(`id(`table),`header(_("Name"), _("Value"), _("Description") ), table_list )),
-				  `HSpacing(2)
+	    OpenDialog( `opt(`decorated ),
+			`VBox(`HSpacing(80),
+			      //heading of popup
+			      `Heading(_("Search for a rc.config variable")),
+			      `VSpacing(0.5),
+			      `HBox(`VSpacing(10),
+				    `HWeight(30,`RichText( helptextCR )),
+				    `HSpacing(2),
+				    // Column header
+				    `HWeight(70,`Table(`id(`table),`header(_("Name"), _("Value"), _("Description") ), table_list )),
+				    `HSpacing(2)
 				  ),
-			    `VSpacing(0.5),
-			    `HBox(
+			      `VSpacing(0.5),
+			      `HBox(
 				  // popup create partition:
 				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
 				  // popup create partition:
 				  `PushButton(`id(`cancel), _("&Cancel"))
 				  )
 			    )
-		      );
+		);
 	  
-	   SetFocus(`id(`table));
-	   symbol  doit            = `cancel;
+	    SetFocus(`id(`table));
+	    symbol  doit            = `cancel;
 
-	   repeat
-	   {
-		   //-------------------------------
-		   // Check the User input / change popup ...
-		   //-------------------------------
-		   doit = UserInput();
+	    repeat
+		{
+		    //-------------------------------
+		    // Check the User input / change popup ...
+		    //-------------------------------
+		    doit = UserInput();
 		   
-	   } until (doit == `ok  ||  doit == `cancel );
+		} until (doit == `ok  ||  doit == `cancel );
 
-	   any ret = QueryWidget(`id(`table), `CurrentItem);
+	    any ret = QueryWidget(`id(`table), `CurrentItem);
 
-	   CloseDialog();
+	    CloseDialog();
 	   
-	   if ( doit == `cancel )
-	   {
-	       return( nil );
-	   }
-	   else
-	   {
-	       return( ret );
-	   }
-    }; });
+	    if ( doit == `cancel )
+		{
+		    return( nil );
+		}
+	    else
+		{
+		    return( ret );
+		}
+	}; });
 
 						      
 }
