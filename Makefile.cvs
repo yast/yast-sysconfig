@@ -1,6 +1,7 @@
 #
-# Makefile.cvs for y2c_rc_config
+# Makefile.cvs for y2c_sysconfig
 #
+
 configure: all
 	./configure
 
