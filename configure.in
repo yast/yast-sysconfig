@@ -6,8 +6,7 @@ AC_ARG_PROGRAM
 VERSION=`cat ${srcdir}/VERSION`
 RPMNAME=`cat ${srcdir}/RPMNAME`
 MAINTAINER=`cat ${srcdir}/MAINTAINER`
-YAST2DOC=/usr/share/doc/packages/$RPMNAME  
-DOCDIR=/usr/share/doc/packages/yast2
+DOCDIR=/usr/share/doc/packages/$RPMNAME
 YAST2DIR=/usr/lib/YaST2
 
 prefix=$YAST2DIR
@@ -19,7 +18,6 @@ AC_SUBST(RPMNAME)
 AC_SUBST(MAINTAINER)
 AC_SUBST(DOCDIR)
 AC_SUBST(YAST2DIR)
-AC_SUBST(YAST2DOC)
 
 dnl Checks for programs.
 AC_PROG_INSTALL

@@ -54,6 +54,4 @@ make install
 @YAST2DIR@/include/rc_dialogs.ycp
 @YAST2DIR@/bin/rc_create_data
 
-%dir @YAST2DOC@
-@YAST2DOC@/*
- 
+%doc @DOCDIR@

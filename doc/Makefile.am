@@ -2,7 +2,7 @@
 # Makefile.am for y2c_rc_config/doc
 #
 
-docdir = @YAST2DOC@
+docdir = @DOCDIR@
 
 doc_DATA = README
 
