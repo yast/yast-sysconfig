@@ -1,45 +1,46 @@
 /*
- *************************************************************
- *
- *     YaST2      SuSE Labs                        -o)
- *     --------------------                        /\\
- *                                                _\_v
- *           www.suse.de / www.suse.com
- * ----------------------------------------------------------
- *
- * Author:        Michael Hager <mike@suse.de>
- *
- * Description:   Choose, if inetd is to start or not
-                  if yes: Choose the ports, which are open
- *
- *
- * Purpose:
+   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\|////////////////////////////////////
+   \\							                 //
+   \\                                                                    //    
+   \\                    __   __    ____ _____ ____                      //    
+   \\                    \ \ / /_ _/ ___|_   _|___ \                     //    
+   \\                     \ V / _` \___ \ | |   __) |                    //    
+   \\                      | | (_| |___) || |  / __/                     //    
+   \\                      |_|\__,_|____/ |_| |_____|                    //    
+   \\                                                         -o)        //
+   --------------------------------------------------------   /\\  --------
+   \\	                                        	     _\_v  
+   \\
+   \\   Author:        Michael Hager <mike@suse.de>
+   \\   
+   \\   Description:   rc_config editior
+   \\   
+   \\   Purpose:       graphical, hierachical rc-config editor
+   \\   
+   \\   external data: SRC( .rc.* )
+   \\
+   ------------------------------------------------------------------------
+   \\ $Id$
 
- * user_settings:
- *
- * external function:  SCR .etc.inetd.conf
- *
- *************************************************************
 
- $Id$
+////////////////////////////////////////////////////////////////////////////////
 
- ---------------------------------------------------------------------------------------
+    namespace:
+   
+    read, the next few lines, then you know what I mean with:
+    - "parent-nodes"
+    - "leaf-nodes"
+   
+    In rc_config editor you see on the left a "tree widget" and on the right a "dialog".
+    In the "tree widget" you have nodes, you can collaps or expand, that are "parent-nodes"
+    Nodes which are "leafs" of the tree, which you can not expand, are the "leaf-nodes",
+    If you click at this leaf-nodes, a editable dialog on the rigth will appear, in which
+    you can edit rc_config-values.
+   
+    
+////////////////////////////////////////////////////////////////////////////////
 
- namespace:
-
- read, the next few lines, then you know what I mean with:
- - "parent-nodes"
- - "leaf-nodes"
-
- In rc_config editor you see on the left a "tree widget" and on the right a "dialog".
- In the "tree widget" you have nodes, you can collaps or expand, that are "parent-nodes"
- Nodes which are "leafs" of the tree, which you can not expand, are the "leaf-nodes",
- If you click at this leaf-nodes, a editable dialog on the rigth will appear, in which
- you can edit rc_config-values.
-
- 
- ---------------------------------------------------------------------------------------
- data structure for internal use:
+    data structure for internal use:
     Example internal data structure of all rc_config KEYs:
 
     list rc_config_keys =
@@ -49,148 +50,47 @@
           "MOUSE"     :$[ `value:"/dev/psaux",  `descr:"Which device is the mouse?" ]
        ];
 
-      
-       assigned means, that after I have checked these fields with the structured information I have (= tree_preferences)
-       the "assigned" entry is in the structured information.
-
        After preprocess and merge with structerd info, the rc_config_keys contains also information about
        structured entrys
 
        for a "parent-nodey"   `descr and `dialogtype
        for a "leaf-node"      `dialogtype
        for a rc_config_key    `decr options and entrynb
+       for all                `parent 
 			      
- ---------------------------------------------------------------------------------------
- from SCR
- list rc_config_eddb =
- [
-   $[ `key:"LANGUAGE",          `property:"type", `value:"string" ], 
-   $[ `key:"LANGUAGE",          `property:"path", `value:"/base" ],
-   $[ `key:"LANGUAGE",          `property:"type", `value:"string" ],
-   $[ `key:"ENABLE_SUSECONFIG", `property:"path", `value:"/base/suseconfig" ],
-   $[ `key:"ENABLE_SUSECONFIG", `property:"type", `value:"boolean" ],
-   ... 
- ]
+////////////////////////////////////////////////////////////////////////////////
 
- the path hash:
- list rc_config_eddb_path =
- $[
-   "LANGUAGE"         :"/base/lang"       ],
-   "ENABLE_SUSECONFIG":"/base/suseconfig" ]
-  ];
-
- ---------------------------------------------------------------------------------------
- data structure for the treedefinition
+     structured info:
+     
+     from SCR
+     list rc_config_eddb =
+     [
+       $[ `key:"LANGUAGE",          `property:"type", `value:"string" ], 
+       $[ `key:"LANGUAGE",          `property:"path", `value:"/base" ],
+       $[ `key:"LANGUAGE",          `property:"type", `value:"string" ],
+       $[ `key:"ENABLE_SUSECONFIG", `property:"path", `value:"/base/suseconfig" ],
+       $[ `key:"ENABLE_SUSECONFIG", `property:"type", `value:"boolean" ],
+       ... 
+     ]
     
- A--|-A1-
-    |
-    |-A2|---A2_1-
-    |   |
-    |   |---A2_2-
-    |   
-    |-A3|---A3_1
-        |
-        |---A3_2
+////////////////////////////////////////////////////////////////////////////////
 
-        
-
-
-    To see which kind of dialog will be display, after the selection of a
-    dialog entry, we have to insert the dialog-type, and the entrys itself:
+     the path hash:
+     list rc_config_eddb_path =
+     $[
+       "LANGUAGE"         :"/base/lang"       ],
+       "ENABLE_SUSECONFIG":"/base/suseconfig" ]
+      ];
     
- map tree_preferences =  $[
-      "A"   : $[`parent: "root",
-               `nodetype:    `dir,
-               `descr:    "All A's",
-               `children: $[ "A1":$[
-	                          `parent="A",
-                                  `nodetype:`dialog,
-                                  `dialogtype:`d4,
-                                  `descr:"Set setting of A1",   
-                                  `children:$[ "A-opt1"  : $[`parent="A1",
-                                                           `nodetype:`entry,
-                                                           `entrynb:`1,
-                                                           `options:["yes","no"]
-                                                           ],   
-                                             "A-opt2"  : $[`parent="A1",
-                                                          `nodetype:`entry,
-                                                          `entrynb:`2,
-                                                          `options:["tcp","udp","dgram"]
-                                                          ],
-                                             "A-opt3"  : $[`parent="A1",
-                                                          `nodetype:`entry,
-                                                          `entrynb:`3,
-                                                          `options:["yes","no"]
-                                                          ],    
-                                             "A-opt4"  : $[`parent="A1",
-                                                          `nodetype:`entry,
-                                                          `entrynb:`4,
-                                                          `options:["yes","no"]
-                                                          ]
-                                              ]
-                                   ],
-				   
-                          "A2":$[`parent="A",
-                                `nodetype:`dir,
-                                `descr:"All A2's",
-                                `children:$[ "A2_1": $[`parent="A2",
-                                                     `nodetype:`dialog,
-                                                     `dialogtype:`d1,
-                                                     `descr:"Set setting of A2_1"
-                                                     ], 
-                                            "A2_2": $[`parent="A2",
-                                                     `nodetype:`dialog,
-                                                     `dialogtype:`d3,
-                                                     `descr:"Set setting of A2_2" ],
-                                                     ]
-                                ]
-                       ]
-               ]
-      ...
-    ]
-    
-
-   Format for Treewidget:
-  [
- `item(`id("A"), "A" , true,
-       [
-        `item(`id("A1"), "A1", false,
-               ..... ),
-                
-        `item(`id("A2"), "A2", false,
-              [
-               `item(`id("A2_1"), "A2_1", false),
-               `item(`id("A2_2"), "A2_2", false)
-              ]
-              ),
-        ...
-
-[
-  --------------------------------------------------------------------------------
-
-  Note:
-  "key" and "entry" are nearly the same. "key" means one rc.config key like MAIL_LEVEL.
-  "entry" is also a key, but in the tree structure.
-  
-  Algo:
-  Take the tree preferences and build with them the tree.
-  - For every entry-type in the tree_prefs, mark this key in rc_config_keys as `assigned=true
-  Look for all key in rc_config_keys which are not assigned, and create entry tree entries
-  in the section "unspecified"
-  
+////////////////////////////////////////////////////////////////////////////////
 
 */
 
 {
-    Include (`rc_process_db());
-  
-    ////////////////////////////////////////////////////////////
-    // Test, if the user wants the inetd.conf custom configuration
-    // (this in normally set in inst_inetd_start)
+    Include (`rc_process_db() );
+    Include (`rc_dialogs()    );
 
-  // warning todo no descr
-  //if (lookup(user_settings, "inetd_status", "off") != "on_custom")  return `auto;
-
+    
     ////////////////////////////////////////////////////////////
     // Testmode, for example fo screenshots
     boolean test_mode    = lookup ( user_settings, "test_mode", false );
@@ -203,854 +103,48 @@
     // string architecture = lookup( user_settings, "architecture", default_architecture);
 
 
-    //y2log( .milestone, "rc_config", 1, "AAAAAAAAAA" );
-        
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                                  D E F I N E S                                   //
-    //////////////////////////////////////////////////////////////////////////////////////
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // getComboList                                                                                  //
-   //-----------------------------------------------------------------------------------------------//
-   // read the possible entrys of combobox, and mark the real value, so that it is shown as default //
-   //-----------------------------------------------------------------------------------------------//
-    
-    define getComboList( string key, map entry_map )
-   ``{
-	// y2log ( .milestone, "rc_config", 1, "COMBOOOOOOO", key, entry_map);
-	  // get real value of the entry
-	  string entry_value  = getValue( key );
-
-	  // produce now a optionlist with the real entry, therefor
-	  // - first:  delete the real entry from the list, if it is in there
-	  // - second: add the real value
-
-	  // first: 
-	  list   entry_opts   = filter( `item, lookup( entry_map, `options, []), ``( item != entry_value ));
-	  // second:
-	  entry_opts = add( entry_opts, entry_value );
-
-	  // now, make from [ "tcp", "dgram" ] ->  [ `item( `id("tcp"), "tcp", false ), `item( `id("dgram"), "dgram", true ) ]
-	  //
-	  entry_opts = maplist( `entry, entry_opts, ``( `item( `id(entry), entry, entry == entry_value )));
-
-	  return( entry_opts );
-    }
-
-    
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                         D I A L O G   D E F I N E S                              //
-    //////////////////////////////////////////////////////////////////////////////////////
-
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d5                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 5 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
-
-    define getD5Dialog( list entry_list )
-   ``{
-
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	  map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-	  map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
-	  map l5 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 5 )), 0 );
-
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-	  if (l3 == nil) l3 = $[];
-	  if (l4 == nil) l4 = $[];
-	  if (l5 == nil) l5 = $[];
-
-	  string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  string l3_key =  lookup( l3, `linekey, "");
-	  string l4_key =  lookup( l4, `linekey, "");
-	  string l5_key =  lookup( l5, `linekey, "");
-	  
-	  string help_text = "";
-	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p><b>%5: </b>%6</p>",
-			       l1_key, getDescr(l1_key),
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key),
-			       l3_key, getDescr(l3_key)   );
-			       
-	  help_text = sformat( "%1<p><b>%2: </b>%3</p><p><b>%4: </b>%5</p>", help_text,
-			       l4_key, getDescr(l4_key),
-			       l5_key, getDescr(l5_key));
-
-	  return( 
-	  `VBox(`VSpacing(1.2),
-		  `Left( `ComboBox ( `id("d5_1"), `opt(`editable,`hstretch), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		  `Left( `ComboBox ( `id("d5_2"), `opt(`editable,`hstretch), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		  `Left( `ComboBox ( `id("d5_3"), `opt(`editable,`hstretch), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-		  `Left( `ComboBox ( `id("d5_4"), `opt(`editable,`hstretch), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-		  `Left( `ComboBox ( `id("d5_5"), `opt(`editable,`hstretch), lookup(l5, `linekey, ""),  getComboList(l5_key, l5))),
-		  `VWeight(1,`RichText( `opt(`shrinkable), help_text) )));
-    };
-
-			     
-	  
-   
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d4                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 4 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
-
-   define getD4Dialog( list entry_list )
-   ``{
-
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	  map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-	  map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
-
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-	  if (l3 == nil) l3 = $[];
-	  if (l4 == nil) l4 = $[];
-	  
-          string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  string l3_key =  lookup( l3, `linekey, "");
-	  string l4_key =  lookup( l4, `linekey, "");
-	  
-	  string help_text = "";
-	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p><b>%5: </b>%6</p>",
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key),
-			       l3_key, getDescr(l3_key)   );
-			       
-	  help_text = sformat( "%1<p><b>%2: </b>%3</p>", help_text,
-			       l4_key, getDescr(l4_key));
-	  
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
-		 `Left( `ComboBox ( `id("d4_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		 `Left( `ComboBox ( `id("d4_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		 `Left( `ComboBox ( `id("d4_3"), `opt(`editable), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-		 `Left( `ComboBox ( `id("d4_4"), `opt(`editable), lookup(l4, `linekey, ""),  getComboList(l4_key, l4))),
-		`RichText( `opt(`shrinkable),  help_text) ));
-    };
-
-   
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d3                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 3 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
-
-   define getD3Dialog( list entry_list )
-   ``{
-
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	  map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-	  if (l3 == nil) l3 = $[];
-
-          string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  string l3_key =  lookup( l3, `linekey, "");
-	  
-	  string help_text = "";
-	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p><b>%5: </b>%6</p>",
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key),
-			       l3_key, getDescr(l3_key)   );
-			       
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
-		 `Left( `ComboBox ( `id("d3_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		 `Left( `ComboBox ( `id("d3_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		 `Left( `ComboBox ( `id("d3_3"), `opt(`editable), lookup(l3, `linekey, ""),  getComboList(l3_key, l3))),
-		`VSpacing(1),
-		`RichText( help_text) ));
-    };
-
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d2                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for 2 entries                                                      //
-   //-----------------------------------------------------------------------------------------------//
-
-   define getD2Dialog( list entry_list )
-   ``{
-
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	  map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-
-	  if (l1 == nil) l1 = $[];
-	  if (l2 == nil) l2 = $[];
-
-          string l1_key =  lookup( l1, `linekey, "");
-	  string l2_key =  lookup( l2, `linekey, "");
-	  
-	  string help_text = "";
-	  
-	  help_text = sformat( "<b>%1: </b>%2<p><b>%3: </b>%4</p><p>",
-			       l1_key, getDescr(l1_key),
-			       l2_key, getDescr(l2_key)   );
-			       
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
-		  `Left( `ComboBox ( `id("d2_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		  `Left( `ComboBox ( `id("d2_2"), `opt(`editable), lookup(l2, `linekey, ""),  getComboList(l2_key, l2))),
-		`VSpacing(1),
-		`RichText( help_text) ));
-    };
-
-   
-   
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog d1                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for one entrie                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   
-   define getD1Dialog( list entry_list )
-   ``{
-
-	  map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-
-	  if (l1 == nil) l1 = $[];
-	  
-          string l1_key =  lookup( l1, `linekey, "");
-	  
-	  string help_text = "";
-	  
-	  help_text = sformat( "<b>%1: </b>%2", l1_key, getDescr(l1_key)   );
-			       
-	  return( 
-	  `VBox(`HSpacing(60),`VSpacing(1.2),
-		  `Left(`ComboBox ( `id("d1_1"), `opt(`editable), lookup(l1, `linekey, ""),  getComboList(l1_key, l1))),
-		`VSpacing(1),
-		`RichText( help_text) ));
-    };
-
-   
-   
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Dialog dir                                                                                    //
-   //-----------------------------------------------------------------------------------------------//
-   // Predefined standard dialog for displaying only a message                                      //
-   //-----------------------------------------------------------------------------------------------//
-   
-    define getDirDialog( string curr_text )
-    ``{
-	  return( `VBox(`HSpacing(60),`VSpacing(1), `RichText( curr_text) ));
-    };
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Layout Mainwindow                                                                             //
-   //-----------------------------------------------------------------------------------------------//
-
-    define getMainWindowTerm( list tree_data )
-    ``{
-	  return(
-	  // Main dialog edit rc_config 
-	  `HBox(`HWeight( 35, `Tree( `id(`key),  `opt(`notify,`vstretch),  _("Config options"), tree_data )),
-		`HSpacing(1),
-		`HWeight( 65, `VBox(
-				    `ReplacePoint(`id(`rp),
-						  `Label("This is a label")  ),
-				    `PushButton(`id(`search), `opt(`default),    _("&Search"))
-				    )
-			  )
-		));
-    };
-
-    
     
     //////////////////////////////////////////////////////////////////////////////////////////////////
     /////                                    D E F I N E S                                       /////
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    define getDescr( string key )
+    define getDirDescr( string key )
     ``{
-             map key_map          = lookup( rc_config_keys, key, $[] );
-             any descr            = lookup(key_map, `descr, `not_read);
-	     
-	     y2log ( .milestone, "rc_config", 1, "TTTTT2", descr);
-		  
-	     if ( descr  == `not_read )
-	     {
-	     	descr          = SCR( `Read(topath(sformat("%1.comment", lookup( key_map,`path,"")))));
-		if ( descr == nil ) descr = "";
-		y2log ( .milestone, "rc_config", 1, "TTTTT", descr);
+	  string|void descr = getDescr( key );
 
-	     	// save it
-	     	key_map        = add( key_map, `descr, descr);
-	     	rc_config_keys = add( rc_config_keys, key, key_map );
-	     }
-	     
-
-	     // delete all #
-	     descr = mergestring(splitstring( descr, "#"),"");
-	     return( descr );
-    };
-
-    
-    define getValue( string key )
-    ``{
-            map key_map  = lookup( rc_config_keys, key, "" );
-            any value    = lookup( key_map, `value, `not_read);
-	    
-	    if ( value  == `not_read )
-	    {
-	       value          = SCR( `Read(lookup( key_map,`path,"") ));
-	    
-	       // save it
-	       key_map        = add( key_map, `value, value);
-	       rc_config_keys = add( rc_config_keys, key, key_map );
-	    }
-
-	    return( value );
-    };
-	 
-          
-    
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Convert Internal Map into the Format, the tree widget needs
-   // AND put information about dir and dialogs into rc_config_keys!!! (dialogtype)
-   //-----------------------------------------------------------------------------------------------
-   //
-   // Return value: Input for TreeWidget <tree>
-   //
-   // Attention: This define works recusive, i.e. tree_preferences can also
-   //            be only a subtree of the "original" tree_preferences
-   //
-   // open:  true: subtree is expanded
-   //       false: subtree is collapsed
-   //-------------------------------------------------------------------------------------------------
-   //
-
-    // todo : rc_config_keys global!
-    
-    define mergeTreeAndRcConfigDataAndBuiltTreeWidgetData ( map tree_preferences, boolean open, string parent )
-    ``{
-	  list table_input = [];
-	
-	  foreach( `key, `line, tree_preferences, ``{
-
-	      /////////////////////////////////////////////
-	      // We have `dir, `dialog, and `entrys
-	      // We can ignore entrys, cause the entrys are
-	      // shown on right side of the dialog
-	      //
-
-	      map|void    curr_keymap = lookup( rc_config_keys, key);
-
-	      // todo check:(quick hack?)
-	      if ( curr_keymap == nil )
-	      {
-		  change( rc_config_keys, key, $[]);
-		  curr_keymap = lookup( rc_config_keys, key);
-	      }
-	      
-	      symbol status = lookup(line, `nodetype, `none);
-
-	      if ( status != `entry )
-	      {
-		  map children = lookup( line, `children, $[] );
-
-		  if ( size(children) <= 0 )
-		  {
-		      table_input = add( table_input, `item( `id( key ), key, open ));
-		  }
-		  else
-		  {
-		      list result = mergeTreeAndRcConfigDataAndBuiltTreeWidgetData( children, false, key);
-
-		      table_input    = add( table_input, `item( `id(key), key, open , result));
-		  }
-	      }
-	      else
-	      {
-		  ///////////////////////////////////////////////////////////////////////////
-		  // here with entrys, no tree-widget-items are created
-		  // but we mark the current entry in rc_config_keys as assigned, cause this
-		  // entry ist set in a structured dialog
-
-                  change( curr_keymap, `options,     lookup( line, `options,   []  ));
-		  change( curr_keymap, `entrynb,     lookup( line, `entrynb, ""    ));
-	      
-		    //rc_config_keys = change_MM( rc_config_keys, key, `assigned,    true );
-		    //rc_config_keys = change_MM( rc_config_keys, key, `options,     lookup( line, `options,   []  ));
-		    //rc_config_keys = change_MM( rc_config_keys, key, `entrynb,     lookup( line, `entrynb, ""  ));
-	      }
-
-
-		///////////////////////////////////////////   
-		// put the parent to the rc_config_keys
-	        change( curr_keymap, `parent,      parent);
-	        // rc_config_keys = change_MM( rc_config_keys, key, `parent,      parent);
-
-		///////////////////////////////////////////   
-		// put the dialogtype into rc_config_keys
-		
-		if ( status == `dialog )
-		{
-		    change( curr_keymap, `dialogtype,  lookup( line, `dialogtype, "none"));
-		    // rc_config_keys = change_MM( rc_config_keys, key, `dialogtype,  lookup( line, `dialogtype, "none"));
-		}
-		else if ( status == `dir )
-		{
-		    change( curr_keymap, `dialogtype, "dir" );
-		    change( curr_keymap, `descr, lookup( line, `descr, ""));
-		    // rc_config_keys = change_MM( rc_config_keys, key, `dialogtype, "dir" );
-		    // rc_config_keys = change_MM( rc_config_keys, key, `descr, lookup( line, `descr, ""));
-		}
-
-	      
-
-
-	  });
+	  y2log( .milestone, "d", "1", descr);
+	  if ( descr == nil || descr == "" ) descr = sformat(UI(_("Subdialog for %1")), key);
 	  
 
-	  return( table_input );
-    };
-    
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // change_MM                                                                                     //
-   //-----------------------------------------------------------------------------------------------//
-   // changes a value in map that includes maps
-   // todo: an ycp change comes soon and I will replace this function ;-))
-   //-----------------------------------------------------------------------------------------------//
-
-    define change_MM( map theMap, any key1, any key1_1, any value )
-    ``{
-	  // theMap =   $[  key1:$[ key1_1:v11,     key1_2:v12 ], key2:$[ key2_1:v21, key2_2:v22 ],
-	  //
-	  // theMap = change_MM ( theMap, key1, key_1_1, "XXXXXXX" );
-	  //
-	  // theMap ==  $[  key1:$[ key1_1:XXXXXXX, key1_2:v12 ], key2:$[ key2_1:v21, key2_2:v22 ],
-	  
-	  map map1 = lookup( theMap, key1,   $[] );
-	  map1     = add(    map1,   key1_1, value );
-	  theMap   = add(    theMap, key1,   map1 );
-
-	  return( theMap );
-    };
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Search dialog                                                                                 //
-   //-----------------------------------------------------------------------------------------------//
-   //-----------------------------------------------------------------------------------------------//
+	  return( descr );
+      };
 
     
-    UI(``{
-    define SearchDlg()
-    ``{
-	  // helptext for popup create partition line 1 of 6
-	  string helptextCR = _("Here you can enter one token, which you are searching for.
- You can enter a part of key like \"MAIL_\"
- or a part of word which can be found in the description of a key like \"network\""); 
-
-	  OpenDialog( `opt(`decorated ),
-		      `VBox(`HSpacing(60),
-			    `Heading(_("Search for a rc.config variable")),
-			    `VSpacing(0.5),
-			    `HBox(`VSpacing(10),
-				  `RichText( helptextCR ),
-				  `HSpacing(2),
-				  `VBox(
-					`VSpacing(1),
-					`TextEntry(`id(`search_entry), _("&Search for:")),
-					`VSpacing(1),
-					`Left(`CheckBox(`id(`ignore), _("abg matches AbG"),    true)),
-					`Left(`CheckBox(`id(`nkey),   _("Search keyname"),     true)),
-					`Left(`CheckBox(`id(`ndescr), _("Search description"), true)),
-					`Left(`CheckBox(`id(`nvalue), _("Search value"),       false)),
-					`VSpacing(1)
-					),
-				  `HSpacing(2)
-				  ),
-			    `VSpacing(0.5),
-			    `HBox(
-				  // popup create partition:
-				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-				  // popup create partition:
-				  `PushButton(`id(`cancel), _("&Cancel"))
-				  )
-			    )
-		      );
-	  
-	   SetFocus(`id(`search_entry));
-	   symbol  doit            = `cancel;
-
-	   repeat
-	   {
-		   //-------------------------------
-		   // Check the User input / change popup ...
-		   //-------------------------------
-		   doit = UserInput();
-		   
-	   } until (doit == `ok  ||  doit == `cancel );
-
-	   map answer = $[];
-	   answer = add( answer, "search", QueryWidget(`id(`search_entry),   `Value));
-	   answer = add( answer, "ignore", QueryWidget(`id(`ignore), `Value));
-	   answer = add( answer, "nkey",   QueryWidget(`id(`nkey),   `Value));
-	   answer = add( answer, "nvalue", QueryWidget(`id(`nvalue), `Value));
-	   answer = add( answer, "ndescr", QueryWidget(`id(`ndescr), `Value));
-    
-
-	  CloseDialog();
-
-	   if ( doit == `cancel )
-	   {
-	       return( nil );
-	   }
-	   else
-	   {
-	       return( answer );
-	   }
-    }; });
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Save dialog                       							     //
-   //------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------//
-
-    
-    UI(``{
-    define SaveDlg( list entry_list )
-    ``{
-	  // helptext for popup create partition line 1 of 6
-	  string helptextCR = _("Here you see the values, YaST2 will change.
-Choose \"OK\" and YaST2 will save these changes.
-Choose \"Cancel\" to edit the values again"); 
-
-	  list table_list = maplist( `entry, entry_list,
-				  ``{
-				      string descr = lookup( entry, `descr,   "");
-
-                                      // delete # from description
-				      descr = mergestring(splitstring(descr, "#"),"");
-				      
-				      // delete \n from description
-				      descr = mergestring(splitstring(descr, "\n"),"");
-				      
-				      return (`item( `id(lookup( entry, `linekey, "x")),
-					     lookup( entry, `linekey, ""),
-					     lookup( entry, `value,   ""),
-					     substring( descr, 0, 70)));
-				   });
-			              		 
-
-  	    OpenDialog( `opt(`decorated ),
-			`VBox(`HSpacing(70),
-			      //heading of popup
-			      `Heading(_("Save rc.config variables")),
-			      `Label(  helptextCR ),
-			      `VSpacing(0.5),
-			      `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Description") ), table_list ),
-			      `VSpacing(0.5),
-			      `HBox(
-				    // popup create partition:
-				    `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-				    // popup create partition:
-				    `PushButton(`id(`cancel), _("&Cancel"))
-				    )
-			      )
-			);
-	  
-	   SetFocus(`id(`table));
-	   symbol  doit            = `cancel;
-
-	   repeat
-	   {
-		   //-------------------------------
-		   // Check the User input / change popup ...
-		   //-------------------------------
-		   doit = UserInput();
-		   
-	   } until (doit == `ok  ||  doit == `cancel );
-
-	   any ret = QueryWidget(`id(`table), `CurrentItem);
-
-	   CloseDialog();
-
-	   
-	   if ( doit == `cancel )
-	   {
-	       return( nil );
-	   }
-	   else
-	   {
-	       return( ret );
-	   }
-    }; });
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-   // Goto dialog, wich appeas after a search 							     //
-   //------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------//
-
-    
-    UI(``{
-    define GotoDlg( list entry_list )
-    ``{
-	  // helptext for popup create partition line 1 of 6
-	  string helptextCR = _("Here you see the results of your search. If you see your item you have searched for, click at this item and then click \"OK\", else click \"Cancel\" to quit the search."); 
-
-	  list table_list = maplist( `entry, entry_list,
-				  ``{
-				      string descr = lookup( entry, `descr,   "");
-
-                                      // delete # from description
-				      descr = mergestring(splitstring(descr, "#"),"");
-				      
-				      // delete \n from description
-				      descr = mergestring(splitstring(descr, "\n"),"");
-				      
-				      return (`item( `id(lookup( entry, `linekey, "x")),
-					     lookup( entry, `linekey, ""),
-					     lookup( entry, `value,   ""),
-					     substring( descr, 0, 70)));
-				   });
-			              		 
-				      
-	  OpenDialog( `opt(`decorated ),
-		      `VBox(`HSpacing(80),
-			    //heading of popup
-			    `Heading(_("Search for a rc.config variable")),
-			    `VSpacing(0.5),
-			    `HBox(`VSpacing(10),
-				  `HWeight(30,`RichText( helptextCR )),
-				  `HSpacing(2),
-				  // Column header
-				  `HWeight(70,`Table(`id(`table),`header(_("Name"), _("Value"), _("Description") ), table_list )),
-				  `HSpacing(2)
-				  ),
-			    `VSpacing(0.5),
-			    `HBox(
-				  // popup create partition:
-				  `PushButton(`id(`ok), `opt(`default),    _("&OK")),
-				  // popup create partition:
-				  `PushButton(`id(`cancel), _("&Cancel"))
-				  )
-			    )
-		      );
-	  
-	   SetFocus(`id(`table));
-	   symbol  doit            = `cancel;
-
-	   repeat
-	   {
-		   //-------------------------------
-		   // Check the User input / change popup ...
-		   //-------------------------------
-		   doit = UserInput();
-		   
-	   } until (doit == `ok  ||  doit == `cancel );
-
-	   any ret = QueryWidget(`id(`table), `CurrentItem);
-
-	   CloseDialog();
-	   
-	   if ( doit == `cancel )
-	   {
-	       return( nil );
-	   }
-	   else
-	   {
-	       return( ret );
-	   }
-    }; });
-
-						      
-	 
- ///////////////////////////////////////////////////////////////////////////////////////
- // path the path string
- // in: "/base/suse/d1"
- // out:  $[ "level":3, "l1":"base", "l2":"suse", "l3":"d1 ]
-     
- define parse_path( string the_path )
- ``{ 
-     list path_list = splitstring(the_path, "/" );
-
-     integer i       = 1;
-     map     ret_map = $[];
-
-     while( i < size( path_list))
-     {
-	   ret_map = add( ret_map, sformat( "l%1", i), select( path_list, i));
-	   i = i+1;
-     }
-	   
-     ret_map = add( ret_map, "level", size( path_list)-1);  
- 
-     _debug( ret_map );
-     return( ret_map );
- } 
-
-
-						     
-///////////////////////////////////////////////////////////////////////////////////////
-// path the path string
-// in: a string: "/base/suse/d1"  or nil
-// out:  [ "base", `children, "suse", `children, "d1" ] for a string
-//	 [ "etc" ] for nil					     
-     
- define get_keys( any the_path )
- ``{
-     if ( the_path == nil ) return( ["etc"] );
-     
-     list path_list = splitstring(the_path, "/" );
-
-      integer i           = 1;
-     boolean first_entry = true;
-     list     ret_list   = [];
-
-     while( i < size( path_list))
-     {
-	 if (  select( path_list, i) != "")
-	 {
-	     if ( !first_entry)    ret_list = add( ret_list, `children);
-	     first_entry = false;
-	     
-	     ret_list = add( ret_list, select( path_list, i));
-	 }
-	 i = i+1;
-     }
-
-     if ( size(ret_list) == 0 )  ret_list = ["etc"];
-
-     // y2log ( .milestone, "rc_config", 1, "TTTTT", ret_list);
-     
-     return( ret_list );
- }; 
-
- 
-
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-
- define change_map( map curr_map, list keys, any value)
-``{
-    integer i = 0;
-    // y2log ( .milestone, "rc_config", 1, "TTTTTMAP", value,  keys);        
-    // build stack
-    void|map ncurr_map = $[]; 
-
-    while( i < (size(keys)-1)  )                                 
-    {
-	
-	    ncurr_map = lookup( curr_map, select(keys,i));
-
-	    if (ncurr_map == nil)
-	    {
-		change(  curr_map, select(keys,i), $[] );
-		ncurr_map = lookup( curr_map, select(keys,i));
-	    }
-
-	    curr_map = ncurr_map;
-	    i=i+1;
-    }
-
-    // now we make the change ...                                     
-    change( curr_map, select(keys, i), value);
- };
-
- 
-////////////////////////////////////////////////////////////////////////////////
- 
- define old_change_map( map map_to_change, list keys, any value)
-``{
-    integer i = 0;
-    // y2log ( .milestone, "rc_config", 1, "TTTTTMAP", value,  keys);        
-    // build stack
-    list stack = [ map_to_change ];
-
-    while( i < (size(keys)-1)  )                                 
-    {
-	map|void  curr_map = lookup( select(stack,i), select(keys,i));
-	if (curr_map == nil) curr_map = $[];
-
-	stack = add( stack, curr_map );
-	i=i+1;
-    }
-
-    // now we make the change ...                                     
-    map changed_map = add( select(stack, i), select(keys, i), value);
-
-    // now we merge maplevels in every loop:     map_n = add( map_n, key_n-1, map_n-1)
-    while( i != 0 )                                                   
-    {
-	changed_map = add( select(stack,i-1), select(keys, i-1), changed_map);
-	i=i-1;
-    }
-
-    return( changed_map );
- };
-
- ////////////////////////////////////////////////////////////
- // merge lists  [ 1,2,3], [2,3,4] -> [1,2,3,2,3,4]
- 
- define lmerge( list a, list b)
- ``{
-      integer i = 0;
-      while ( i < size(b) )
-      {
-      	 a = add( a, select( b, i ));
-      	 i = i+1;
-      }
-      
-      return(a);
- };
-
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     //////                                       STATIC DATA                                       //////
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		    string curr_text = "<p><b>RC_KKKK</b>: damit änder Sie die KKKK Variable in Ihrem Systen</p><p><b>RC_LLLKK</b>:
-Damit können Sie erreiche bla <p><b>RC_KKKK</b>: damit änder Sie die KKKK Variable i haus kann
-aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
-<p><b>RC_KKKK</b>: damit änder Sie die KKKK Variable in Ihrem Systen";
-
- list rc_config_eddb =
- [
-   $[ `key:"base",              `property:"path",        `value:"/" ], 
-   $[ `key:"base",              `property:"type",        `value:"node" ], 
-   $[ `key:"base",              `property:"descr",        `value:"Basic configuration parameter" ], 
-   $[ `key:"LANGUAGE",          `property:"type",        `value:"enum", `list:["german","english"] ], 
-   $[ `key:"LANGUAGE",          `property:"path",        `value:"/base/rr/sec/lang" ],
-   $[ `key:"CHECK_ETC_HOSTS",          `property:"path",        `value:"/base/rr/sec/lang" ],
-   $[ `key:"CHECK_ETC_HOSTS",          `property:"type",        `value:"boolean" ],
-   $[ `key:"LANGUAGE",          `property:"type",        `value:"string" ],
-   $[ `key:"KBD_TTY",           `property:"mtype",       `value:"enum", `list:["tty1","tty2"]],
-   $[ `key:"ENABLE_SUSECONFIG", `property:"path",        `value:"/base2/suseconfig" ],
-   $[ `key:"SUSECONFIG_OFF",    `property:"path",        `value:"/base/suseconfig" ],
-   $[ `key:"SUSECONFIG_OFF",    `property:"mtype",       `value:"enum", `list:["xx","yy"]],
-   $[ `key:"SUSECONFIG_OFF2",    `property:"path",        `value:"/base/suseconfig" ],
-   $[ `key:"SUSECONFIG_OFF2",    `property:"mtype",       `value:"enum", `list:["xx","yy"]],
-   $[ `key:"suseconfig",        `property:"path",        `value:"/base" ],
-   $[ `key:"suseconfig",        `property:"dialogtype",  `value:"d3" ],
-   $[ `key:"ENABLE_SUSECONFIG", `property:"type",        `value:"boolean" ]
-   
- ];
+ 
+    list rc_config_eddb =
+    [
+      $[ `key:"base",              `property:"path",        `value:"/" ], 
+      $[ `key:"base",              `property:"type",        `value:"node" ], 
+      $[ `key:"base",              `property:"descr",        `value:"Basic configuration parameter" ], 
+      $[ `key:"LANGUAGE",          `property:"type",        `value:"enum", `list:["german","english"] ], 
+      $[ `key:"LANGUAGE",          `property:"path",        `value:"/base/rr/sec/lang" ],
+      $[ `key:"CHECK_ETC_HOSTS",          `property:"path",        `value:"/base/rr/sec/lang" ],
+      $[ `key:"CHECK_ETC_HOSTS",          `property:"type",        `value:"boolean" ],
+      $[ `key:"LANGUAGE",          `property:"type",        `value:"string" ],
+      $[ `key:"KBD_TTY",           `property:"mtype",       `value:"enum", `list:["tty1","tty2"]],
+      $[ `key:"ENABLE_SUSECONFIG", `property:"path",        `value:"/base2/suseconfig" ],
+      $[ `key:"SUSECONFIG_OFF",    `property:"path",        `value:"/base/suseconfig" ],
+      $[ `key:"SUSECONFIG_OFF",    `property:"mtype",       `value:"enum", `list:["xx","yy"]],
+      $[ `key:"SUSECONFIG_OFF2",    `property:"path",        `value:"/base/suseconfig" ],
+      $[ `key:"SUSECONFIG_OFF2",    `property:"mtype",       `value:"enum", `list:["xx","yy"]],
+      $[ `key:"suseconfig",        `property:"path",        `value:"/base" ],
+      $[ `key:"suseconfig",        `property:"dialogtype",  `value:"d3" ],
+      $[ `key:"ENABLE_SUSECONFIG", `property:"type",        `value:"boolean" ]
+      
+    ];
 
 
 
@@ -1059,15 +153,10 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
    // Main helptext                                                                                 //
    //-----------------------------------------------------------------------------------------------//
    
-
     string help_text = "";
 
-    // helptext  "main dialog edit rc_config_editor" 
-    help_text =  UI(_("<p>To be done ..."));
-
-    help_text = help_text + "<p>(.1)<\p>";
-
-    
+    // helptext  "main dialog edit rc_config_editor not show unitl now 
+    help_text =  UI(_(""));
 
     
     /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1075,100 +164,76 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     
-    // Options to test this modules, but the other modules are in testmode:
-    // architecture        = "ppc";
-    // test_mode   = true;
-    // test_mode   = false;
-    // todo: descr all options above
-
-
     /////////////////////////////////////////////////////////////////
     //  Read the list of all rc_config variables
     //  get the data of all varaiables and put them into the table
     /////////////////////////////////////////////////////////////////
 
 
+     map  rc_config_keys = $[];
+     list rc_dir         = SCR( `Dir( .rc ));
 
-    
-
-//    rc_config_keys = maplist( entry, raw_rc_config_keys,
-//				    ``{
-//					 path   curr_path = rc.system + topath( entry );
-//					 string value     = SCR( `Read( curr_path ));
-//					 string comment   = SCR( `ReadComment( curr_path ));
-//				      });
-//				       
- map  rc_config_keys = $[];
- list rc_dir = SCR( `Dir( .rc ));
- y2log ( .milestone, "rc_config", 1, "AAAAAAAAAA vor SCRRead");
-
- foreach( `dir, rc_dir,
- ``{
-    list rc_variables = SCR(`Dir(topath(sformat(".rc.%1", dir))));
-    
-    // todo remove begin
-    // if ( dir == "system") rc_variables = filter( `entry, rc_variables, ``( substring( entry, 0, 1) == "C" ));
-    // todo remove end
-    
-    integer i=0;
-    while(  i < size(rc_variables) )
-    {
-    	string key     = select( rc_variables, i);
-	string paths = sformat(".rc.%1.%2", dir, key);
-	string descr = SCR( `Read(topath(sformat("%1.comment", paths))));
-	string value = SCR( `Read(topath(paths) ));
-    	change( rc_config_keys, key, $[`value:value,
-				      `descr: descr,
-				      `path:topath(sformat(".rc.%1.%2", dir, key))
-	                              ]
-		);
-    	i=i+1; 
-    }
- });
-
-    
- y2log ( .milestone, "rc_config", 1, "AAAAAAAAAA vor merge");
-
- list tree_data =  process_eddb_create_widgettree_and_fill_rcconfigkeys();
+     y2debug ( "SCRRead");
  
- y2log ( .milestone, "rc_config", 1, "AAAAAAAAAA nach Merge");
-    
-  _debug( "TTTTTTTTTTTTTTTTTT", tree_data );
-  _debug( "RRRRRTTTTTTTTTTTTT", rc_config_keys );
-  
-  
+     foreach( `dir, rc_dir,
+     ``{
+	 list rc_variables = SCR(`Dir(topath(sformat(".rc.%1", dir))));
+	 
+	 integer i=0;
+	 while(  i < size(rc_variables) )
+	 {
+	     string key   = select( rc_variables, i);
+	     string paths = sformat(".rc.%1.%2", dir, key);
+	     
+	     string descr = SCR( `Read(topath(sformat("%1.comment", paths))));
+	     string value = SCR( `Read(topath(paths) ));
+	     
+	     change( rc_config_keys, key, $[`value:value,
+					   `descr: descr,
+					   `path:topath(sformat(".rc.%1.%2", dir, key))
+	                                   ]
+		    );
+	     i=i+1; 
+	 }
+     });
 
-    // Setting up the main window
-    term main_window = getMainWindowTerm( tree_data );
- y2log ( .milestone, "rc_config", 1, "AAAAAAAA getMainWin");
     
-    // translator: Main window header
+     //////////////////////////////////////////////////////////////////////////////////
+     // Lets build the main window ...
+     //////////////////////////////////////////////////////////////////////////////////
+     
+     y2debug ( "vor  Merge");
+     list tree_data =  process_eddb_create_widgettree_and_fill_rcconfigkeys();
+     y2debug ( "nach Merge");
+
+     // Setting up the main window
+     term main_window = getMainWindowTerm( tree_data );
+    
+     // translator: Main window header
      UI(`SetContents(_("Edit rc_config"), main_window, help_text, true, true ));
- y2log ( .milestone, "rc_config", 1, "AAAAAAAA nach Set Contents");
-
 
      // Initial Settings:
-     term curr_dialog = getDirDialog( "With this Editor, you can edit the rc.config, the central configuration of your SuSE Linux");
+     term curr_dialog = getDirDialog( UI(_("<p>With this Editor, you can edit the variables in /etc/rc.config,
+the central configuration file of your SuSE Linux<\p>")) + UI(_("<p>Please notice, that many of this variables are
+set by specialized configuration modules like the \"Network configuration\"<\p>")));
      
      UI( `ChangeWidget(  `id(`next), `Label,  _("&Save") ) );
      UI( `ChangeWidget(  `id(`key),  `Tree,  tree_data));
      UI( `ReplaceWidget( `id(`rp),   curr_dialog ));
 
 	      
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-   ////  Loop for User Input ....
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    symbol ret              = `next;
-    string dialogtype       = "";
-    boolean descr_read       = true;
-    boolean value_read       = true;
-
-    repeat
-    {
+     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ////  Loop for User Input ....
+     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+     symbol ret              = `next;
+     string dialogtype       = "";
+     boolean descr_read       = true;
+     boolean value_read       = true;
+     
+     repeat
+     {
         ret= UI(`UserInput());
 
-	_debug( "KKKKKKKKKKK", ret );
-	
 	if ( ret == `search )
 	{
             //////////////////////////////////////////////////////////////////////////////////
@@ -1246,8 +311,6 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
 		      // is saved in the parent variable:
 		      string toDisplayDialogKey = lookup( lookup( rc_config_keys, goto_key, $[] ), `parent, "" );
 		      
-		      _debug( "RRRR", toDisplayDialogKey );
-
 		      if ( toDisplayDialogKey != "" )
 		      {
 			  UI( `ChangeWidget(`id(`key), `CurrentItem, toDisplayDialogKey ));
@@ -1258,7 +321,9 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
 	}
 	else
 	{
+            //////////////////////////////////////////////////////////////////////////////////
 	    // User has changed the tree  
+            //////////////////////////////////////////////////////////////////////////////////
             
 	    any key = UI(`QueryWidget(`id(`key), `CurrentItem));
 
@@ -1306,9 +371,7 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
 	    
             entry_list               = filter(  `entry, entry_list, ``( lookup( entry, `parent, "" ) == key ));
 	    
-            _debug( "dialogtype", dialogtype);
-	    
-            y2log( .milestone, "rc_config", 1, "AAAAAAA2", key, dialogtype, entry_list );
+            y2debug("dialogtype %1", dialogtype);
 	    
             if ( dialogtype == "d1" )
             {
@@ -1338,7 +401,7 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
             }
             else if ( dialogtype == "dir" )
             {
-            	term curr_dialog = getDirDialog( getDescr( key));
+            	term curr_dialog = getDirDialog( getDirDescr( key));
             	UI(`ReplaceWidget(`id(`rp), curr_dialog ));
             }
         }   
@@ -1354,24 +417,23 @@ aich nicth gebaut werden, weil ein anderer darauf eine Vorbaurecht hat.
 	       //////////////////////////////////////////////////////////////////////////////////
 	       // User want to save Data
 	       //////////////////////////////////////////////////////////////////////////////////
-		// The User want to serach fo the string "search_val"
-		list  changes_list = maplist( `linekey, `line, rc_config_keys,``( add(line, `linekey, linekey )));
+		
+	        list  changes_list = maplist( `linekey, `line, rc_config_keys,``( add(line, `linekey, linekey )));
 		changes_list       = filter(`entry, changes_list, ``( lookup(entry, `new, false) == true ));
 
-		y2log( .milestone, "rc_config", 1, "AAAA");	
-	       string|void save_val = UI(`SaveDlg( changes_list));
+		string|void save_val = UI(`SaveDlg( changes_list));
 
-	       if (save_val == nil)
-	       {
-   	          // Cancel:
-		  ret = `again;
-	       }
-	       else
-	       {
-		  // Doit:
-		  maplist( `entry, changes_list, ``(SCR( `Write(lookup(entry, `path), lookup(entry, `value)))));
-		  return( `next );
-	       }
+	        if (save_val == nil)
+	        {
+   	           // Cancel:
+	           ret = `again;
+	        }
+	        else
+	        {
+	           // Doit:
+	           maplist( `entry, changes_list, ``(SCR( `Write(lookup(entry, `path), lookup(entry, `value)))));
+	           return( `next );
+	        }
             }
 
             if ( ret == `back )

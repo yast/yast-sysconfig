@@ -1,28 +1,42 @@
 /*
- *************************************************************
- *
- *     YaST2      SuSE Labs                        -o)
- *     --------------------                        /\\
- *                                                _\_v
- *           www.suse.de / www.suse.com
- * ----------------------------------------------------------
- *
- * Author:        Michael Hager <mike@suse.de>
- *
- * Description:   
- *
- * Purpose:
- *
- * external data:  rc_config_eddb, rc_config_keys
- *
- *************************************************************
- *
- * $Id$
- *
- */
+   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\|////////////////////////////////////
+   \\							                 //
+   \\                                                                    //    
+   \\                    __   __    ____ _____ ____                      //    
+   \\                    \ \ / /_ _/ ___|_   _|___ \                     //    
+   \\                     \ V / _` \___ \ | |   __) |                    //    
+   \\                      | | (_| |___) || |  / __/                     //    
+   \\                      |_|\__,_|____/ |_| |_____|                    //    
+   \\                                                         -o)        //
+   --------------------------------------------------------   /\\  --------
+   \\	                                        	     _\_v  
+   \\
+   \\   Author:        Michael Hager <mike@suse.de>
+   \\   
+   \\   Description:   rc_config editior
+   \\   
+   \\   Purpose:       graphical, hierachical rc-config editor
+   \\   
+   \\   external data: SRC( .rc.* )
+   \\
+   ------------------------------------------------------------------------
+   \\ $Id$
+
+*/
 
 {
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// process_eddb_create_widgettree_and_fill_rcconfigkey()                                                                                    //
+//-----------------------------------------------------------------------------------------------//
+// This mega function at least creates the wigettree and fills all relevat data into the
+// rc_config_keys map.
+// Fill the rc_config_keys map: Read all relevant data from rc_ronfig_eddb an push it into
+//                              rc_config_keys
+// Build widgettree:            with all relevat data in rc_config_keys, compute the hierarchie
+//                              of the variables -> rc_config_branch_hash
+//                              With this hierarchie, compute the widget tree  
+//-----------------------------------------------------------------------------------------------//
 
 define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 ``{
@@ -70,9 +84,6 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
       // rc_config_keys = testdata_rc_config_keys;
    }
 
-   SCR(`Write (.dumpto.tmp.rc, rc_config_keys ));
-
-
    //////////////////////////////////////////////////////////////////////////////
    // Problem: merge eddb and rc_configkey
    // The eddb hold information for all possible rc_variables
@@ -86,11 +97,13 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    //////////////////////////////////////////////////////////////////////////////
 
 
-   y2log( .milestone, "S", 1, "AAAAA1 new"); 
+   y2debug("1");
    
    //////////////////////////////////////////////////////////////////////////////
    // put all branch from the eddb into rc_config_keys,
    // which belong to a rc_variable that is already in rc_config_keys  
+   //////////////////////////////////////////////////////////////////////////////
+
    
    foreach( `entry, rc_config_eddb,
    ``{
@@ -109,14 +122,15 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
   	}
     });
 
-	     y2log( .milestone, "S", 1, "AAAAA2 new");
+   y2debug("2");
 
+   
 	     
    //////////////////////////////////////////////////////////////////////////////
    // Now fill all rc_config_keys variables without branch with branch="etc"
    // because this the default for "unknow variables
    // and add `parent for all nodes	     
-
+   //////////////////////////////////////////////////////////////////////////////
 
    rc_config_keys =  mapmap( `key, `value, rc_config_keys,
    ``{
@@ -141,12 +155,14 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
      });
 
 
-   y2log( .milestone, "S", 1, "AAAAA3 new");
+   y2debug("3");
 
+   
 		 
    //////////////////////////////////////////////////////////////////////////////
    // Next we create a branch hash, so we can look if a branch exists in
    // the tree-widget or not
+   //////////////////////////////////////////////////////////////////////////////
 
    rc_config_branch_hash = maplist( `key, `value, rc_config_keys,
    ``{
@@ -170,11 +186,15 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    
    rc_config_branch_hash = toset(flatten( rc_config_branch_hash ));
 
-   y2log( .milestone, "S", 1, "AAAAA4 new");
+   y2debug("4");
 
+   
+
+   
    //////////////////////////////////////////////////////////////////////////////
    // now we fill in all missinge subbranches, the missing dir and dialog nodes, into
    // the rc_config_keys
+   //////////////////////////////////////////////////////////////////////////////
 
    foreach( `branch, rc_config_branch_hash, 
    ``{
@@ -191,16 +211,18 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	 }
    });
 
-   SCR(`Write (.dumpto.tmp.red0, rc_config_keys ));
-   y2log( .milestone, "S", 1, "AAAAA5 new");
-
+   y2debug("5");
 
    // Now all the branch-data in the
    // rc_config_branch_hash is valid and complete 
    // ---------------------------------------------------
 
+   
+   
+   ////////////////////////////////////////////////////////////////////////
    // now we fillup rc_config_keys with the last vaild
    //   data in eddb, the type and descr information 
+   ////////////////////////////////////////////////////////////////////////
    
    foreach( `entry, rc_config_eddb,
    ``{
@@ -256,8 +278,11 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 
     });
 
-   y2log( .milestone, "S", 1, "AAAAA6 new");
+   y2debug("6");
 
+
+   
+   ////////////////////////////////////////////////////////////////////////
    // next step is to count the entry in a dialog and
    // fill in the dialiogtype (automatik dialog)
    // if the dialogtype is already defined (manual mode)
@@ -266,6 +291,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    // reverse sort of hash: (its already sorted from toset() above)	     
    // rc_config_branch_hash = sort(`x,`y, rc_config_branch_hash,``(x>=y) );
    // is much slower
+   ////////////////////////////////////////////////////////////////////////
 
    integer counter = size(rc_config_branch_hash);
 
@@ -275,13 +301,11 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
         return(select( rc_config_branch_hash, counter ));
      });  
 	
-   // SCR(`Write (.dumpto.tmp.rhash, rc_config_branch_hash ));
-
 
    // _reduced: like other hash, but only dir and dialogs
    list rc_config_branch_hash_reduced = [];
    
-   y2log( .milestone, "S", 1, "AAAAA6c new");
+   y2debug("7");
 
    string  last_branch    = "";
    integer last_entrynb = 0;
@@ -333,8 +357,11 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	 last_branch = rc_branch;
    });
 
-	     y2log( .milestone, "S", 1, "AAAAA7 new");
+   y2debug( "8");
 
+
+   
+   ////////////////////////////////////////////////////////////////////////
    // Let`s build the WidgetTree
    // we use a type of tempory stack: subitems_map
    //
@@ -345,6 +372,7 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
    //  		         `item(`id("SUSEWM_WM"),  "SUSEWM_WM",  false)
    //  		      ],
    //     ... ]
+   ////////////////////////////////////////////////////////////////////////
 
    map subitems_map = $[];
 
@@ -415,17 +443,18 @@ define process_eddb_create_widgettree_and_fill_rcconfigkeys()
 	 }
 
    });
-   
 
-   y2log( .milestone, "S", 1, "AAAAA8 new");
+   y2debug( "9");
 
-   //SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
+   // debug
+   // SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
    // SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
    // SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
    // SCR(`Write (.dumpto.tmp.hash, subitems_map ));
 
    return( lookup( subitems_map, "root", nil) ); 
 };
+
 }
 	  
     
