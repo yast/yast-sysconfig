@@ -25,8 +25,16 @@ Please wait...<br></p>
     "write" : _("<p><b><big>Saving sysconfig Configuration</big></b><br>
 Please wait...<br></p>
 
-")
+"),
 
+    /* Read dialog help (powertwek mode)*/
+    "read_powertweak" : _("<p><b><big>Initializing Powertweak Configuration</big></b><br>
+Please wait...<br></p>
+"),
+
+    /* Write dialog help (powertweak mode) */
+    "write_powertweak" : _("<p><b><big>Saving Powertweak Configuration</big></b><br>
+Please wait...<br></p>")
 ];
 
 /* EOF */

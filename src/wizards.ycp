@@ -12,6 +12,7 @@
 textdomain "sysconfig";
 
 import "Wizard";
+import "Sysconfig";
 
 include "ui/common_popups.ycp";
 include "ui/common_messages.ycp";
@@ -49,7 +50,7 @@ global define symbol SysconfigSequence() ``{
     ];
 
     // dialog header
-    string caption = _("System Configuration Editor");
+    string caption = (Sysconfig::powertweak_mode) ? _("Powertweak Configuration") : _("System Configuration Editor");
     // text in label widget
     term contents = `Label(_("Initializing ..."));
 
@@ -70,7 +71,7 @@ global define symbol SysconfigSequence() ``{
  */
 global define symbol SysconfigAutoSequence() ``{
     // dialog header
-    string caption = _("System Configuration Editor");
+    string caption = (Sysconfig::powertweak_mode) ? _("Powertweak Configuration") : _("System Configuration Editor");
 
     // text in label widget
     term contents = `Label(_("Initializing ..."));

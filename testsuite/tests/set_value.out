@@ -1,0 +1,391 @@
+Dump	Testing data type validation
+Return	nil
+Dump	Test yesno type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: yesno\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: yesno\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: yesno\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: yesno\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: yesno\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	$["Type":"yesno", "comment":"Comment with metadata ", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "value":"yes"]
+Dump	Test boolean type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: boolean\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: boolean\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: boolean\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: boolean\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test integer type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test integer(0:100) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:100)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test integer(-10:10) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test integer(0:) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(0:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test integer(-10:) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(-10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test integer(10:) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: integer(10:)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test string type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Dump	Test string(0,10) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: string(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Dump	Test list(0,10) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(0,10)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test list("a, bc",a,b,,c,\") type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(\"a, bc\",a,b,,c,\\\")\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(\"a, bc\",a,b,,c,\\\")\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(\"a, bc\",a,b,,c,\\\")\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(\"a, bc\",a,b,,c,\\\")\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(\"a, bc\",a,b,,c,\\\")\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: list(\"a, bc\",a,b,,c,\\\")\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test ip type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Dump	Test ip4 type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip4\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip4\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip4\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip4\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip4\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test ip6 type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip6\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip6\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip6\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip6\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: ip6\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Dump	Test regexp(abc) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(abc)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(abc)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(abc)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(abc)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Test regexp(^0[0-7]*$) type
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`not_valid
+Dump	Testing value setting
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	$["Type":"regexp(^0[0-7]*$)", "comment":"Comment with metadata ", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"023", "value":"yes"]
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	$["Type":"regexp(^0[0-7]*$)", "comment":"Comment with metadata ", "file":"/etc/sysconfig/test", "location":"", "name":"VARIABLE", "new_value":"0897", "value":"yes"]
+Dump	Testing list of changed values
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Return	false
+Return	[]
+Read	.syseditor.value_comment."/etc/sysconfig/test"."VARIABLE" "## Type: regexp(^0[0-7]*$)\n# Comment with metadata"
+Read	.syseditor.value."/etc/sysconfig/test"."VARIABLE" "yes"
+Return	`ok
+Return	true
+Return	["VARIABLE$/etc/sysconfig/test"]

@@ -42,7 +42,8 @@ global define boolean Modified() ``{
  * @return `abort if aborted and `next otherwise
  */
 global define symbol ReadDialog() ``{
-    Wizard::RestoreHelp(HELPS["read"]:"");
+    Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
+
     Sysconfig::AbortFunction = ``{ return PollAbort();};
 
     string powertweakconfig = "/etc/powertweak/tweaks";
@@ -127,7 +128,8 @@ Create it and use powerteak?
  * @return `abort if aborted and `next otherwise
  */
 global define symbol WriteDialog() ``{
-    Wizard::RestoreHelp(HELPS["write"]:"");
+    Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["write_powertweak"]:"" : HELPS["write"]:"");
+
     Sysconfig::AbortFunction = ``{ return PollAbort();};
 
     boolean ret = true;
@@ -680,7 +682,8 @@ global define symbol MainDialog() ``{
 				),
 				`VSpacing(1),
 				// help rich text displayed after module start (1/2)
-				`RichText(`id(`rt), _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
+				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") :
+				    _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")),
 				// push button label - displayed only in autoinstallation config mode

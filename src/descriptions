@@ -65,12 +65,15 @@
 ## Path:	System/Security
 ## Description:	Security settings
 
-## Path:	System/Power management
-## Description:	Power management configuration - APM, ACPI
-
 ## Path:	System/File systems
 ## Description:	Local file systems configuration
 
 ## Path:	System/Environment
 ## Description:	Environment and localization settings
+
+## Path:        System/Powermanagement
+## Description: There are two different kind of power management: APM \
+##              and ACPI. Which one you are using depends on your machine \
+##              and what you choose at boottime. Have a look in the /proc \
+##              directory. There is either a file 'apm' or a directory 'acpi'.
 
