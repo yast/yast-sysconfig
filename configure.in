@@ -43,6 +43,6 @@ AC_SUBST(CXXFLAGS)
 fi
 
 AC_OUTPUT(Makefile
-	package/yast2-config-rc_config.spec:yast2-config-rc_config.spec.in
+	package/yast2-config-rcconfig.spec:yast2-config-rcconfig.spec.in
 	src/Makefile
 	doc/Makefile)
