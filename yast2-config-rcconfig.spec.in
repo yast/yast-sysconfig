@@ -47,8 +47,8 @@ make install
 %dir @YAST2DIR@/clients
 %dir @YAST2DIR@/include
 %dir @YAST2DIR@/menuentries
-@YAST2DIR@/menuentries/menuentry_rc_config.ycp
-@YAST2DIR@/menuentries/menuentry_firewall.ycp
+@YAST2DIR@/menuentries/menuentry_rc_config.y2cc
+@YAST2DIR@/menuentries/menuentry_firewall.y2cc
 @YAST2DIR@/clients/rc_config_step1.ycp
 @YAST2DIR@/clients/rc_config.ycp
 @YAST2DIR@/meta_rc.config
