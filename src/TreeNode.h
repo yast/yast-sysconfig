@@ -11,11 +11,11 @@
 |                             rc_create_data                           |
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
- 
+
   File:       TreeNode.h
- 
+
   Author:     Michael K"ohrmann <curry@suse.de>
- 
+
 */
 
 /*!
@@ -29,10 +29,14 @@
 #ifndef __TREENODE_H
 #define __TREENODE_H
 
-using namespace std;
-
+#include <iostream>
 #include <string>
-#include <list.h>
+#include <list>
+
+using std::string;
+using std::list;
+using std::ostream;
+
 
 /*!
   \class TreeNode
@@ -52,7 +56,7 @@ class TreeNode
 
   /*!
     \fn TreeNode()
-    
+
     Constructor.
    */
   TreeNode();
@@ -77,21 +81,21 @@ class TreeNode
   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  /*! 
+  /*!
     Get the name of the current TreeNode.
 
     \return The name of the curren TreeNode.
   */
   string getName() const { return *itsName; }
 
-  /*! 
+  /*!
     Get the StringList of the current TreeNode.
 
     \return The StringList of the current TreeNode.
   */
   list<string> getStringList() const { return *itsStringList; }
 
-  /*! 
+  /*!
     Get a pointer to the StringList of the current TreeNode.
 
     \return A pointer to the StringList of the current TreeNode.
@@ -128,17 +132,16 @@ class TreeNode
 
   /*!
     Overloading function of the output stream operator <code><<</code>.
-    
+
     \param ostream& s
     \param const TreeNode& x
     \return ostream&
   */
   friend ostream& operator<<(ostream& s, const TreeNode& x)
-    {
-      s << x.getName() << "\n";
-      
+  {
+      s << x.getName() << '\n';
       return s;
-    }
+  }
 
  private:
   ////////////////////////////////////////////////////////////////////////////////

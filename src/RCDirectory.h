@@ -31,10 +31,12 @@
 
 #include <string>
 #include <vector>
-#include <iostream.h>
+#include <iostream>
 
 using std::string;
 using std::vector;
+using std::ostream;
+using std::cout;
 
 
 //typedef vector<RCVariable*> RCVarVector;

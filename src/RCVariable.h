@@ -29,10 +29,11 @@
 #ifndef __RCVARIABLE_H
 #define __RCVARIABLE_H
 
-#include <iostream.h>
+#include <iostream>
 #include <string>
 
 using std::string;
+using std::ostream;
 
 
 /*!

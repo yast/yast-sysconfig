@@ -39,16 +39,17 @@
 */
 
 #include <ctype.h>
-#include <iostream.h>
 #include <stdio.h>
-#include <fstream.h>
+#include <glob.h>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <map>
 #include <set>
 #include <list>
 #include <algorithm>
-#include <glob.h>
-#include <unistd.h>
+
 #include "RCVariable.h"
 #include "RCDirectory.h"
 #include "TreeNode.h"
@@ -57,6 +58,9 @@ using std::string;
 using std::map;
 using std::set;
 using std::list;
+using std::endl;
+using std::ifstream;
+using std::ofstream;
 
 
 /////////////////////////////////////////////////////////////////////
@@ -162,7 +166,7 @@ string trim(const string& str)
 }
 
 // wrapper class for tolower
-struct mytolower : public unary_function <int, int>
+struct mytolower : public std::unary_function <int, int>
 {
     int operator () (int x) { return tolower (x); }
 };
@@ -363,9 +367,9 @@ int main(int argc, char* argv[])
   char  rc_config_keys_arr[FILENAME_LENGTH]  = "/usr/lib/YaST2/rc_config_keys";
   char  tree_data_arr[FILENAME_LENGTH]       = "/usr/lib/YaST2/tree_data";
   char *meta_rc_config                       = meta_rc_config_arr;
-  char *rc_config_keys                       = rc_config_keys_arr; 
+  char *rc_config_keys                       = rc_config_keys_arr;
   char *tree_data                            = tree_data_arr;
-  
+
   //  const char rc_config_keys[FILENAME_LENGTH] = "rc_config_keys";
   //  const char tree_data[FILENAME_LENGTH]      = "tree_data";
   //  const char y2log[FILENAME_LENGTH]          = "var/log/y2log";
@@ -472,11 +476,11 @@ int main(int argc, char* argv[])
   DirectorySet.insert(*dirPath);
 
   if (!firewall_mode )
-  {   
+  {
      *dirPath = (string)"/etc";
      DirectorySet.insert(*dirPath);
   }
-  
+
   ///////////////////////////////////////////////////////////////////
   //
   // Get input from configuration files in /etc/rc.config and
@@ -505,7 +509,7 @@ int main(int argc, char* argv[])
      //filename = globbuffer.gl_pathv[i];
      filename = *filenameit;
      cout << "\n### File: " << filename << endl;
-     
+
      ifstream fin_filename(filename.c_str());
      if(!fin_filename)
      {
@@ -759,7 +763,7 @@ int main(int argc, char* argv[])
 	}
      }
   }
-  
+
   ///////////////////////////////////////////////////////////////////
   //
   // Generate branch, parent and entrynb of the RCVariables if there
@@ -897,13 +901,13 @@ int main(int argc, char* argv[])
 			 << ci_newdirectories->first
 			 << ci_newdirectories->second;
      ++ci_newdirectories;
-  
+
      for (; ci_newdirectories != NewRCDirectories.end(); ++ci_newdirectories )
 	fout_rc_config_keys << ",\n  \""
 			    << ci_newdirectories->first
 			    << ci_newdirectories->second;
   }
-  
+
   fout_rc_config_keys << "\n]" << endl;
 
   // close fout
@@ -1017,27 +1021,27 @@ int main(int argc, char* argv[])
 template<class T, class A>
 void showMap(const map<T, A>& v)
 {
-  map<T, A>::const_iterator ci = v.begin();
-  cout << "  \"" << ci->first << ci->second;
-  ++ci;
+    typename map<T, A>::const_iterator ci = v.begin();
+    cout << "  \"" << ci->first << ci->second;
+    ++ci;
 
-  for (; ci != v.end(); ++ci )
-    cout << ",\n  \"" << ci->first << ci->second;
+    for (; ci != v.end(); ++ci )
+	cout << ",\n  \"" << ci->first << ci->second;
 }
 
 template<class T>
 void showSet(const set<T>& v)
 {
-  for (set<T>::const_iterator ci = v.begin(); ci != v.end(); ++ci)
-    cout << (string)*ci << endl;
+    for (typename set<T>::const_iterator ci = v.begin(); ci != v.end(); ++ci)
+	cout << (string)*ci << endl;
 }
 
 template<class T>
 void showList(const list<T>& v)
 {
-  for (list<T>::const_iterator ci = v.begin(); ci != v.end(); ++ci)
-    cout << (string)*ci << " ";
-  cout << endl;
+    for (typename list<T>::const_iterator ci = v.begin(); ci != v.end(); ++ci)
+	cout << (string)*ci << " ";
+    cout << endl;
 }
 
 template<class T>
@@ -1104,4 +1108,3 @@ void showTree(const Tree& v)
       cout << "\n";
     }
 }
-// end: main.cpp vim:sw=2
