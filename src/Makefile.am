@@ -14,6 +14,7 @@ ynclude_DATA =			\
 	wizards.ycp		\
 	dialogs.ycp		\
 	complex.ycp		\
+	cmdline.ycp		\
 	routines.ycp
 
 config_DATA =			\

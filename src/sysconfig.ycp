@@ -22,34 +22,72 @@ y2milestone ("----------------------------------------");
 y2milestone ("Sysconfig module started");
 
 import "Sysconfig";
-include "sysconfig/wizards.ycp";
 
-/* is this proposal or not? */
-boolean propose = false;
-list args = WFM::Args();
-if(size(args) > 0) {
-    if(is(WFM::Args(0), path) && WFM::Args(0) == .propose) {
-        y2milestone("Using PROPOSE mode");
-        propose = true;
-    }
-    else if(is(WFM::Args(0), string) && WFM::Args(0) == ".powertweak") {
-        y2milestone("Using POWERTWEAK mode");
-        Sysconfig::powertweak_mode = true;
-    }
-    else
-        y2error("Bad argument for sysconfig: %1", WFM::Args(0));
-}
+include "sysconfig/wizards.ycp";
+include "sysconfig/cmdline.ycp";
+include "commandline/commandline.ycp";
+
+    /**
+     * Command line definition
+     */
+    map cmdline = $[
+	// help text header - configuration of 'powertweak' utility
+	"help"      : (Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") :
+	// help text header - sysconfig editor
+	 _("Editor for /etc/sysconfig files"),
+	"id"        : (Sysconfig::powertweak_mode == true) ? "powertweak" : "sysconfig",
+	"guihandler": ``(SysconfigSequence()),
+	"initialize": ``(Sysconfig::Read()),
+	// use write handler - disable progress bar
+	"finish"    : ``(writeHandler()),
+	"actions"   : $[
+	    "list" : $[
+		// help text for command 'list'
+		"help"      : _("Display configuration summary"),
+		"handler"   : ``(listHandler())
+	    ],
+	    "set" : $[
+		// help text for command 'set'
+		"help"      : _("Set variable value"),
+		"handler"   : ``(setHandler())
+	     ],
+	    "details" : $[
+		// help text for command 'details'
+		"help"      : _("Show details about selected variable"),
+		"handler"   : ``(detailsHandler())
+	    ]
+	],
+	"options" : $[
+	    "all" : $[
+		// help text for option 'all'
+		"help"	    : _("Display all variables")
+	    ],
+	    "variable" : $[
+		// help text for option 'variable'
+		"help"      : _("Selected variable")
+	    ],
+	    "value" : $[
+		// help text for option 'value'
+		"help"      : _("New value")
+	    ]
+	],
+	"mappings" : $[
+	    "list" : ["all"],
+	    "set"  : ["variable", "value"],
+	    "details" : ["variable"]
+	]
+    ];
+
 
 /* main ui function */
-any ret = nil;
+boolean ret = CommandLineRun(cmdline);
 
-if(propose) ret = SysconfigAutoSequence();
-else ret = SysconfigSequence();
 y2debug("ret == %1", ret);
 
 /* Finish */
 y2milestone("Sysconfig module finished");
 y2milestone("----------------------------------------");
+
 return ret;
 
 /* EOF */

@@ -45,8 +45,6 @@ global define boolean Modified() ``{
 global define symbol ReadDialog() ``{
     Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
 
-    string powertweakconfig = "/etc/powertweak/tweaks";
-
     if (Sysconfig::powertweak_mode == true)
     {
 	// do not ask user to create powertweak configuration file
@@ -113,15 +111,7 @@ Create it and use powerteak?
 	}
     }
 
-    // read only powerteak config or all sysconfig files
-    if (Sysconfig::powertweak_mode == true)
-    {
-       Sysconfig::Read([powertweakconfig]);
-    }
-    else
-    {
-       Sysconfig::Read(Sysconfig::configfiles);
-    }
+    Sysconfig::Read();
 
     return `next;
 }
@@ -157,28 +147,29 @@ global define symbol WriteDialog() ``{
 /**
  * Create rich text description string from description values
  * @param description Description
+ * @param richtext if true result is rich text, if false result is plain text
  * @return string Rich text string
  */
-global define string create_richtext_description(map description) ``{
+global define string create_description(map description, boolean richtext) ``{
     string varname = description["name"]:"";
     string file = description["file"]:"";
     string default_value = description["Default"]:nil;
     string comment = description["comment"]:"";
 
-    string possible_vals = possible_values(description);
+    string possible_vals = possible_values(description, richtext);
 
     string result = "";
 
     if (file != "" && file != nil)
     {
 	// rich text item
-	result = result + "<P><B>" + _("File: ") + "</B> " + file + "</P>";
+	result = result + ((richtext) ? "<P><B>":"") + _("File: ") + ((richtext) ?"</B> ":"") + file + ((richtext) ? "</P>":"\n");
     }
 
     if (possible_vals != "" && possible_vals != nil)
     {
 	// rich text item
-	result = result + "<P><B>" + _("Possible Values: ") + "</B> " + possible_vals + "</P>";
+	result = result + ((richtext) ? "<P><B>":"") + _("Possible Values: ") + ((richtext) ?"</B> ":"") + possible_vals + ((richtext) ?"</P>":"\n");
     }
 
     if (default_value != nil && size(file) > 0)
@@ -186,7 +177,7 @@ global define string create_richtext_description(map description) ``{
 	// TODO: replace empty value by special text (e.g. "</I>empty</I>")
 
 	// rich text value
-	result = result + "<P><B>" + _("Default Value: ") + "</B> " + default_value + "</P>";
+	result = result + ((richtext) ?"<P><B>":"") + _("Default Value: ") + ((richtext) ?"</B> ":"") + default_value + ((richtext) ?"</P>":"\n");
     }
 
     // if value was modified add original value
@@ -200,7 +191,7 @@ global define string create_richtext_description(map description) ``{
 	    original = "\"\"";
 	}
 	// rich text value
-	result = result + "<P><B>" + _("Original Value: ") + "</B> " + original + "</P>";
+	result = result + ((richtext) ?"<P><B>":"") + _("Original Value: ") + ((richtext) ?"</B> ":"") + original + ((richtext) ?"</P>":"\n");
     }
 
     if (haskey(description, "actions"))
@@ -216,7 +207,7 @@ global define string create_richtext_description(map description) ``{
 	if (size(precommand) > 0)
 	{
 	    // header in the variable description text, bash command is appended
-	    result = result + "<P><B>" + _("Prepare Command: ") + "</B> " + precommand + "</P>";
+	    result = result + ((richtext) ?"<P><B>":"") + _("Prepare Command: ") + ((richtext) ?"</B> ":"") + precommand + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(conf_modules) > 0)
@@ -224,51 +215,54 @@ global define string create_richtext_description(map description) ``{
 	    // parse string with options, then add them to the rich text
 	    list conf = Sysconfig::ParseString(conf_modules, Sysconfig::parse_param);
 	    // header in the variable description text, SuSEconfig/ULconfig module names are appended
-	    result = result + "<P><B>" + _("Configuration Script: ") + "</B> " + mergestring(conf, ", ") + "</P>";
+	    result = result + ((richtext) ?"<P><B>":"") + _("Configuration Script: ") + ((richtext) ?"</B> ":"") + mergestring(conf, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(reload) > 0)
 	{
 	    list services = Sysconfig::ParseString(reload, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
-	    result = result + "<P><B>" + _("Service to Reload: ") + "</B> " + mergestring(services, ", ") + "</P>";
+	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Reload: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(restart) > 0)
 	{
 	    list services = Sysconfig::ParseString(restart, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
-	    result = result + "<P><B>" + _("Service to Restart: ") + "</B> " + mergestring(services, ", ") + "</P>";
+	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Restart: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(command) > 0)
 	{
 	    // header in the variable description text, bash command is appended
-	    result = result + "<P><B>" + _("Activation Command: ") + "</B> " + command + "</P>";
+	    result = result + ((richtext) ?"<P><B>":"") + _("Activation Command: ") + ((richtext) ?"</B> ":"") + command + ((richtext) ?"</P>":"\n");
 	}
     }
 
     if (comment != "" && comment != nil)
     {
-	// convert '<' and '>' to '&lt;' '&gt;'
-	comment = mergestring(splitstring(comment, "<"), "&lt;");
-	comment = mergestring(splitstring(comment, ">"), "&gt;");
-
-	// keep comment formatting:
-	// convert '\n' => '<BR>'
-	comment = mergestring(splitstring(comment, "\n"), "<BR>");
-
-	// do not change node descriptions
-	if (file != "")
+	if (richtext)
 	{
-	    // convert ' ' => '&nbsp;'
-	    comment = mergestring(splitstring(comment, " "), "&nbsp;");
+	    // convert '<' and '>' to '&lt;' '&gt;'
+	    comment = mergestring(splitstring(comment, "<"), "&lt;");
+	    comment = mergestring(splitstring(comment, ">"), "&gt;");
+
+	    // keep comment formatting:
+	    // convert '\n' => '<BR>'
+	    comment = mergestring(splitstring(comment, "\n"), "<BR>");
+
+	    // do not change node descriptions
+	    if (file != "")
+	    {
+		// convert ' ' => '&nbsp;'
+		comment = mergestring(splitstring(comment, " "), "&nbsp;");
+	    }
+
+	    y2debug("formatted comment: %1", comment);
 	}
 
-	y2debug("formatted comment: %1", comment);
-
 	// rich text value
-	result = result + "<P><B>" + _("Description: ") + "</B><BR> " + comment + "</P>";
+	result = result + ((richtext) ?"<P><B>":"") + _("Description: ") + ((richtext) ?"</B><BR> ":"") + comment + ((richtext) ?"</P>":"");
     }
 
     return result;
@@ -464,9 +458,10 @@ global define list combo_list(map description, boolean set_default) ``{
 /**
  * Get string representation of type definition. Used at richtext description.
  * @param description Variable description
+ * @param richtext result is rich/plain text
  * @return string Textual description of the type
  */
-global define string possible_values(map description) ``{
+global define string possible_values(map description, boolean richtext) ``{
     string ret = "";
 
     string type = description["Type"]:"";
@@ -506,18 +501,18 @@ global define string possible_values(map description) ``{
 	);
 
 	// suffix added to the allowed (predefined) values
-	ret = mergestring(spaces, ", ") + " <I>" + _("or any value") + "</I>";
+	ret = mergestring(spaces, ", ") + (richtext?" <I>":" ") + _("or any value") + (richtext?"</I>":"");
     }
     else if (regexpmatch(type, "^regexp\\(.*\\)"))
     {
 	string regex = regexpsub(type, "^regexp\\((.*)\\)", "\\1");
 	// Translation: description of possible values, regular expression string is added after the text
-	ret = "<I>" + _("Value Matching Regular Expression:") + "</I>" + regex;
+	ret = (richtext?"<I>":"") + _("Value Matching Regular Expression:") + (richtext?"</I>":"") + regex;
     }
     else if (type == "integer")
     {
 	// allowed value description
-	ret = "<I>" + _("Any integer value") + "</I>";
+	ret = (richtext?"<I>":"") + _("Any integer value") + (richtext?"</I>":"");
     }
     else if (regexpmatch(type, "^integer\\(.*:.*\\)"))
     {
@@ -529,38 +524,38 @@ global define string possible_values(map description) ``{
 	if (max == "" && min != "")
 	{
 	    // allowed value description
-	    ret = "<I>" + sformat(_("Integer value greater or equal to %1"), min) + "</I>";
+	    ret = (richtext?"<I>":"") + sformat(_("Integer value greater or equal to %1"), min) + (richtext?"</I>":"");
 	}
 	else if (min == "" && max != "")
 	{
 	    // allowed value description
-	    ret = "<I>" + sformat(_("Integer value less or equal to %1"), max) + "</I>";
+	    ret = (richtext?"<I>":"") + sformat(_("Integer value less or equal to %1"), max) + (richtext?"</I>":"");
 	}
 	else
 	{
 	    // Translation: allowed value description, %1 is minimum value, %2 is maximum integer value
-	    ret = "<I>" + sformat(_("Any integer value from %1 to %2"), min, max) + "</I>";
+	    ret = (richtext?"<I>":"") + sformat(_("Any integer value from %1 to %2"), min, max) + (richtext?"</I>":"");
 	}
     }
     else if (type == "string")
     {
 	// allowed value description - any value is allowed
-	ret = "<I>" + _("Any value") + "</I>";
+	ret = (richtext?"<I>":"") + _("Any value") + (richtext?"</I>":"");
     }
     else if (type == "ip")
     {
 	// allowed value description - IP adress
-	ret = "<I>" + _("IPv4 or IPv6 address") + "</I>";
+	ret = (richtext?"<I>":"") + _("IPv4 or IPv6 address") + (richtext?"</I>":"");
     }
     else if (type == "ip4")
     {
 	// allowed value description - IPv4 adress
-	ret = "<I>" + _("IPv4 address") + "</I>";
+	ret = (richtext?"<I>":"") + _("IPv4 address") + (richtext?"</I>":"");
     }
     else if (type == "ip6")
     {
 	// allowed value description - IPv6 adress
-	ret = "<I>" + _("IPv6 address") + "</I>";
+	ret = (richtext?"<I>":"") + _("IPv6 address") + (richtext?"</I>":"");
     }
     else
     {
@@ -732,7 +727,7 @@ global define symbol MainDialog() ``{
 				),
 				`VSpacing(1),
 				// help rich text displayed after module start (1/2)
-				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") :
+				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("<P><B>Powertweak Configuration</B></P><P>In this configuratin module you can tune some kernel and hardware options.</P><P><B>Warning:</B> This configuration module is for experts only!</P>") :
 				    _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")),
@@ -847,20 +842,26 @@ Choose \"Cancel\" to edit the values again.
 	}
 	else if (ret == `help)
 	{
-	    string helptext =
+	    string helptext = (Sysconfig::powertweak_mode == true) ?
+
+		// help text (powertweak mode)
+		_("<p>After you save your changes, this editor changes the variables in the
+/etc/powertweak/tweaks file. Then it restarts powertweak daemon which activates changes.</p>
+")
+
+	    :
 		// helptext for popup - part 1/3
 		_("<p>After you save your changes, this editor changes the variables in the
-corresponding  sysconfig file. Then it runs
-SuSEconfig, which changes the underlying configuration files, stops and starts daemons,
+corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,
 and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>
 ") +
 
                 // helptext for popup - part 2/3
-		_("<p><b>Important:</b> You still can edit each individual configuration file manually.</p>") +
+		_("<p><b>Important:</b> You still can edit each individual configuration file manually. Name of file is displayed in variable description.</p>") +
 
                 // helptext for popup - part 3/3
 		_("<p> SuSEconfig saves a checksum of each configuration file, so that it can detect if
- you have manually changed any of them.  If you have changed a configuration file manually,
+ you have manually changed any of them. If you have changed a configuration file manually,
  it will not touch it.</p>");
 
 
@@ -936,7 +937,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 	    y2milestone("Descr: %1", description);
 
 	    // update richtext content
-	    UI::ChangeWidget(`id(`rt), `Value, create_richtext_description(description));
+	    UI::ChangeWidget(`id(`rt), `Value, create_description(description, true));
 
 	    // update combo box
 	    update_combo(description, false);

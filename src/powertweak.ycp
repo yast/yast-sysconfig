@@ -11,7 +11,12 @@
 
 {
 
-return WFM::CallFunction("sysconfig", add(WFM::Args(), ".powertweak"));
+import "Sysconfig";
 
-/* EOF */
+// set powertweak mode
+Sysconfig::powertweak_mode = true;
+
+// start sysconfig client, pass all arguments to it
+return WFM::CallFunction("sysconfig", WFM::Args());
+
 }
