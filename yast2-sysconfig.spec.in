@@ -3,7 +3,9 @@
 # neededforbuild  gpp libgpp yast2-devel-packages
 
 @HEADER@
-Requires:	yast2
+Requires:	yast2 perl
+
+BuildArchitectures:	noarch
 
 Provides:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
 Obsoletes:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
@@ -33,18 +35,19 @@ Summary:	Powertweak configuration
 
 %files
 %defattr(-,root,root)
-@configdir@/sysconfig.y2cc
-@clientdir@/sysconfig_step1.ycp
-@clientdir@/sysconfig.ycp
-@ydatadir@/meta_sys.config
-@ydatadir@/powertweak.agent
 %dir @yncludedir@/sysconfig
-@yncludedir@/sysconfig/sys_dialogs.ycp
-@ybindir@/syscreate_data
+@yncludedir@/sysconfig/*
+@clientdir@/sysconfig.ycp
+@clientdir@/sysconfig_*.ycp
+@moduledir@/Sysconfig.ycp
+@configdir@/sysconfig.y2cc
+@ybindir@/parse_configs.pl
+@ydatadir@/sysedit.agent
 %doc @docdir@
 
 %files -n yast2-powertweak
 %defattr(-,root,root)
 @configdir@/powertweak.y2cc
 @clientdir@/powertweak.ycp
+@ydatadir@/powertweak.agent
 

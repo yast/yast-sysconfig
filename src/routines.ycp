@@ -1,0 +1,57 @@
+/**
+ * File:	include/sysconfig/routines.ycp
+ * Package:	Configuration of sysconfig
+ * Summary:	Miscelanous functions for configuration of sysconfig.
+ * Authors:	Ladislav Slezak <lslezak@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "sysconfig";
+
+/* FIXME: Remove this file if you do not need it! */
+
+/**
+ * Abort function
+ * @return blah blah lahjk
+ */
+global define boolean Abort() ``{
+    if(AbortFunction != nil)
+	return eval(AbortFunction) == true;
+    return false;
+}
+
+/**
+ * Check for pending Abort press
+ * @return true if pending abort
+ */
+global define boolean PollAbort() ``{
+    return UI::PollInput() == `abort;
+}
+
+/**
+ * If modified, ask for confirmation
+ * @return true if abort is confirmed
+ */
+global define boolean ReallyAbort() ``{
+    return !Modified() || UI::ReallyAbortPopup(true);
+}
+
+/**
+ * Progress::NextStage and Progress::Title combined into one function
+ * @param title progressbar title
+ */
+global define void ProgressNextStage(string title) ``{
+    Progress::NextStage();
+    Progress::Title(title);
+}
+
+global define path file_to_path(string file) ``{
+    return topath(mergestring(splitstring(file, "/"), "."));
+}
+
+
+/* EOF */
+}

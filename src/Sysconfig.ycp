@@ -1,0 +1,363 @@
+/**
+ * File:	modules/Sysconfig.ycp
+ * Package:	Configuration of sysconfig
+ * Summary:	Data for configuration of sysconfig, input and output functions.
+ * Authors:	Ladislav Slezak <lslezak@suse.cz>
+ *
+ * $Id$
+ *
+ * Representation of the configuration of sysconfig.
+ * Input and output routines.
+ */
+
+{
+
+module "Sysconfig";
+textdomain "sysconfig";
+
+import "Progress";
+import "Report";
+import "Summary";
+import "Directory";
+
+include "sysconfig/routines.ycp";
+
+/**
+ * Abort function
+ * return boolean return true if abort
+ */
+global block AbortFunction = nil;
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+global boolean proposal_valid = false;
+global boolean write_only = false;
+
+// all read variables
+map variables = $[];
+
+map node_comments = $[];
+
+global list tree_content = [];
+
+/**
+ * Data was modified?
+ * @return true if modified
+ */
+global define boolean Modified() ``{
+    y2debug("modified=%1",modified);
+    return modified;
+};
+
+
+global define map get_description(string varid) ``{
+
+    string varname = get_name_from_id(varid);
+    string fname = get_file_from_id(varid);
+
+    // TODO: detect changed value
+
+    path comment_path = add(add(.syseditor.value_comment, fname), varname);
+    path value_path = add(add(.syseditor.value, fname), varname);
+    string comment = SCR::Read(comment_path);
+
+    map meta = parse_metadata(comment);
+
+    meta = add(meta, "name", get_name_from_id(varid));
+    meta = add(meta, "file", get_file_from_id(varid));
+    meta = add(meta, "location", varname != "" ? get_location_from_id(varid) : varid);
+    meta = add(meta, "comment", varname != "" ? get_only_comment(comment) : (node_comments[varid]:""));
+    meta = add(meta, "value", SCR::Read(value_path));
+
+    return meta;
+}
+
+global define map parse_metadata(string comment) ``{
+    map ret = $[];
+
+    // get metadata part of comment
+    list metalines = get_metadata(comment);
+
+    y2debug("metadata: %1", metalines);
+
+    // parse each metadata line
+    foreach(string metaline, metalines, ``{
+	    string tag = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
+	    string val = regexpsub(metaline, "^##[ \t]*(.*):[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\2");
+
+	    y2debug("tag: %1 val: '%2'", tag, val);
+
+	    // add tag and value to map if they are present in comment
+	    if (tag != nil && val != nil)
+	    {
+		ret = add(ret, tag, val);
+	    }
+	    else
+	    {
+		// ignore separator lines
+		if (!regexpmatch(metaline, "^#*$"))
+		{
+		    y2warning("Unknown metadata line: %1", metaline);
+		}
+	    }
+	}
+    );
+
+    return ret;
+}
+
+
+global define list(string) get_metadata(string input) ``{
+    if (input == nil || input == "")
+    {
+	return [];
+    }
+
+    list(string) lines = splitstring(input, "\n");
+    return (filter(string line, lines, ``(regexpmatch(line, "^##.*"))));
+}
+
+// only comment withou metadata
+global define string get_only_comment(string input) ``{
+    if (input == nil || input == "")
+    {
+	return "";
+    }
+
+    list(string) lines = splitstring(input, "\n");
+
+    string ret = "";
+
+    foreach(string line, lines, ``{
+	    string com_line = regexpsub(line, "^#([^#].*)", "\\1");
+
+	    if (com_line != nil)
+	    {
+		com_line = regexpsub(com_line, "^ *(.*)", "\\1");
+	    }
+
+	    if (com_line != nil)
+	    {
+		ret = ret + com_line + " ";
+	    }
+	}
+    );
+
+    return ret;
+}
+
+global define string get_name_from_id(string id) ``{
+
+    integer pos = findfirstof(id, "$");
+
+    if (pos >= 0)
+    {
+	return substring(id, 0, findfirstof(id, "$"));
+    }
+    else
+    {
+	return "";
+    }
+}
+
+global define string get_location_from_id(string id) ``{
+    integer pos = findlastof(id, "$");
+
+    if (pos >= 0 && size(id) >= pos + 1)
+    {
+	return substring(id, pos + 1);
+    }
+    else
+    {
+	return "";
+    }
+}
+
+global define string get_file_from_id(string id) ``{
+
+    integer pos = findfirstof(id, "$");
+
+    if (pos >= 0)
+    {
+	string file_location = substring(id, pos + 1);
+
+	pos = findlastof(file_location, "$");
+
+	if (pos >= 0)
+	{
+	    return substring(file_location, 0, pos);
+	}
+	else
+	{
+	    return "";
+	}
+    }
+    else
+    {
+	return "";
+    }
+}
+
+
+
+/**
+ * Read all sysconfig settings
+ * @return true on success
+ */
+global define boolean Read(list(string) files) ``{
+
+    /* sysconfig read dialog caption */
+    string caption = _("Initializing sysconfig configuration");
+
+    string tmpdir = SCR::Read(.target.tmpdir);
+    if (tmpdir == nil || tmpdir == "")
+    {
+	y2security("Using /tmp directory !");
+	tmpdir = "/tmp";
+    }
+
+    // register configuration files in SCR using INI-agent
+    string agentdef = sformat(".syseditor\n\n`ag_ini(IniAgent( %1,\n", files) + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    string tmp = tmpdir + "/sysconfig-agent.scr";
+
+    SCR::Write(.target.string, tmp, agentdef);
+    SCR::RegisterAgent(.syseditor, tmp);
+
+    // list of all config files
+    list(string) configfiles = SCR::Dir(.syseditor.section);
+
+    // create script opstions
+    string param = "";
+    foreach(string par, files, ``{param = param + "'" + par + "' ";});
+
+    // create tree definition list
+    SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + param + "> " + tmpdir + "/treedef.ycp");
+
+    // read list
+    list parsed_output = SCR::Read(.target.ycp, tmpdir + "/treedef.ycp");
+    tree_content = parsed_output[0]:[];
+
+    node_comments = parsed_output[1]:$[];
+
+/*
+UI::OpenDialog(`VBox(
+                     `Tree(`id(`dest_dir), `opt(`notify),
+                                   "&Variables:",
+                                   tree_content
+			)
+		    )
+		);
+
+
+symbol ui = UI::UserInput();
+
+while (ui != `cancel)
+{
+    if (ui == `dest_dir)
+    {
+	y2milestone("Selected: %1", UI::QueryWidget(`id(`dest_dir), `CurrentItem));
+    }
+
+    ui = UI::UserInput();
+}
+
+UI::CloseDialog();
+*/
+    return true;
+}
+
+/**
+ * Write all sysconfig settings
+ * @return true on success
+ */
+global define boolean Write() ``{
+
+    /* Xsysconfig read dialog caption */
+    string caption = _("Saving sysconfig configuration");
+
+    // TODO FIXME And set the right number of stages
+    integer steps = 2;
+
+    integer sl = 500;
+    sleep(sl);
+
+    // TODO FIXME Names of real stages
+    // We do not set help text here, because it was set outside
+    Progress::New(caption, " ", steps, [
+	    _("Write the settings"),
+	    _("Run SuSEconfig")
+	], [
+	    _("Writing the settings..."),
+	    _("Running SuSEconfig..."),
+	    _("Finished")
+	],
+	""
+    );
+
+    // write settings
+    if(Abort()) return false;
+    Progress::NextStage();
+    if(false) Report::Error (_("Can not write settings!"));
+    sleep(sl);
+
+    // run SuSEconfig
+    if(Abort()) return false;
+    Progress::NextStage ();
+    if(false) Report::Error (_("SuSEconfig script failed!"));
+    sleep(sl);
+
+    if(Abort()) return false;
+    ProgressNextStage(_("Finished"));
+    sleep(sl);
+
+    if(Abort()) return false;
+    return true;
+}
+
+/**
+ * Get all sysconfig settings from the first parameter
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+global define boolean Import (map settings) ``{
+    // TODO FIXME: your code here (fill the above mentioned variables)...
+    sleep(3000);
+    return true;
+}
+
+/**
+ * Dump the sysconfig settings to a single map
+ * (For use by autoinstallation.)
+ * @return map Dumped settings (later acceptable by Import ())
+ */
+global define map Export () ``{
+    // TODO FIXME: your code here (return the above mentioned variables)...
+    sleep(3000);
+    return $[];
+}
+
+/**
+ * Create a textual summary and a list of unconfigured cards
+ * @param split split configured and unconfigured?
+ * @return summary of the current configuration
+ */
+global define list Summary() ``{
+    // TODO FIXME: your code here...
+    return [ _("Configuration summary ..."), [] ];
+}
+
+/**
+ * Create an overview table with all configured cards
+ * @return table items
+ */
+global define list Overview() ``{
+    // TODO FIXME: your code here...
+    return [];
+}
+
+/* EOF */
+}

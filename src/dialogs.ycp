@@ -1,0 +1,97 @@
+/**
+ * File:	include/sysconfig/dialogs.ycp
+ * Package:	Configuration of sysconfig
+ * Summary:	Dialogs definitions
+ * Authors:	Ladislav Slezak <lslezak@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "sysconfig";
+
+import "Sysconfig";
+
+include "ui/common_popups.ycp";
+include "ui/common_messages.ycp";
+
+include "sysconfig/helps.ycp";
+include "sysconfig/routines.ycp";
+
+/**
+ * Configure1 dialog
+ * @return dialog result
+ */
+global define symbol Configure1Dialog () ``{
+
+    /* Sysconfig configure1 dialog caption */
+    string caption = _("Sysconfig configuration");
+
+    /* XXPkg configure1 dialog contents */
+    term contents = `Label (_("First part of configuration of sysconfig"));
+
+    Wizard::SetContentsButtons(caption, contents, HELPS["c1"]:"",
+	    BackButtonLabel(), NextButtonLabel());
+
+    any ret = nil;
+    while(true) {
+
+	ret = UI::UserInput();
+
+	/* abort? */
+	if(ret == `abort || ret == `cancel) {
+	    if(ReallyAbort()) break;
+	    else continue;
+	}
+        else if(ret == `next || ret == `back) {
+            break;
+        }
+        else {
+            y2error("unexpected retcode: %1", ret);
+            continue;
+        }
+    }
+
+    return ret;
+}
+
+/**
+ * Configure2 dialog
+ * @return dialog result
+ */
+global define symbol Configure2Dialog () ``{
+
+    /* Sysconfig configure2 dialog caption */
+    string caption = _("Sysconfig configuration");
+
+    /* XXPkg configure2 dialog contents */
+    term contents = `Label (_("Second part of configuration of sysconfig"));
+
+    Wizard::SetContentsButtons(caption, contents, HELPS["c2"]:"",
+	    BackButtonLabel(), NextButtonLabel());
+
+    any ret = nil;
+    while(true) {
+
+	ret = UI::UserInput();
+
+	/* abort? */
+	if(ret == `abort || ret == `cancel) {
+	    if(ReallyAbort()) break;
+	    else continue;
+	}
+        else if(ret == `next || ret == `back) {
+            break;
+        }
+        else {
+            y2error("unexpected retcode: %1", ret);
+            continue;
+        }
+    }
+
+    return ret;
+}
+
+/* EOF */
+}

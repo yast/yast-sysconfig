@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Nov 19 11:14:39 CET 2002 - lslezak@suse.cz
+
+- removed metadata database (now part of configuration files)
+- read and parse metadata
+- merged with CVS head
+- version 2.7.0
+
+-------------------------------------------------------------------
 Fri Sep  6 17:01:56 CEST 2002 - lslezak@suse.cz
 
 - fixed metadata

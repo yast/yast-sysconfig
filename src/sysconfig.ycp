@@ -1,139 +1,51 @@
 /**
  * File:	clients/sysconfig.ycp
- * Module:	Editor for /etc/sysconfig
+ * Package:	Configuration of sysconfig
  * Summary:	Main file
- * Authors:	Michael Hager <mike@suse.de>
+ * Authors:	Ladislav Slezak <lslezak@suse.cz>
  *
  * $Id$
+ *
+ * Main file for sysconfig configuration. Uses all other files.
  */
 
 {
 
-  import "Mode";
-  Mode::normal = true;	// system is already installed
+/***
+ * <h3>Configuration of the sysconfig</h3>
+ */
 
-  include "ui/common_messages.ycp";
+textdomain "sysconfig";
 
-  textdomain "sysconfig";
-  global boolean firewall_mode   = false;
-  global boolean powertweak_only_mode = false;
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("Sysconfig module started");
 
-  integer arg_n = size(WFM::Args()) - 1;
+include "sysconfig/wizards.ycp";
 
-  while (arg_n >= 0)
-  {
-      if (WFM::Args(arg_n) == ".firewall")
-      {
-	  firewall_mode = true;
-      }
+/* is this proposal or not? */
+boolean propose = false;
+list args = WFM::Args();
+if(size(args) > 0) {
+    if(is(WFM::Args(0), path) && WFM::Args(0) == .propose) {
+        y2milestone("Using PROPOSE mode");
+        propose = true;
+    }
+    else
+        y2error("Bad argument for sysconfig: %1", WFM::Args(0));
+}
 
-      if (WFM::Args(arg_n) == ".powertweak")
-      {
-	  powertweak_only_mode = true;
-      }
+/* main ui function */
+any ret = nil;
 
-     arg_n = arg_n - 1;
-  }
+if(propose) ret = SysconfigAutoSequence();
+else ret = SysconfigSequence();
+y2debug("ret == %1", ret);
 
-  y2milestone( "STARTING rc-config editor ... %1", firewall_mode);
+/* Finish */
+y2milestone("Sysconfig module finished");
+y2milestone("----------------------------------------");
+return ret;
 
-  // definition of map user_settings
-  map user_settings = $[];
-
-  //  set "rc_config_status" `off
-  user_settings = add(user_settings, "rc_config_status", `off);
-
-    UI(``{
-	   /**
-	    * Create main window dialog
-	    */
-	   global define void ImageOpenDialog()
-	      ``{
-	         // The main dialog. Copied from installation.ycp.
-		 OpenDialog(`opt(`defaultsize),
-			    `VBox(`Left(
-					`Image(`suseheader, "SuSE")),
-                                        `HSpacing(85),
-					`HWeight(70, `VBox(
-							    // popup window header
-							   `Left(`Heading(`id(`title), _("YaST2\nLoad rc.config database ..."))),
-							   `HVCenter(`ReplacePoint(`id(`contents),
-										   `VBox(
-											 `VSpacing(4),
-											 `HBox(
-											       `HSpacing(10),
-											       `Top(`ProgressBar(`id(`package), " ", 100)),
-											       `HSpacing(12)
-											       )
-											 )
-										   )),
-							   `HBox(
-								 // back pushbutton: the user input is ignored and the last dialog is called
-								 `PushButton(`id(`back), `opt(`disabled), BackButtonLabel()),
-								 `HStretch(),
-								// push button label
-								 `PushButton(`id(`help), `opt(`disabled), HelpButtonLabel()),
-								 `HStretch(),
-								// push button label
-								 `PushButton(`id(`search),`opt(`disabled), _("&Search")),
-								 `HStretch(),
-								// push button label
-								 `PushButton(`id(`next), `opt(`disabled), FinishButtonLabel())
-								 )
-							   )
-						 )
-					)
-
-			    );
-	   };
-
-
-    /**
-     * Set contents of dialog
-     * @param title Dialog title
-     * @param contents Dialog contents
-     * @param helptext Help text
-     * @param has_back Enable/disable Back button
-     * @param has_next Enable/disable Next button
-     */
-    global define void SetContents(string title, term contents, string helptext,
-		       boolean has_back, boolean has_next) ``{
-      ChangeWidget(`id(`next),   `Enabled, has_next);
-      ChangeWidget(`id(`back),   `Enabled, has_back);
-      ChangeWidget(`id(`search), `Enabled, true);
-      ChangeWidget(`id(`help),   `Enabled, true);
-      ChangeWidget(`id(`title),  `Value, title);
-      ReplaceWidget(`id(`contents), contents);
-    };
-
-    });
-
-  UI(`ImageOpenDialog());
-
-  y2debug( "Initializing ...");
-  // message on top of the progress bar
-  UI(`ChangeWidget(`id(`package),   `Label, _("Reading /etc/rc.config and additional describing data ...")));
-  UI(`ChangeWidget(`id(`package),   `Value, 10));
-
-  arg_n = size(WFM::Args()) - 1;
-  boolean test_mode = false;
-
-  while (arg_n >= 0) {
-      if (WFM::Args(arg_n) == .test) {
-	  test_mode = true;
-      }
-      arg_n = arg_n - 1;
-  }
-
-  user_settings = add( user_settings, "test_mode", test_mode );
-
-  /*
-   * Main dialog cycle
-   *
-   */
-
-    WFM::CallFunction(`sysconfig_step1());
-
-    return UI::CloseDialog();
-
+/* EOF */
 }

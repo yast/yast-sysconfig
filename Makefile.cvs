@@ -1,5 +1,5 @@
 #
-# Makefile.cvs for y2c_sysconfig
+# Makefile.cvs for sysconfig
 #
 
 configure: all
