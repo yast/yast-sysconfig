@@ -1181,7 +1181,7 @@ global define boolean Write() ``{
 	    if (written == false)
 	    {
 		// error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
-		Report::Error(sformat(_("Saving variable %1 to the file %2 failed"), name, file));
+		Report::Error(sformat(_("Saving variable %1 to the file %2 failed."), name, file));
 		ret = false;
 	    }
 
@@ -1222,7 +1222,7 @@ global define boolean Write() ``{
 	// action command is missing, start complete SuSEconfig (backward compatibility)
 	string start_command = sformat("/sbin/%1", SuSEconfigName);
 	string confirm = sformat("Complete %1 will be started", SuSEconfigName);
-	string label = sformat(_("Starting %1 ..."), SuSEconfigName);
+	string label = sformat(_("Starting %1..."), SuSEconfigName);
 	string error = sformat(_("Script %1 failed"), SuSEconfigName);
 
 	Progress::NextStep();

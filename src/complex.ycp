@@ -83,7 +83,9 @@ global define symbol ReadDialog() ``{
 
 	    if (just_installed == false)
 	    {
-		Popup::Error(_("Package installation failed\nPress OK to exit"));
+		Popup::Error(_("Package installation failed.
+Press OK to exit.
+"));
 		return `abort;
 	    }
 	}
@@ -143,7 +145,7 @@ global define symbol WriteDialog() ``{
 	if (Sysconfig::Write() == false)
 	{
 	    // error popup message
-	    Popup::Error(_("An error occured during saving and activating the changes."));
+	    Popup::Error(_("An error occurred while saving and activating the changes."));
 	}
 	else
 	{
@@ -221,27 +223,27 @@ global define string create_richtext_description(map description) ``{
 	    // parse string with options, then add them to the rich text
 	    list conf = Sysconfig::ParseString(conf_modules, Sysconfig::parse_param);
 	    // header in the variable description text, SuSEconfig/ULconfig module names are appended
-	    result = result + "<P><B>" + _("Configuration script: ") + "</B> " + mergestring(conf, ", ") + "</P>";
+	    result = result + "<P><B>" + _("Configuration Script: ") + "</B> " + mergestring(conf, ", ") + "</P>";
 	}
 
 	if (reload != nil)
 	{
 	    list services = Sysconfig::ParseString(reload, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
-	    result = result + "<P><B>" + _("Service to reload: ") + "</B> " + mergestring(services, ", ") + "</P>";
+	    result = result + "<P><B>" + _("Service to Reload: ") + "</B> " + mergestring(services, ", ") + "</P>";
 	}
 
 	if (restart != nil)
 	{
 	    list services = Sysconfig::ParseString(restart, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
-	    result = result + "<P><B>" + _("Service to restart: ") + "</B> " + mergestring(services, ", ") + "</P>";
+	    result = result + "<P><B>" + _("Service to Restart: ") + "</B> " + mergestring(services, ", ") + "</P>";
 	}
 
 	if (command != nil)
 	{
 	    // header in the variable description text, bash command is appended
-	    result = result + "<P><B>" + _("Activation command: ") + "</B> " + command + "</P>";
+	    result = result + "<P><B>" + _("Activation Command: ") + "</B> " + command + "</P>";
 	}
     }
 
@@ -819,7 +821,7 @@ global define symbol MainDialog() ``{
 _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
-"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), _("Confirm each activation command"), false);
+"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), _("Confirm Each Activation Command"), false);
 
 		if (result["ui"]:`dummy == `cancel)
 		{
