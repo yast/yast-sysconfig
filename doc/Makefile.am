@@ -5,6 +5,6 @@
 docdir = @DOCDIR@
 htmldir = $(docdir)/y2c_rc_config
 
-html_DATA =
+html_DATA = README
 
 EXTRA_DIST = $(html_DATA)
