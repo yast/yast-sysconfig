@@ -6,7 +6,7 @@
 # please send bugfixes or comments to @MAINTAINER@
 #
 
-# neededforbuild  gpp libgpp autoconf automake ydoc glibc-devel glibc  
+# neededforbuild yast2-devtools  gpp libgpp autoconf automake ydoc glibc-devel glibc  
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.4 (i386)
