@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 10 14:14:34 CEST 2001 - lnussel@suse.de
+
+- moved icon in Control Center from Group "Misc" to "System"
+  (Bug #10256)
+
+-------------------------------------------------------------------
 Sat Aug 11 18:21:36 CEST 2001 - arvin@suse.de
 
 - fixed for gcc 3.0
