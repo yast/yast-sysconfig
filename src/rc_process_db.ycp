@@ -1,0 +1,431 @@
+/*
+ *************************************************************
+ *
+ *     YaST2      SuSE Labs                        -o)
+ *     --------------------                        /\\
+ *                                                _\_v
+ *           www.suse.de / www.suse.com
+ * ----------------------------------------------------------
+ *
+ * Author:        Michael Hager <mike@suse.de>
+ *
+ * Description:   
+ *
+ * Purpose:
+ *
+ * external data:  rc_config_eddb, rc_config_keys
+ *
+ *************************************************************
+ *
+ * $Id$
+ *
+ */
+
+{
+
+
+define process_eddb_create_widgettree_and_fill_rcconfigkeys()
+``{
+
+  
+   list testdata_rc_config_eddb =
+   [
+     $[ `key:"base",              `property:"path",        `value:"/" ], 
+     $[ `key:"base",              `property:"type",        `value:"node" ], 
+     $[ `key:"base",              `property:"descr",        `value:"Basic configuration parameter" ], 
+     $[ `key:"LANGUAGE",          `property:"type",        `value:"enum", `list:["german","english"] ], 
+     $[ `key:"LANGUAGE",          `property:"path",        `value:"/base/rr/sec/lang" ],
+     $[ `key:"CHECK_ETC_HOSTS",          `property:"path",        `value:"/base/rr/sec/lang" ],
+     $[ `key:"CHECK_ETC_HOSTS",          `property:"type",        `value:"boolean" ],
+     $[ `key:"LANGUAGE",          `property:"type",        `value:"string" ],
+     $[ `key:"KBD_TTY",           `property:"mtype",       `value:"enum", `list:["tty1","tty2"]],
+     $[ `key:"ENABLE_SUSECONFIG", `property:"path",        `value:"/base2/suseconfig" ],
+     $[ `key:"SUSEWM_XPM",         `property:"path",        `value:"base/ladi/check" ],
+     $[ `key:"SUSEWM_WM",         `property:"path",        `value:"base/suseconfig" ],
+     $[ `key:"SUSEWM_WM",         `property:"mtype",       `value:"enum", `list:["xx","yy"]],
+     $[ `key:"SUSEWM_WM2",        `property:"path",        `value:"/base/suseconfig/" ],
+     $[ `key:"SUSEWM_WM2",        `property:"mtype",       `value:"enum", `list:["xx","yy"]],
+     $[ `key:"suseconfig",        `property:"path",        `value:"/base" ],
+     $[ `key:"suseconfig",        `property:"descr",       `value:"Configure your SUSE_CONFIG" ],
+     $[ `key:"ENABLE_SUSECONFIG", `property:"type",        `value:"boolean" ]
+     
+   ];
+  
+  
+   map testdata_rc_config_keys =
+  	     $[ "MAIL_LEVEL"    :$[ `value:"warn",                    `descr:"There are two levels of mailing...",`assigned:true ],
+  		"MOUSE"         :$[ `value:"/dev/psaux",              `descr:"Which device is the mouse?" ],
+  		"SUSEWM_UPDATE" :$[ `value:      "no1",               `descr:"SuSEconfig.wm can create a .fvwm2r " ],
+  		"SUSEWM_WM"     :$[ `value:      "all",               `descr:"This is the (space separated) list ."],
+  		"SUSEWM_WM2"    :$[ `value:      "yes",               `descr:"If you want the look of the windows "],
+  		"SUSEWM_XPM"    :$[ `value:      "yes",               `descr:"Your fvwm2/95 is slow? Don't want sm."],
+  		"SUSEWM_ADD"    :$[ `value:      "",                  `descr:"These are  files always to figuration"]
+  	     ];
+  
+   list rc_config_branch_hash = [];
+
+   if ( lib_test_mode )
+   {
+      rc_config_eddb = testdata_rc_config_eddb;
+      // rc_config_keys = testdata_rc_config_keys;
+   }
+
+   SCR(`Write (.dumpto.tmp.rc, rc_config_keys ));
+
+
+   //////////////////////////////////////////////////////////////////////////////
+   // Problem: merge eddb and rc_configkey
+   // The eddb hold information for all possible rc_variables
+   // in the editor, only the really exiting variables should be presented
+   // All really existing are in the rc_config_keys
+   //  - at the end all RELEVANT information should be in rc_config_keys
+   //  - in eddb there are variables and branch, which are not
+   //    in rc_config_keys. These info should not be transmitted
+   //  - in rc_config_key are variables, which are not mentioned in eddb
+   //    These variables should be moved to the branch "etc" 
+   //////////////////////////////////////////////////////////////////////////////
+
+
+   y2log( .milestone, "S", 1, "AAAAA1 new"); 
+   
+   //////////////////////////////////////////////////////////////////////////////
+   // put all branch from the eddb into rc_config_keys,
+   // which belong to a rc_variable that is already in rc_config_keys  
+   
+   foreach( `entry, rc_config_eddb,
+   ``{
+        string property = lookup( entry, `property, "" );
+  	string key      = lookup( entry, `key,      "" );
+  
+  	if ( property == "path" && (lookup( rc_config_keys, key, nil ) != nil) )
+  	{
+            string branch = lookup( entry, `value, "/etc" );
+	    
+            // unify branch entrys:
+	    if ( substring(branch, 0, 1)              != "/" ) branch = "/" + branch;
+	    if ( substring(branch, size(branch)-1, 1) == "/" ) branch = substring( branch, 0, size(branch)-1 );
+	    
+  	    change( lookup( rc_config_keys, key ), `branch, branch );
+  	}
+    });
+
+	     y2log( .milestone, "S", 1, "AAAAA2 new");
+
+	     
+   //////////////////////////////////////////////////////////////////////////////
+   // Now fill all rc_config_keys variables without branch with branch="etc"
+   // because this the default for "unknow variables
+   // and add `parent for all nodes	     
+
+
+   rc_config_keys =  mapmap( `key, `value, rc_config_keys,
+   ``{
+        string|void branch = lookup( value,`branch, nil);
+	
+        if ( branch == nil )
+        {
+	    change( value,  `branch, sformat("/etc/%1",tolower(key)));
+	    change( value,  `parent, tolower(key));
+	    
+            // add default branch
+            return( [ key, value ] );
+        }
+        else
+        {
+            // don`t change
+	    string parent_key = substring( branch, findlastof( branch, "/" )+1);
+
+	    change( value, `parent, parent_key);
+            return( [key,value] );
+        }
+     });
+
+
+   y2log( .milestone, "S", 1, "AAAAA3 new");
+
+		 
+   //////////////////////////////////////////////////////////////////////////////
+   // Next we create a branch hash, so we can look if a branch exists in
+   // the tree-widget or not
+
+   rc_config_branch_hash = maplist( `key, `value, rc_config_keys,
+   ``{
+
+          list   buffer = [];
+	  string branch = lookup(value, `branch) + "/" + key;
+
+	  // if a branch is not inserted:
+	  // - insert it
+	  // - and insert subbranch which are not inserted
+	  
+	  while (  branch != ""   )
+	  {
+	      change( buffer, branch );
+	      branch = substring( branch, 0, findlastof( branch, "/" ));
+	  }
+
+	  return( buffer );
+   });
+   
+   
+   rc_config_branch_hash = toset(flatten( rc_config_branch_hash ));
+
+   y2log( .milestone, "S", 1, "AAAAA4 new");
+
+   //////////////////////////////////////////////////////////////////////////////
+   // now we fill in all missinge subbranches, the missing dir and dialog nodes, into
+   // the rc_config_keys
+
+   foreach( `branch, rc_config_branch_hash, 
+   ``{
+	 string   key      = substring( branch, findlastof( branch, "/" )+1);
+	 map|void curr_map = lookup( rc_config_keys, key, nil);
+	 
+	 if ( curr_map == nil )
+	 {
+	     string rc_branch = substring( branch, 0, findlastof( branch, "/" ));
+
+	     if (rc_branch == "") rc_branch = "/";
+	     
+	     change( rc_config_keys, key, $[ `branch:rc_branch] );
+	 }
+   });
+
+   SCR(`Write (.dumpto.tmp.red0, rc_config_keys ));
+   y2log( .milestone, "S", 1, "AAAAA5 new");
+
+
+   // Now all the branch-data in the
+   // rc_config_branch_hash is valid and complete 
+   // ---------------------------------------------------
+
+   // now we fillup rc_config_keys with the last vaild
+   //   data in eddb, the type and descr information 
+   
+   foreach( `entry, rc_config_eddb,
+   ``{
+       string    property    = lookup( entry,         `property, "" );
+       string    key         = lookup( entry,         `key,      ""  );
+       map|void  curr_map    = lookup( rc_config_keys, key,      nil );
+	    
+       // valid entry ?
+       if ( curr_map != nil )
+       {
+        
+	   if ( property == "type" || property == "mtype" )
+	   {
+
+	       string type = lookup( entry,`value);
+	       if ( type == "boolean" )
+	       {
+		   change( curr_map, `type,    `options  );
+		   change( curr_map, `options, ["yes","no"]);
+	       }
+	       else if ( type == "enum" )
+	       {
+		   change( curr_map, `type ,   `options  );
+		   change( curr_map, `options, lookup( entry, `list ));
+	       }
+	       else if ( type == "integer" )
+	       {
+		   change( curr_map, `type,    `options);
+		   change( curr_map, `options, []  );
+	       }
+	       else if ( type == "string" )
+	       {
+		   change( curr_map, `type,    `options);
+		   change( curr_map, `options, []  );
+
+	       }
+	       ////////////////////////////////////////////
+	       // todo: nice to have
+	       // difference mtype type,
+	       // use typedef
+	       // use `integer as `type
+	   }
+	      
+
+	   if ( property == "dialogtype" )
+	   {
+	       change( curr_map, `dialogtype, lookup( entry,`value)  );
+	   }
+
+		  ////////////////////////////////
+		// todo: read just_run 
+       }
+
+    });
+
+   y2log( .milestone, "S", 1, "AAAAA6 new");
+
+   // next step is to count the entry in a dialog and
+   // fill in the dialiogtype (automatik dialog)
+   // if the dialogtype is already defined (manual mode)
+   // dont touch it
+
+   // reverse sort of hash: (its already sorted from toset() above)	     
+   // rc_config_branch_hash = sort(`x,`y, rc_config_branch_hash,``(x>=y) );
+   // is much slower
+
+   integer counter = size(rc_config_branch_hash);
+
+   rc_config_branch_hash = maplist( `entry, rc_config_branch_hash,
+   ``{
+        counter = counter -1;
+        return(select( rc_config_branch_hash, counter ));
+     });  
+	
+   // SCR(`Write (.dumpto.tmp.rhash, rc_config_branch_hash ));
+
+
+   // _reduced: like other hash, but only dir and dialogs
+   list rc_config_branch_hash_reduced = [];
+   
+   y2log( .milestone, "S", 1, "AAAAA6c new");
+
+   string  last_branch    = "";
+   integer last_entrynb = 0;
+   
+   foreach( `branch, rc_config_branch_hash, 
+   ``{
+         
+	 string key       = substring( branch,    findlastof( branch, "/" )+1);
+         string rc_branch = substring( branch, 0, findlastof( branch, "/" )  );
+
+	 map|void curr_map = lookup( rc_config_keys, key, nil);
+	 
+	 
+	 if ( last_branch == branch )
+	 {
+	     if ( last_entrynb != 0 )
+	     {
+	        // dialog:
+		 
+		if ( lookup( curr_map, `dialogtype, nil) == nil )
+		{
+		    // automaic dialog
+		    change( curr_map, `dialogtype, sformat( "d%1", last_entrynb));
+		}
+	     }
+	     else
+	     {
+		 // `dir
+		 change( curr_map, `dialogtype,   "dir");
+	     }
+	     last_entrynb = 0;
+
+	     // insert dir and dialog in the special hash
+	     change( rc_config_branch_hash_reduced, branch );
+	 }
+	 else if ( last_branch == rc_branch )
+	 {
+	     // item on the same level
+	     last_entrynb = last_entrynb +1;
+	     change( curr_map, `entrynb,   last_entrynb);
+	 }
+	 else
+	 {
+	     // new entry
+	     last_entrynb = 1;
+	     change( curr_map, `entrynb,   last_entrynb);
+	 }
+
+	 last_branch = rc_branch;
+   });
+
+	     y2log( .milestone, "S", 1, "AAAAA7 new");
+
+   // Let`s build the WidgetTree
+   // we use a type of tempory stack: subitems_map
+   //
+   // $[ <key>:[ <list of subitems in widgetnotation> ], ... ]
+   //
+   // Example:
+   // $[ "suseconfig":[  `item(`id("SUSEWM_WM2"), "SUSEWM_WM2", false),
+   //  		         `item(`id("SUSEWM_WM"),  "SUSEWM_WM",  false)
+   //  		      ],
+   //     ... ]
+
+   map subitems_map = $[];
+
+   foreach( `branch, rc_config_branch_hash_reduced, 
+   ``{
+         boolean initial_show_node = false;
+         string  rc_branch        = substring( branch,   0, findlastof( branch,    "/" )  );
+	 string  key              = substring( branch,      findlastof( branch,    "/" )+1);
+	 string  parent_key       = "";
+
+	 if ( rc_branch == "" )
+	 {
+	     rc_branch          = "/";
+	     parent_key        = "root";
+	     if ( branch != "/etc" ) initial_show_node = true;         
+	 }
+	 else
+	 {
+	     parent_key = substring( rc_branch,   findlastof( rc_branch, "/" )+1);
+	 }
+
+	 // y2log( .milestone, "XX", 1, sformat( "%1 %2----%3--	--%4--	--%5--", "AAAAA ", branch, rc_branch, key, parent_key ));
+	 
+	 list|void subitems = lookup( subitems_map, key, nil);
+
+	 // do we have subitems or is it a leaf
+	 if ( subitems != nil )
+	 {
+	     // subitems exist (we are a dialog or a dir)
+	     
+	     list|void parent_subitems = lookup( subitems_map, parent_key, nil);
+
+	     // does our parent already have a list with subitems,
+	     // or must we create this list
+	     
+	     if ( parent_subitems != nil )
+	     {
+		 // parent has list
+		 // add this item with the subitems
+		 change( parent_subitems,  `item( `id(key), key, initial_show_node, subitems));
+	     }
+	     else
+	     {
+		 // parent has no list until now
+		 change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node, subitems) ]);
+	     }
+	 }
+	 else
+	 {
+	     // subitems do not exist (we are a leaf)
+	     
+	       list|void parent_subitems = lookup( subitems_map, parent_key, nil);
+
+	       // does our parent already have a list with subitems,
+	       // or must we create this list
+	       
+	       if ( parent_subitems != nil )
+	       {
+		   // parent has list
+		   // add this item 
+		   change( parent_subitems,  `item( `id(key), key, initial_show_node));
+	       }
+	       else
+	       {
+		   // parent has no list until now
+		   change( subitems_map, parent_key, [ `item(`id(key), key, initial_show_node) ]);
+	       }
+	 }
+
+   });
+   
+
+   y2log( .milestone, "S", 1, "AAAAA8 new");
+
+   //SCR(`Write (.dumpto.tmp.redh, rc_config_branch_hash ));
+   // SCR(`Write (.dumpto.tmp.red, rc_config_branch_hash_reduced ));
+   // SCR(`Write (.dumpto.tmp.tree, rc_config_keys ));
+   // SCR(`Write (.dumpto.tmp.hash, subitems_map ));
+
+   return( lookup( subitems_map, "root", nil) ); 
+};
+}
+	  
+    
