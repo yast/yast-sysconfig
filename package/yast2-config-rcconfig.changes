@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Feb  8 17:31:05 CET 2002 - mike@suse.de
+
+- changes due to /etc/sysconfig changes
+
+-------------------------------------------------------------------
 Mon Sep 24 14:14:34 CEST 2001 - mike@suse.de
 
 - fixed: broken logfile of scripts
