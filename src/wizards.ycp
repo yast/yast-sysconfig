@@ -53,6 +53,12 @@ include "sysconfig/dialogs.ycp";
     Wizard::CreateDialog();
     Wizard::SetDesktopIcon(Sysconfig::powertweak_mode ? "powertweak" : "sysconfig");
 
+    // initialization
+    if (Mode::config && !Sysconfig::Modified() && (Sysconfig::tree_content == nil || size(Sysconfig::tree_content) == 0))
+    {
+	Sysconfig::Read();
+    }
+
     symbol ret = MainSequence();
 
     UI::CloseDialog();

@@ -67,6 +67,12 @@ else if (func == "Export")
 {
     ret = Sysconfig::Export();
 }
+else if (func == "GetModified") {
+    ret =  Sysconfig::Modified();
+}
+else if (func == "SetModified") {
+    Sysconfig::SetModified();
+}
 else if (func == "Write")
 {
     import "Progress";

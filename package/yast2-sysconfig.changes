@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep 14 13:10:42 CEST 2004 - lslezak@suse.cz
+
+- GetModified/SetModified functions (AutoYaST API)
+- don't call Read() in Import()
+- version 2.10.4
+
+-------------------------------------------------------------------
 Mon Aug 23 15:08:50 CEST 2004 - lslezak@suse.cz
 
 - fixed datatype (value returned from command line)
