@@ -9,6 +9,7 @@
 
 include "testsuite.ycp";
 
+import "Pkg";   // override packamanager
 import "Sysconfig";
 
 TEST( ``(Sysconfig::parse_metadata(nil) ), [ $[], $[], $[] ], nil );
@@ -17,6 +18,8 @@ TEST( ``(Sysconfig::parse_metadata("    ") ), [ $[], $[], $[] ], nil );
 TEST( ``(Sysconfig::parse_metadata("## Type: abc") ), [ $[], $[], $[] ], nil );
 TEST( ``(Sysconfig::parse_metadata("## Type: abc\n## Default: x") ), [ $[], $[], $[] ], nil );
 TEST( ``(Sysconfig::parse_metadata("## Type: abc\n\n##Default:x\n\n ") ), [ $[], $[], $[] ], nil );
+// multiline
+TEST( ``(Sysconfig::parse_metadata("## Command: echo sdmvf,vm \\\n## sdgfsdg sdf sf sf sdf \n## Config:x, asdf\n\n ") ), [ $[], $[], $[] ], nil );
 
 }
 

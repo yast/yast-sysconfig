@@ -9,6 +9,7 @@
 
 include "testsuite.ycp";
 
+import "Pkg";   // override packamanager
 import "Sysconfig";
 
 TEST( ``(Sysconfig::get_name_from_id(nil) ), [ $[], $[], $[] ], nil );
