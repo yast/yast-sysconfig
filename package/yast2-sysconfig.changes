@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Wed Aug  6 09:46:55 CEST 2003 - lslezak@suse.cz
+
+- use the new metadata (the activation commands)
+- use Label:: and Popup:: modules instead of includes
+- fixed double quote backslashing bug (character before
+  the double quote character was lost)
+- fixed testsuites
+- added .desktop files
+- .spec: added yast2-installation package to Requires
+  and neededforbuild (Product.ycp module)
+- version 2.8.0
+
+-------------------------------------------------------------------
 Wed Mar 12 14:33:47 CET 2003 - lslezak@suse.de
 
 - fixed undefined function call UI::ErrorMessage
