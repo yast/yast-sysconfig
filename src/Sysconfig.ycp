@@ -775,7 +775,7 @@ global define list get_modified()
 global define boolean Read(list(string) files) ``{
 
     /* sysconfig read dialog caption */
-    string caption = _("Initializing sysconfig configuration");
+    string caption = _("Initializing sysconfig Configuration");
 
     string tmpdir = SCR::Read(.target.tmpdir);
     if (tmpdir == nil || tmpdir == "")
@@ -828,7 +828,7 @@ global define boolean Read(list(string) files) ``{
 global define boolean Write() ``{
 
     // write dialog caption
-    string caption = _("Saving sysconfig configuration");
+    string caption = _("Saving sysconfig Configuration");
 
     // set the right number of stages
     integer steps = size(modified_variables);
@@ -936,7 +936,7 @@ global define list Export () ``{
  */
 global define list Summary() ``{
     // configuration summary headline
-    string summary = Summary::AddHeader("", _("Configuration summary"));
+    string summary = Summary::AddHeader("", _("Configuration Summary"));
 
     y2milestone("Summary: %1", modified_variables);
 

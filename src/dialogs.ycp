@@ -31,7 +31,7 @@ global define map display_search_dialog()
     UI::OpenDialog( `opt(`decorated ),
 		`VBox(`HSpacing(60),
 		    // search popup window header
-		      `Heading(_("Search for a configuration variable")),
+		      `Heading(_("Search for a Configuration Variable")),
 		      `VSpacing(0.5),
 		      `HBox(`VSpacing(10),
 			    `RichText( helptextCR ),
@@ -42,9 +42,9 @@ global define map display_search_dialog()
 				`TextEntry(`id(`search_entry), _("&Search for:")),
 				`VSpacing(1),
 				// check box label
-				`Left(`CheckBox(`id(`ignore), _("&Case insensitive search"), true)),
+				`Left(`CheckBox(`id(`ignore), _("&Case Insensitive Search"), true)),
 				// check box label
-				`Left(`CheckBox(`id(`nkey), _("Search &variable name"), true)),
+				`Left(`CheckBox(`id(`nkey), _("Search &Variable Name"), true)),
 				// check box label
 				`Left(`CheckBox(`id(`ndescr), _("Search &description"), true)),
 				// check box label
@@ -108,7 +108,7 @@ global define map display_variables_dialog(string header, string label, list tab
 		`VSpacing(0.5),
 
 		// table column header
-		`Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old value"), _("File"), _("Description")), table_content),
+		`Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old Value"), _("File"), _("Description")), table_content),
     `VSpacing(0.5),
 		`HBox(
 		    // push button label
@@ -135,17 +135,21 @@ global define map display_variables_dialog(string header, string label, list tab
 global define map powertweak_install_dialog() ``{
 
     // question displayed in popup dialog
-    string helptext = _("This module requires package \"powertweak\", do you want to install it?\n\nClick \"Install\" to install packages and start module or click \"Cancel\" to quit without any change.\nPackage \"powertweak-extra\" extends configuration options of powertweak package.");
+    string helptext = _("This module requires the package \"powertweak\". Install it?
+
+Click \"Install\" to install the packages and start the module or click \"Cancel\" to quit without any change.
+The package \"powertweak-extra\" extends configuration options of powertweak.
+");
 
     UI::OpenDialog(`opt(`decorated),
 	`VBox(
 	    // popup dialog header
-	    `Heading(_("Install powertweak package?")),
+	    `Heading(_("Install powertweak Package?")),
 	    `VSpacing(1),
 	    `Label(helptext),
 	    `VSpacing(1),
 	    // check box label text
-	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra package"), true)),
+	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra Package"), true)),
 	    `VSpacing(1),
 	    `HBox(
 		`PushButton(`id(`ok), `opt(`key_F10), InstallButtonLabel()),
@@ -175,14 +179,14 @@ global define map add_new_variable()
 	`VBox(
 	    `HBox(
 		// text entry label
-		`TextEntry(`id(`name), _("&Variable name"), ""),
+		`TextEntry(`id(`name), _("&Variable Name"), ""),
 		// text entry label
 		`TextEntry(`id(`value), _("V&alue"), "")
 	    ),
 	    `VSpacing(1),
 	    `HBox(
 		// text entry label
-		`TextEntry(`id(`file), _("&File name"), "")
+		`TextEntry(`id(`file), _("&File Name"), "")
 	    ),
 	    `VSpacing(1),
 	    `HBox(
@@ -209,19 +213,19 @@ global define map add_new_variable()
 	    if (name == "")
 	    {
 		// warning popup message - variable name is empty
-		UI::WarningPopup(_("Missing variable name value!"));
+		UI::WarningPopup(_("Missing variable name value."));
 		ui = nil;
 	    }
 	    else if (size(file) <= 1)
 	    {
 		// warning popup message - file name is empty
-		UI::WarningPopup(_("Missing file name value!"));
+		UI::WarningPopup(_("Missing file name value."));
 		ui = nil;
 	    }
 	    else if (substring(file, 0, 1) != "/")
 	    {
 		// warning popup message - file name is required with absolute path
-		UI::WarningPopup(_("Missing absolute path in file name!"));
+		UI::WarningPopup(_("Missing absolute path in file name."));
 		ui = nil;
 	    }
 	}
