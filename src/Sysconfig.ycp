@@ -33,6 +33,9 @@ global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
     "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions"];
 
+// Additional files from Import
+list custom_files = [];
+
 // all read variables
 map variables = $[];
 
@@ -992,7 +995,7 @@ global define boolean Import (list settings) ``{
     Set(settings);
 
     // register agent for user defined files, read values
-    return Sysconfig::Read(files);
+    return Sysconfig::Read(custom_files);
 }
 
 /**
@@ -1004,7 +1007,7 @@ global define void Set(list settings) ``{
     if (settings != nil)
     {
 	modified_variables = $[];
-	list files = configfiles;
+	custom_files = configfiles;
 
 	// convert from 8.1 export format
 	foreach(map setting, settings,
@@ -1024,9 +1027,9 @@ global define void Set(list settings) ``{
 		modified_variables = add(modified_variables, key, v);
 
 		// add configuration file if it isn't already specified
-		if (!contains(files, f))
+		if (!contains(custom_files, f))
 		{
-		    files = add(files, f);
+		    custom_files = add(custom_files, f);
 		}
 	    }
 	);
