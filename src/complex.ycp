@@ -44,8 +44,6 @@ global define boolean Modified() ``{
 global define symbol ReadDialog() ``{
     Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
 
-    Sysconfig::AbortFunction = ``{ return PollAbort();};
-
     string powertweakconfig = "/etc/powertweak/tweaks";
 
     if (Sysconfig::powertweak_mode == true)
@@ -117,10 +115,16 @@ Create it and use powerteak?
     }
 
     // read only powerteak config or all sysconfig files
-    boolean ret = (Sysconfig::powertweak_mode) ? Sysconfig::Read([powertweakconfig])
-	: Sysconfig::Read(Sysconfig::configfiles);
+   if (Sysconfig::powertweak_mode == true)
+   {
+       Sysconfig::Read([powertweakconfig]);
+   }
+   else
+   {
+       Sysconfig::Read(Sysconfig::configfiles);
+   }
 
-    return ret ? `next : `abort;
+    return `next;
 }
 
 /**
@@ -130,31 +134,15 @@ Create it and use powerteak?
 global define symbol WriteDialog() ``{
     Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["write_powertweak"]:"" : HELPS["write"]:"");
 
-    Sysconfig::AbortFunction = ``{ return PollAbort();};
-
     boolean ret = true;
 
     if (Sysconfig::Modified() == true)
     {
-	// write changes
-	ret = Sysconfig::Write();
-
-	if (Sysconfig::powertweak_mode == true)
-	{
-	    y2milestone("Activating powertweak configuration");
-	    SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon");
-
-	    // activate powertweak at startup
-	    Runlevel::ServiceAdjust("powertweakd", "enable");
-	}
-	else
-	{
-	    // start suseconfig
-	    WFM::CallFunction(`inst_suseconfig(false, false));
-	}
+	// write and activate changes
+	Sysconfig::Write();
     }
 
-    return ret ? `next : `abort;
+    return `next;
 }
 
 /**
@@ -372,7 +360,7 @@ global define list combo_list(map description, boolean set_default) ``{
 
     if (deflt != nil)
     {
-	list parsed = Sysconfig::parse_options(deflt);
+	list parsed = Sysconfig::parse_options(deflt, Sysconfig::parse_param);
 	deflt = parsed[0]:deflt;
     }
 
@@ -391,7 +379,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-	list(string) parsed = Sysconfig::parse_options(values_string);
+	list(string) parsed = Sysconfig::parse_options(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -403,7 +391,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	list(string) parsed = Sysconfig::parse_options(values_string);
+	list(string) parsed = Sysconfig::parse_options(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -452,7 +440,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	list spaces = [];
-	list values = Sysconfig::parse_options(regexpsub(type, "^list\\((.*)\\)", "\\1"));
+	list values = Sysconfig::parse_options(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -464,7 +452,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	list spaces = [];
-	list values = Sysconfig::parse_options(regexpsub(type, "^string\\((.*)\\)", "\\1"));
+	list values = Sysconfig::parse_options(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
