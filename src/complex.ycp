@@ -14,7 +14,7 @@ textdomain "sysconfig";
 import "Wizard";
 import "Sysconfig";
 import "Mode";
-import "Require";
+import "Package";
 import "String";
 
 import "Popup";
@@ -43,7 +43,7 @@ include "sysconfig/dialogs.ycp";
  * @return `abort if aborted and `next otherwise
  */
  define symbol ReadDialog() ``{
-    Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
+    Wizard::SetHelpText(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
 
     if (Sysconfig::powertweak_mode == true)
     {
@@ -74,7 +74,7 @@ include "sysconfig/dialogs.ycp";
 		install = add(install, "powertweak-extra");
 	    }
 
-	    just_installed = Require::DoInstallAndRemove(install, []);
+	    just_installed = Package::DoInstall(install);
 
 	    if (just_installed == false)
 	    {
@@ -121,7 +121,7 @@ Create it and use powerteak?
  * @return `abort if aborted and `next otherwise
  */
  define symbol WriteDialog() ``{
-    Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["write_powertweak"]:"" : HELPS["write"]:"");
+    Wizard::SetHelpText(Sysconfig::powertweak_mode ? HELPS["write_powertweak"]:"" : HELPS["write"]:"");
 
     boolean ret = true;
 
@@ -712,6 +712,9 @@ Really set this value?
 	    if (size(comm) > 90)
 	    {
 		comm = substring(comm, 0, 90);
+		// when a comment is too long to display it in the table
+		// it is shortened and mark (three dot characters) is added to the end
+		comm = comm + _("...");
 	    }
 
 	    table_content = add(table_content, `item(`id(varid), name, new, old, file, comm));
@@ -727,19 +730,25 @@ Really set this value?
  */
  define symbol MainDialog() ``{
 
-    UI::OpenDialog(`opt(`defaultsize),
-	`VBox(`Left(`Image(`suseheader, "SuSE")),
-	    `HSpacing(85),
-	    `HWeight(70,
-		`VBox(
-		    `HBox(
-			`HWeight(35,
-			    // tree widget label
-			    `Tree(`id(`tree), `opt(`notify, `vstretch), _("&Configuration Options"), Sysconfig::tree_content)
-			),
-			`HSpacing(1),
-			`HWeight(65,
-			    `VBox(`HSpacing(60),
+    term button_box = `HBox(
+	 // back pushbutton: the user input is ignored and the last dialog is called
+	 `PushButton(`id(`abort), `opt(`key_F9), Label::AbortButton()),
+	 `HStretch(),
+	 `PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()),
+	 `HStretch(),
+	  // Translation: push button label
+	 `PushButton(`id(`search), _("&Search")),
+	 `HStretch(),
+	 `PushButton(`id(`next), `opt(`key_F10), Label::FinishButton())
+    );
+
+    // tree widget label
+    term help_space_content = `Tree(`id(`tree), `opt(`notify, `vstretch), _("&Configuration Options"), Sysconfig::tree_content);
+
+    Wizard::OpenCustomDialog(help_space_content, button_box);
+
+    Wizard::SetContents(_("/etc/sysconfig Editor"),
+			    `VBox(
 				// label widget
 				`Left(`Heading(`id(`heading), `opt(`hstretch), _("Current Selection: "))),
 				`VSpacing(0.5),
@@ -766,32 +775,17 @@ Really set this value?
 					// push button label - displayed only in autoinstallation config mode
 					`PushButton(`id(`add_new), `opt(`key_F3), _("&Add New Variable..."))
 				    ) : `Empty()
-			    )
-			)
-		    ),
-
-		   `HBox(
-			 // back pushbutton: the user input is ignored and the last dialog is called
-			 `PushButton(`id(`abort), `opt(`key_F9), Label::AbortButton()),
-			 `HStretch(),
-			 `PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()),
-			 `HStretch(),
-			  // Translation: push button label
-			 `PushButton(`id(`search), _("&Search")),
-			 `HStretch(),
-			 `PushButton(`id(`next), `opt(`key_F10), Label::FinishButton())
-			 )
-		    )
-		)
-	    )
+	),
+	nil, true, true
     );
 
+    Wizard::SetDesktopIcon("sysconfig");
 
     symbol ret = `dummy;
 
     while(ret != `cancel && ret != `abort && ret != `next && ret != `back)
     {
-	ret = (symbol)UI::UserInput();
+	ret = (symbol)Wizard::UserInput();
 
 	// "Default" button
 	if (ret == `def)
