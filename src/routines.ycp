@@ -48,6 +48,11 @@ global define void ProgressNextStage(string title) ``{
     Progress::Title(title);
 }
 
+/**
+ * Convert file name to the path name (convert '/' => '.')
+ * @param file File name
+ * @return path Result path
+ */
 global define path file_to_path(string file) ``{
     return topath(mergestring(splitstring(file, "/"), "."));
 }

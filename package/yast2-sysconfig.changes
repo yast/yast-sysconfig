@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Jan  8 13:19:42 CET 2003 - lslezak@suse.cz
+
+- added descriptions of predefined paths
+- support for /etc/sysconfig/network/ifcfg-* files
+- read network metadata from ifcg.template file
+- support IPv4 and IPv6 data types
+- support "variable = 'value'" lines in config files
+- fixes - shortcuts, translations, ycpdoc comments
+- version 2.7.2
+
+-------------------------------------------------------------------
 Thu Nov 28 16:26:32 CET 2002 - lslezak@suse.cz
 
 - check if new value is valid (according to specified data type)
