@@ -662,11 +662,11 @@ Would now you like to see the logging?
 	  return( 
 		 `VBox(`HSpacing(60),`VSpacing(1.2),
 		       `Left( `ComboBox ( `id("d2_1"),
-					  `opt(getComboBoxOption(l1_key)),
+					  `opt(getComboBoxOption(l1_key),`hstretch),
 					  lookup(l1, `linekey, ""),
 					  getComboList(l1_key, l1))),
 		       `Left( `ComboBox ( `id("d2_2"),
-					  `opt(getComboBoxOption(l2_key)),
+					  `opt(getComboBoxOption(l2_key),`hstretch),
 					  lookup(l2, `linekey, ""),
 					  getComboList(l2_key, l2))),
 		       `VSpacing(1),
@@ -704,7 +704,7 @@ Would now you like to see the logging?
 	  return( 
 		 `VBox(`HSpacing(60),`VSpacing(1.2),
 		       `Left(`ComboBox ( `id("d1_1"),
-					 `opt(getComboBoxOption(l1_key)),
+					 `opt(getComboBoxOption(l1_key),`hstretch),
 					 lookup(l1, `linekey, ""),
 					 getComboList(l1_key, l1))),
 		       `VSpacing(1),

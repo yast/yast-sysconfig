@@ -263,11 +263,11 @@ configuration modules like the \"Network configuration\".</p>
 
 	    if ( search != nil )
 	    {
-		string search_str = lookup( search, "search");
-		boolean ignore    = lookup( search, "ignore");
-		boolean nkey      = lookup( search, "nkey");
-		boolean nvalue    = lookup( search, "nvalue");
-		boolean ndescr    = lookup( search, "ndescr");
+		string search_str = lookup( search, "search", "");
+		boolean ignore    = lookup( search, "ignore", false );
+		boolean nkey      = lookup( search, "nkey",   false );
+		boolean nvalue    = lookup( search, "nvalue", false );
+		boolean ndescr    = lookup( search, "ndescr", false );
 		
 		// AbC matches abc
                 if ( ignore ) search_str = tolower( search_str );
