@@ -459,15 +459,16 @@ global define map get_description(string varid) ``{
 		    }
 		}
 	    );
-
-	    template_only_comment = get_only_comment(template_comment);
-
-	    if (size(template_only_comment) > 0)
-	    {
-		template_only_comment = template_only_comment + "<BR><BR>";
-	    }
 	}
 
+	template_only_comment = get_only_comment(template_comment);
+
+	if (size(template_only_comment) > 0)
+	{
+	    template_only_comment = template_only_comment + "\n";
+	}
+
+	y2milestone("Comment read from template: %1", template_only_comment);
 	y2milestone("Meta read from template: %1", template_meta);
     }
 
@@ -913,7 +914,7 @@ global define boolean Read(list(string) files) ``{
 
 
     // register agent for reading network template
-    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(IniAgent(\"/usr/share/doc/packages/sysconfig/ifcfg.template\"\n,") + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
     tmp = tmpdir + "/sysconfig-template-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -1045,7 +1046,7 @@ global define void Set(list settings) ``{
 /**
  * Dump the sysconfig settings to a single map
  * (For use by autoinstallation.)
- * @return map Dumped settings (later acceptable by Import ())
+ * @return list Dumped settings (later acceptable by Import ())
  */
 global define list Export () ``{
     // return structured map (for 8.1 compatibility)
@@ -1075,7 +1076,6 @@ global define list Export () ``{
 
 /**
  * Create a textual summary
- * @param split split configured and unconfigured?
  * @return summary of the current configuration
  */
 global define list Summary() ``{
