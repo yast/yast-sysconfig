@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Sep  6 17:01:56 CEST 2002 - lslezak@suse.cz
+
+- fixed metadata
+- reenabled SuSEconfig after save
+- do not show powertweak settings in sysconfig mode
+- provide/obsolete old packages
+- version 2.6.11
+
+-------------------------------------------------------------------
 Thu Sep  5 11:50:45 CEST 2002 - lslezak@suse.cz
 
 - added new metadata

@@ -232,7 +232,7 @@
 	 rc_create_command = rc_create_command + " -p";
     }
 
-    if (SCR::Read(.target.size, powertweakconfig) == -1 || (SCR::Read(.target.size, powertweakconfig) == 0 && powertweak_only_mode == true))
+    if ((SCR::Read(.target.size, powertweakconfig) == -1 || SCR::Read(.target.size, powertweakconfig) == 0) && powertweak_only_mode == true)
     {
 	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") > 0)
 	{
@@ -253,13 +253,13 @@ Create it and use powerteak?
 	    }
 	    else
 	    {
-		// create empty file - next time user will not be asked to use powertweak
-		SCR::Write(.target.string, "/etc/powertweak/tweaks", "");
+		return `cancel;
 	    }
 	}
 	else
 	{
-	    y2debug("Powertweak is not installed");
+	    y2error("Powertweak is not installed");
+	    return `cancel;
 	}
     }
 
@@ -699,7 +699,7 @@ configuration modules like the \"Network configuration\".</p>
 		    }
 		    else
 		    {
-//		        WFM::CallFunction( `inst_suseconfig( false, false ) );
+		        WFM::CallFunction( `inst_suseconfig( false, false ) );
 		    }
 
 		    return( `next );
