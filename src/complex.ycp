@@ -27,13 +27,13 @@ include "sysconfig/dialogs.ycp";
 /**
  * current selected variable in the tree widget
  */
-global string selected_variable = "";
+ string selected_variable = "";
 
 /**
  * Return a modification status
  * @return true if data was modified
  */
-global define boolean Modified() ``{
+ define boolean Modified() ``{
     return Sysconfig::Modified();
 }
 
@@ -42,7 +42,7 @@ global define boolean Modified() ``{
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
  */
-global define symbol ReadDialog() ``{
+ define symbol ReadDialog() ``{
     Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
 
     if (Sysconfig::powertweak_mode == true)
@@ -120,7 +120,7 @@ Create it and use powerteak?
  * Write settings dialog
  * @return `abort if aborted and `next otherwise
  */
-global define symbol WriteDialog() ``{
+ define symbol WriteDialog() ``{
     Wizard::RestoreHelp(Sysconfig::powertweak_mode ? HELPS["write_powertweak"]:"" : HELPS["write"]:"");
 
     boolean ret = true;
@@ -150,7 +150,7 @@ global define symbol WriteDialog() ``{
  * @param richtext result is rich/plain text
  * @return string Textual description of the type
  */
-global define string possible_values(map description, boolean richtext) ``{
+ define string possible_values(map description, boolean richtext) ``{
     string ret = "";
 
     string type = description["Type"]:"";
@@ -260,7 +260,7 @@ global define string possible_values(map description, boolean richtext) ``{
  * @param richtext if true result is rich text, if false result is plain text
  * @return string Rich text string
  */
-global define string create_description(map<string, any> description, boolean richtext) ``{
+ define string create_description(map<string, any> description, boolean richtext) ``{
     string varname = description["name"]:"";
     string file = description["file"]:"";
     string default_value = (string) (description["Default"]:nil);
@@ -383,7 +383,7 @@ global define string create_description(map<string, any> description, boolean ri
  * @param description Description of variable
  * @return boolean True if combo box should be editable
  */
-global define boolean combo_editable(map description) ``{
+ define boolean combo_editable(map description) ``{
     string type = description["Type"]:"";
 
     return (type == "" || regexpmatch(type, "^integer\\(.*:.*\\)$") || type == "integer"
@@ -397,7 +397,7 @@ global define boolean combo_editable(map description) ``{
  * @param v Input value
  * @return list List with value v
  */
-global define list add_if_missing(list l, string v) ``{
+ define list add_if_missing(list l, string v) ``{
     return (!contains(l, v)) ? add(l, v) : l;
 }
 
@@ -406,7 +406,7 @@ global define list add_if_missing(list l, string v) ``{
  * @param input String to escape
  * @return Escaped string
  */
-global define string backslash_add(string input) ``{
+ define string backslash_add(string input) ``{
 
     // escape double quotes and back slashes
     string escaped = "";
@@ -448,7 +448,7 @@ global define string backslash_add(string input) ``{
  * @param input Escaped string
  * @return string String without escape chars
  */
-global define string backslash_remove(string input) ``{
+ define string backslash_remove(string input) ``{
 
     if (input == nil)
     {
@@ -492,7 +492,7 @@ global define string backslash_remove(string input) ``{
  * @param set_default If true add default value to the list
  * @return list List of values for combo box widget
  */
-global define list combo_list(map<string, any> description, boolean set_default) ``{
+ define list combo_list(map<string, any> description, boolean set_default) ``{
     string new_value = backslash_remove((string) (description["new_value"]:nil));
     string value = backslash_remove(description["value"]:"");
     list ret = [];
@@ -575,7 +575,7 @@ global define list combo_list(map<string, any> description, boolean set_default)
  * @param description Variable description
  * @param set_default Set to true ifdefault value should be in the combo box
  */
-global define void update_combo(map<string, any> description, boolean set_default) ``{
+ define void update_combo(map<string, any> description, boolean set_default) ``{
     string varname = description["name"]:"";
 
     // modification flag added to variable name (if it was changed)
@@ -617,7 +617,7 @@ global define void update_combo(map<string, any> description, boolean set_defaul
  * Update "Default" button state (enable/disable) in the dialog
  * @param description Variable description
  */
-global define void update_button_state(map<string, any> description) ``{
+ define void update_button_state(map<string, any> description) ``{
     string def = (string) (description["Default"]:nil);
 
     UI::ChangeWidget(`id(`def), `Enabled, (def != nil));
@@ -627,7 +627,7 @@ global define void update_button_state(map<string, any> description) ``{
  * Update location text in the dialog
  * @param description Variable description
  */
-global define void update_location(map description) ``{
+ define void update_location(map description) ``{
     string l = description["location"]:"";
 
     // header label
@@ -639,7 +639,7 @@ global define void update_location(map description) ``{
  * @param id Value from tree widget
  * @return boolean True if node is not leaf-node
  */
-global define boolean is_node(string id) ``{
+ define boolean is_node(string id) ``{
     return (findfirstof(id, "$") == nil);
 }
 
@@ -647,7 +647,7 @@ global define boolean is_node(string id) ``{
  * Set new value for variable, warn user if new value does not match type definition.
  * @param force_change force value as changed even if it is equal to the old one
  */
-global define void check_set_current_value(boolean force_change)
+ define void check_set_current_value(boolean force_change)
 ``{
     // check current value
     if (selected_variable != "")
@@ -684,7 +684,7 @@ Really set this value?
  * @param varids Variables which will be contained in the table
  * @return list Table content
  */
-global define list create_table_content(list varids)
+ define list create_table_content(list varids)
 ``{
     list table_content = [];
 
@@ -717,7 +717,7 @@ global define list create_table_content(list varids)
  * Display main configuration dialog
  * @return dialog result
  */
-global define symbol MainDialog() ``{
+ define symbol MainDialog() ``{
 
     UI::OpenDialog(`opt(`defaultsize),
 	`VBox(`Left(`Image(`suseheader, "SuSE")),

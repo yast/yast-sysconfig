@@ -27,14 +27,14 @@
 
     textdomain "sysconfig";
 
-    global define string variable2id(string variable);
+     define string variable2id(string variable);
 
     /**
      * Command line interface - handler for list command
      * @param options list command options
      * @return boolean Returns true (succeess)
      */
-    global define boolean listHandler(map options) ``{
+     define boolean listHandler(map options) ``{
 	// display all variables or only modified ones?
 	boolean all = haskey(options, "all");
 
@@ -63,7 +63,7 @@
      * @param options list command options
      * @return boolean True on success
      */
-    global define boolean setHandler(map<string, any> options) ``{
+     define boolean setHandler(map<string, any> options) ``{
 	if (haskey(options, "variable") && haskey(options, "value"))
 	{
 	    string variable = (string) (options["variable"]:nil);
@@ -92,7 +92,7 @@
      * @param options details command options
      * @return boolean True on success
      */
-    global define boolean detailsHandler(map<string, any> options) ``{
+     define boolean detailsHandler(map<string, any> options) ``{
 	string variable = (string) (options["variable"]:nil);
 	string varid = variable2id(variable);
 
@@ -123,7 +123,7 @@
      * @param variable Variable name
      * @return string variable identification
      */
-    global define string variable2id(string variable) ``{
+     define string variable2id(string variable) ``{
 	if (variable != nil)
 	{
 	    map<string, list<string> > all_names = Sysconfig::get_all_names();
@@ -173,7 +173,7 @@
      * Write handler - disable progress bar (there is no UI) and write settings to the system.
      * @return boolean True on sucess
      */
-    global define boolean writeHandler() ``{
+     define boolean writeHandler() ``{
 	// disable progress bar
 	Progress::off();
 

@@ -23,7 +23,7 @@ include "sysconfig/routines.ycp";
  * Display search dialog
  * @return map Search option values selected in the dialog
  */
-global define map display_search_dialog()
+ define map display_search_dialog()
 ``{
     // helptext for popup search
     string helptextCR = _("Enter a keyword related to the information needed.");
@@ -98,7 +98,7 @@ global define map display_search_dialog()
  * @param checkboxvalue Check box value
  * @return map Selected variable, checkbox value (nil if it wasn't used), user input values
  */
-global define map<string, any> display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label, string checkboxlabel, boolean checkboxvalue) ``{
+ define map<string, any> display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label, string checkboxlabel, boolean checkboxvalue) ``{
 
     UI::OpenDialog(`opt(`decorated),
 	`HBox(
@@ -136,7 +136,7 @@ global define map<string, any> display_variables_dialog(string header, string la
  * Display dialog - ask user to install powertweak packages
  * @return map User input and powertweak-extra package selection value
  */
-global define map powertweak_install_dialog() ``{
+ define map powertweak_install_dialog() ``{
 
     // question displayed in popup dialog
     string helptext = _("This module requires the package \"powertweak\". Install it?
@@ -177,7 +177,7 @@ The package \"powertweak-extra\" extends configuration options of powertweak.
  * @return map Map with keys "ui" (`ok or `cancel - user input), "name" (name of
  * the new variable), "file" (location of variable) and "value" (value to write)
  */
-global define map add_new_variable()
+ define map add_new_variable()
 ``{
     UI::OpenDialog(`opt(`decorated),
 	`VBox(

@@ -85,7 +85,7 @@ global define string get_name_from_id(string id) ``{
 
     integer pos = findfirstof(id, "$");
 
-    if (pos >= 0)
+    if (pos != nil && pos >= 0)
     {
 	return substring(id, 0, findfirstof(id, "$"));
     }
@@ -109,7 +109,7 @@ global define string get_file_from_id(string id) ``{
 
     integer pos = findfirstof(id, "$");
 
-    if (pos >= 0)
+    if (pos != nil && pos >= 0)
     {
 	return substring(id, pos + 1);
     }
@@ -441,7 +441,7 @@ global define map<string, any> get_description(string varid) ``{
     string used_comment = varname;
 
     // no comment present
-    if (size(comment) == 0 && !regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
+    if (comment != nil && size(comment) == 0 && !regexpmatch(fname, "^/etc/sysconfig/network/ifcfg-.*"))
     {
 	y2warning("Comment for variable %1 is missing", varid);
 
