@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Mar 12 10:25:53 CET 2004 - lslezak@suse.cz
+
+- use new Wizard
+- use Package module
+- fixed module description (#35372)
+- version 2.9.11
+
+-------------------------------------------------------------------
 Fri Mar  5 14:42:53 CET 2004 - lslezak@suse.cz
 
 - data type fixes

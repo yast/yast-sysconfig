@@ -19,7 +19,7 @@ X-SuSE-YaST-AutoInstDataType=list
 Icon=rc_config
 Exec=/sbin/yast2 sysconfig 
 
-Name=Editor for /etc/sysconfig Files
+Name=/etc/sysconfig Editor
 GenericName=Change settings in /etc/sysconfig configuration files
 Name[cs]=Editor souborů /etc/sysconfig
 GenericName[cs]=Změnit nastavení v souborech /etc/sysconfig
