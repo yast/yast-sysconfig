@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Feb  8 18:05:19 CET 2002 - lnussel@suse.de
+
+- command line argument is of type string
+
+-------------------------------------------------------------------
 Fri Feb  8 17:31:05 CET 2002 - mike@suse.de
 
 - changes due to /etc/sysconfig changes

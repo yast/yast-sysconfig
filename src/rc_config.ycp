@@ -24,7 +24,7 @@
 
   while (arg_n >= 0)
   {
-      if (Args(arg_n) == .firewall)
+      if (Args(arg_n) == ".firewall")
       {
 	  firewall_mode = true;
       }
