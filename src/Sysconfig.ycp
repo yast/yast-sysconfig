@@ -29,13 +29,17 @@ include "network/ip.ycp";
  */
 global block AbortFunction = nil;
 
+global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
+    "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
+    "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions"];
+
 // all read variables
 map variables = $[];
 
 // modified variables
 map modified_variables = $[];
 
-// comment for non-varable nodes
+// comment for non-variable nodes
 map node_comments = $[];
 
 // location for each variable
@@ -619,11 +623,12 @@ global define string get_file_from_id(string id) ``{
  * @param variable Variable identification
  * @param new_value New value
  * @param force If true - do not check if new value is valid
+ * @param force_change Force value as changed even if it is equal to old value
  * @return symbol Result: `not_found (specified variable was not found in config file),
  *   `not_valid (new  value is not valid - doesn't match variable type definition),
  *   `ok (success)
  */
-global define symbol set_value(string variable, string new_value, boolean force) ``{
+global define symbol set_value(string variable, string new_value, boolean force, boolean force_change) ``{
     map desc = get_description(variable);
     string name = get_name_from_id(variable);
 
@@ -637,11 +642,11 @@ global define symbol set_value(string variable, string new_value, boolean force)
 
     string curr_val = (modif != nil) ? modif : old;
 
-    if (new_value != curr_val)
+    if (force_change || new_value != curr_val)
     {
 	y2milestone("variable: %1 changed from: %2 to: %3", variable, curr_val, new_value);
 
-	if (new_value == old)
+	if (new_value == old && !force_change)
 	{
 	    // variable was reset to the original value, remove it from map of modified
 	    y2debug("Variable %1 was reset to the original value", variable);
@@ -656,7 +661,7 @@ global define symbol set_value(string variable, string new_value, boolean force)
 		// check data type
 		string type = desc["Type"]:"string";
 
-		if (type == "string" || regexpmatch(type, "^string\(.*\)$") == true)
+		if (type == "string" || regexpmatch(type, "^string\\(.*\\)$") == true)
 		{
 		    // string type is valid always
 		    valid = true;
@@ -674,17 +679,17 @@ global define symbol set_value(string variable, string new_value, boolean force)
 		    valid = regexpmatch(new_value, "^-{0,1}[0-9]*$");
 
 		}
-		else if (regexpmatch(type, "^list\(.*\)$"))
+		else if (regexpmatch(type, "^list\\(.*\\)$"))
 		{
-		    string listopt = regexpsub(type, "^list\((.*)\)$", "\\1");
+		    string listopt = regexpsub(type, "^list\\((.*)\\)$", "\\1");
 		    list parsed_opts = parse_options(listopt);
 
 		    valid = contains(parsed_opts, new_value);
 		}
-		else if (regexpmatch(type, "^integer\(-{0,1}[0-9]*:-{0,1}[0-9]*\)$"))
+		else if (regexpmatch(type, "^integer\\(-{0,1}[0-9]*:-{0,1}[0-9]*\\)$"))
 		{
-		    string min = regexpsub(type, "^integer\((-{0,1}[0-9]*):-{0,1}[0-9]*\)$", "\\1");
-		    string max = regexpsub(type, "^integer\(-{0,1}[0-9]*:(-{0,1}[0-9]*)\)$", "\\1");
+		    string min = regexpsub(type, "^integer\\((-{0,1}[0-9]*):-{0,1}[0-9]*\\)$", "\\1");
+		    string max = regexpsub(type, "^integer\\(-{0,1}[0-9]*:(-{0,1}[0-9]*)\\)$", "\\1");
 
 		    y2milestone("min: %1  max: %2", min, max);
 
@@ -693,9 +698,9 @@ global define symbol set_value(string variable, string new_value, boolean force)
 
 		    y2milestone("min_int: %1  max_int: %2", min_int, max_int);
 		}
-		else if (regexpmatch(type, "^regexp\(.*\)$"))
+		else if (regexpmatch(type, "^regexp\\(.*\\)$"))
 		{
-		    string regex = regexpsub(type, "^regexp\((.*)\)$", "\\1");
+		    string regex = regexpsub(type, "^regexp\\((.*)\\)$", "\\1");
 		    valid = regexpmatch(new_value, regexp);
 		}
 		else if (type == "ip")
@@ -792,7 +797,7 @@ global define boolean Read(list(string) files) ``{
 
 
     // list of all config files
-    list(string) configfiles = SCR::Dir(.syseditor.section);
+    y2milestone("Registered config files: %1", SCR::Dir(.syseditor.section));
 
     // create script options
     string param = "";
@@ -826,9 +831,12 @@ global define boolean Write() ``{
 
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
+	// progress bar item
 	    _("Write the settings"),
 	], [
+	// progress bar item
 	    _("Writing the settings..."),
+	// progress bar item
 	    _("Finished")
 	],
 	""
@@ -859,11 +867,26 @@ global define boolean Write() ``{
  * @return boolean True on success
  */
 global define boolean Import (map settings) ``{
-    // TODO FIXME: your code here (fill the above mentioned variables)...
+    modified_variables = settings;
 
-    // TODO register files in INI-agent
-    sleep(3000);
-    return true;
+    list files = configfiles;
+
+    if (size(settings) > 0)
+    {
+	// register agent for user defined files
+	foreach(string varid, string val, settings,
+	    ``{
+		string file = get_file_from_id(varid);
+
+		if (!contains(files, file))
+		{
+		    files = add(files, file);
+		}
+	    }
+	);
+    }
+
+    return Sysconfig::Read(files);
 }
 
 /**
@@ -872,29 +895,39 @@ global define boolean Import (map settings) ``{
  * @return map Dumped settings (later acceptable by Import ())
  */
 global define map Export () ``{
-    // TODO FIXME: your code here (return the above mentioned variables)...
-    sleep(3000);
-    return $[];
+    return modified_variables;
 }
 
 /**
- * Create a textual summary and a list of unconfigured cards
+ * Create a textual summary
  * @param split split configured and unconfigured?
  * @return summary of the current configuration
  */
 global define list Summary() ``{
-    // TODO FIXME: your code here...
-    return [ _("Configuration summary ..."), [] ];
+    // configuration summary headline
+    string summary = Summary::AddHeader("", _("Configuration summary"));
+
+    y2milestone("Summary: %1", modified_variables);
+
+    if (size(modified_variables) > 0)
+    {
+	foreach(string varid, string newval, modified_variables,
+	    ``{
+		string varnam = get_name_from_id(varid);
+		string filename = get_file_from_id(varid);
+
+		summary = Summary::AddLine(summary, sformat("%1=\"%2\" (%3)", varnam, newval, filename));
+	    }
+	);
+    }
+    else
+    {
+	summary = Summary::AddLine(summary, Summary::NotConfigured());
+    }
+
+    return summary;
 }
 
-/**
- * Create an overview table with all configured cards
- * @return table items
- */
-global define list Overview() ``{
-    // TODO FIXME: your code here...
-    return [];
-}
 
 /* EOF */
 }

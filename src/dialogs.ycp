@@ -56,9 +56,9 @@ global define map display_search_dialog()
 		      `VSpacing(0.5),
 		      `HBox(
 			  // push button label
-			  `PushButton(`id(`ok), `opt(`default), OKButtonLabel()),
+			  `PushButton(`id(`ok), `opt(`default, `key_F10), OKButtonLabel()),
 			  // push button label
-			  `PushButton(`id(`cancel), CancelButtonLabel())
+			  `PushButton(`id(`cancel), `opt(`key_F9), CancelButtonLabel())
 			  )
 		    )
 	);
@@ -98,26 +98,27 @@ global define map display_search_dialog()
  */
 global define map display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label) ``{
 
-    UI::OpenDialog(`opt(`decorated), `HBox(
-	`VSpacing(14),
-	`VBox(`HSpacing(70),
-	    //heading of popup
-	    `Heading(header),
-	    `Label(label),
-	    `VSpacing(0.5),
+    UI::OpenDialog(`opt(`decorated),
+	`HBox(
+	    `VSpacing(17),
+	    `VBox(`HSpacing(70),
+		//heading of popup
+		`Heading(header),
+		`Label(label),
+		`VSpacing(0.5),
 
-	    // table column header
-	    `Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old value"), _("File"), _("Description")), table_content),
-`VSpacing(0.5),
-	    `HBox(
-		// push button label
-		`PushButton(`id(`action), `opt(`default), ok_label),
-		// push button label
-		`PushButton(`id(`cancel), cancel_label)
+		// table column header
+		`Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old value"), _("File"), _("Description")), table_content),
+    `VSpacing(0.5),
+		`HBox(
+		    // push button label
+		    `PushButton(`id(`action), `opt(`default, `key_F10), ok_label),
+		    // push button label
+		    `PushButton(`id(`cancel), `opt(`key_F9), cancel_label)
+		)
 	    )
-	   )
-          )
-	);
+        )
+    );
 
     symbol ret = UI::UserInput();
     string selected = UI::QueryWidget(`id(`table), `CurrentItem);
@@ -133,10 +134,12 @@ global define map display_variables_dialog(string header, string label, list tab
  */
 global define map powertweak_install_dialog() ``{
 
+    // question displayed in popup dialog
     string helptext = _("This module requires package \"powertweak\", do you want to install it?\n\nClick \"Install\" to install packages and start module or click \"Cancel\" to quit without any change.\nPackage \"powertweak-extra\" extends configuration options of powertweak package.");
 
     UI::OpenDialog(`opt(`decorated),
 	`VBox(
+	    // popup dialog header
 	    `Heading(_("Install powertweak package?")),
 	    `VSpacing(1),
 	    `Label(helptext),
@@ -145,8 +148,8 @@ global define map powertweak_install_dialog() ``{
 	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra package"), true)),
 	    `VSpacing(1),
 	    `HBox(
-		`PushButton(`id(`ok), InstallButtonLabel()),
-		`PushButton(`id(`cancel), CancelButtonLabel())
+		`PushButton(`id(`ok), `opt(`key_F10), InstallButtonLabel()),
+		`PushButton(`id(`cancel), `opt(`key_F9), CancelButtonLabel())
 	    )
 	)
     );
@@ -157,6 +160,78 @@ global define map powertweak_install_dialog() ``{
     UI::CloseDialog();
 
     return $[ "ui" : ui, "extra" : extra ];
+}
+
+/**
+ * Display dialog for new variable. This dialog is used at autoinstalation config mode
+ * only - some packages may not be available at configure time, but they will be present
+ * at installation, so it is possible to change them even if they are not displayed.
+ * @return map Map with keys "ui" (`ok or `cancel - user input), "name" (name of
+ * the new variable), "file" (location of variable) and "value" (value to write)
+ */
+global define map add_new_variable()
+``{
+    UI::OpenDialog(`opt(`decorated),
+	`VBox(
+	    `HBox(
+		// text entry label
+		`TextEntry(`id(`name), _("&Variable name"), ""),
+		// text entry label
+		`TextEntry(`id(`value), _("V&alue"), "")
+	    ),
+	    `VSpacing(1),
+	    `HBox(
+		// text entry label
+		`TextEntry(`id(`file), _("&File name"), "")
+	    ),
+	    `VSpacing(1),
+	    `HBox(
+		`PushButton(`id(`ok), `opt(`key_F10), OKButtonLabel()),
+		`PushButton(`id(`cancel), `opt(`key_F9), CancelButtonLabel())
+	    )
+	)
+    );
+
+    symbol ui = nil;
+
+    string name = "";
+    string file = "";
+
+    while(ui != `ok && ui != `cancel)
+    {
+	ui = UI::UserInput();
+
+	name = UI::QueryWidget(`id(`name), `Value);
+	file = UI::QueryWidget(`id(`file), `Value);
+
+	if (ui == `ok)
+	{
+	    if (name == "")
+	    {
+		// warning popup message - variable name is empty
+		UI::WarningPopup(_("Missing variable name value!"));
+		ui = nil;
+	    }
+	    else if (size(file) <= 1)
+	    {
+		// warning popup message - file name is empty
+		UI::WarningPopup(_("Missing file name value!"));
+		ui = nil;
+	    }
+	    else if (substring(file, 0, 1) != "/")
+	    {
+		// warning popup message - file name is required with absolute path
+		UI::WarningPopup(_("Missing absolute path in file name!"));
+		ui = nil;
+	    }
+	}
+    }
+
+    string value = UI::QueryWidget(`id(`value), `Value);
+
+    UI::CloseDialog();
+
+    return $[ "ui" : ui, "name" : name, "value" : value, "file" : file ];
 }
 
 /* EOF */

@@ -7,8 +7,6 @@ yncludedir = @yncludedir@/sysconfig
 client_DATA =			\
 	sysconfig.ycp		\
 	sysconfig_auto.ycp	\
-	sysconfig_proposal.ycp	\
-	sysconfig_write.ycp	\
 	powertweak.ycp
 
 ynclude_DATA =			\

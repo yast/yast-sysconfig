@@ -10,6 +10,9 @@
 ## Path: 	Applications
 ## Description: Applications which have sysconfig configuration file can be configured here.
 
+## Path:	Desktop
+## Description:	Desktop settings - display manager, window manager,...
+
 ## Path:	Other
 ## Description:	Files which do not contain location information are put in this subtree.\
 ## Subtree path is equal to directory path to the configuration file.
@@ -52,6 +55,9 @@
 
 ## Path:	Network/Distributed system
 ## Description:	Distributed systems configuration
+
+## Path:	System
+## Description:	Basic system configuration
 
 ## Path:	System/Yast2
 ## Description:	Yast2 modules configuration

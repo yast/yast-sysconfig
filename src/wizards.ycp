@@ -48,7 +48,9 @@ global define symbol SysconfigSequence() ``{
 	]
     ];
 
+    // dialog header
     string caption = _("System configuration editor");
+    // text in label widget
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();
@@ -67,7 +69,10 @@ global define symbol SysconfigSequence() ``{
  * @return sequence result
  */
 global define symbol SysconfigAutoSequence() ``{
+    // dialog header
     string caption = _("System configuration editor");
+
+    // text in label widget
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();

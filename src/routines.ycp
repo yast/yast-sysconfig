@@ -11,17 +11,6 @@
 
 textdomain "sysconfig";
 
-/* FIXME: Remove this file if you do not need it! */
-
-/**
- * Abort function
- * @return blah blah lahjk
- */
-global define boolean Abort() ``{
-    if(AbortFunction != nil)
-	return eval(AbortFunction) == true;
-    return false;
-}
 
 /**
  * Check for pending Abort press
@@ -36,17 +25,9 @@ global define boolean PollAbort() ``{
  * @return true if abort is confirmed
  */
 global define boolean ReallyAbort() ``{
-    return !Modified() || UI::ReallyAbortPopup(true);
+    return !Sysconfig::Modified() || UI::ReallyAbortPopup(true);
 }
 
-/**
- * Progress::NextStage and Progress::Title combined into one function
- * @param title progressbar title
- */
-global define void ProgressNextStage(string title) ``{
-    Progress::NextStage();
-    Progress::Title(title);
-}
 
 /**
  * Convert file name to the path name (convert '/' => '.')
