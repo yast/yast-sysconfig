@@ -383,10 +383,32 @@ set by specialized YaST2 configuration modules like the \"Network configuration\
 	           ret = `again;
 	        }
 	        else
-	        {
-		    // Doit:
-		    list ret_list = maplist( `entry, changes_list, ``(SCR( `Write(lookup(entry, `path), lookup(entry, `value)))));
-		    
+		  {
+		    // Doit new:
+
+		    // this list contains all rc_file paths, that must be saved before starting SuSEconfig
+		    list rc_file_list = [];
+
+		    list ret_list = maplist( `entry, changes_list, ``( {
+		      SCR( `Write(lookup(entry, `path), lookup(entry, `value)));
+
+		      string this_path    = sformat("%1", lookup(entry, `path,    ""));
+		      string this_linekey = sformat("%1", lookup(entry, `linekey, ""));
+
+		      this_path  = substring( this_path, 0, (size(this_path)-size(this_linekey)-1) );
+		      
+		      // add filepath to list, convert string to path before
+		      rc_file_list = add( rc_file_list, topath(this_path) );
+		    }));
+
+		    // delete duplicate filepaths from the list
+		    rc_file_list = toset(rc_file_list);
+
+		    path rc_file_path = nil;
+
+		    // save all changed files before start SuSEconfig
+		    foreach(`rc_file_path, rc_file_list, ``{ SCR( `Write(rc_file_path, nil)); });
+
 		    y2milestone("Starting SuSEconfig");
 
 		    UI(`WaitSuSEconfig());
