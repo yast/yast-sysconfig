@@ -25,7 +25,7 @@ include "sysconfig/dialogs.ycp";
  * Whole configuration of sysconfig
  * @return sequence result
  */
-global define symbol SysconfigSequence() ``{
+global define boolean SysconfigSequence() ``{
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
@@ -54,7 +54,8 @@ global define symbol SysconfigSequence() ``{
     any ret = WizardSequencer(aliases, sequence);
 
     UI::CloseDialog();
-    return ret;
+
+    return ret == `next;
 }
 
 /**

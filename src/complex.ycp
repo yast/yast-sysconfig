@@ -17,6 +17,7 @@ import "Runlevel";
 import "Directory";
 import "Mode";
 import "Require";
+import "String";
 
 import "Popup";
 import "Label";
@@ -213,21 +214,21 @@ global define string create_description(map description, boolean richtext) ``{
 	if (size(conf_modules) > 0)
 	{
 	    // parse string with options, then add them to the rich text
-	    list conf = Sysconfig::ParseString(conf_modules, Sysconfig::parse_param);
+	    list conf = String::ParseOptions(conf_modules, Sysconfig::parse_param);
 	    // header in the variable description text, SuSEconfig/ULconfig module names are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Configuration Script: ") + ((richtext) ?"</B> ":"") + mergestring(conf, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(reload) > 0)
 	{
-	    list services = Sysconfig::ParseString(reload, Sysconfig::parse_param);
+	    list services = String::ParseOptions(reload, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Reload: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
 
 	if (size(restart) > 0)
 	{
-	    list services = Sysconfig::ParseString(restart, Sysconfig::parse_param);
+	    list services = String::ParseOptions(restart, Sysconfig::parse_param);
 	    // header in the variable description text, service names (e.g. "apache") are appended
 	    result = result + ((richtext) ?"<P><B>":"") + _("Service to Restart: ") + ((richtext) ?"</B> ":"") + mergestring(services, ", ") + ((richtext) ?"</P>":"\n");
 	}
@@ -315,6 +316,11 @@ global define string backslash_add(string input) ``{
 	    if (ch == "\"")
 	    {
 		escaped = escaped + "\\\"";
+	    }
+	    else if (ch == "\n")
+	    {
+		// multi line value
+		escaped = escaped + "\\\n";
 	    }
 	    else
 	    {
@@ -419,7 +425,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-	list(string) parsed = Sysconfig::ParseString(values_string, Sysconfig::parse_param);
+	list(string) parsed = String::ParseOptions(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -431,7 +437,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	list(string) parsed = Sysconfig::ParseString(values_string, Sysconfig::parse_param);
+	list(string) parsed = String::ParseOptions(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -481,7 +487,7 @@ global define string possible_values(map description, boolean richtext) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	list spaces = [];
-	list values = Sysconfig::ParseString(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+	list values = String::ParseOptions(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -493,7 +499,7 @@ global define string possible_values(map description, boolean richtext) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	list spaces = [];
-	list values = Sysconfig::ParseString(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+	list values = String::ParseOptions(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -589,6 +595,23 @@ global define void update_combo(map description, boolean set_default) ``{
 
     // disable combo for non-leaf nodes
     UI::ChangeWidget(`id(`combo), `Enabled, ((description["file"]:"") != ""));
+
+    // display warning if value is not single line
+    // combobox is one line entry, multiline values are merged to one line
+    // (new lines are displayed as spaces, but they are correctly preserved
+    string val = (description["new_value"]:nil != nil) ? description["new_value"]:"" : description["value"]:"";
+
+    if (val != nil)
+    {
+	list<string> lines = splitstring(val, "\n");
+
+	if (size(lines) > 1)
+	{
+	    // current value has more than one line - it is displayed incorrectly
+	    // because combobox widget has single line entry (lines are merged)
+	    Popup::Warning(_("Currently selected value has more than one line.\nThere are displayed joined lines in the combo box."));
+	}
+    }
 }
 
 /**

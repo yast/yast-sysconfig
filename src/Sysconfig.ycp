@@ -22,6 +22,7 @@ import "Directory";
 import "Product";
 import "Label";
 import "IP";
+import "String";
 
 include "sysconfig/routines.ycp";
 
@@ -204,260 +205,6 @@ global define string remove_whitespaces(string input) ``{
 }
 
 /**
- * Parse string of values - split string to values, quoting and backslash sequences are supported
- * @param options Input string
- * @param parameters Parmeter used at parsing - map with keys:
- *	"separator":<string> - value separator (default: " \t"),
- *	"unique":<boolean> - result will not contain any duplicates, first occurance of the string is stored into output (default: false),
- *	"interpret_backslash":<boolean> - convert backslash sequence into one character (e.g. "\\n" => "\n") (default: true)
- *	"remove_whitespace":<boolean> - remove white spaces around values (default: false),
- *	"remove_empty_strings":<boolean> - remove empty strings from result (default: true)
- * @return list List of strings
- * @see ParseString.txt documenation
- */
-global define list ParseString(string options, map parameters) ``{
-    list ret = [];
-
-    // parsing options
-    string separator = parameters["separator"]:" \t";
-    boolean unique = parameters["unique"]:false;
-    boolean interpret_backslash = parameters["interpret_backslash"]:true;
-    boolean remove_whitespace = parameters["remove_whitespace"]:false;
-    boolean remove_empty_strings = parameters["remove_empty_strings"]:true;
-
-    y2debug("Input: string: '%1', parameters: %2", options, parameters);
-    y2debug("Used values: separator: '%1', unique: %2, remove_empty_strings: %3, remove_whitespace: %4", separator, unique, remove_empty_strings, remove_whitespace);
-
-    if (options == nil)
-    {
-	return [];
-    }
-
-    // two alghorithms are used:
-    // first is much faster, but only usable if string
-    // doesn't contain any double qoute characters
-    // and backslash sequences are not interpreted
-    // second is more general, but of course slower
-
-    if (findfirstof(options, "\"") == nil && interpret_backslash == false)
-    {
-	// easy case - no qouting, don't interpres backslash sequences => use splitstring
-	list(string) values = splitstring(options, separator);
-
-	foreach (string v, values, ``{
-		if (remove_whitespace == true)
-		{
-		    v = remove_whitespaces(v);
-		}
-
-		if (unique == true)
-		{
-		    if (!contains(ret, v)) ret = add(ret, v);
-		}
-		else
-		{
-		    ret = add(ret, v);
-		}
-	    }
-	);
-    }
-    else
-    {
-	// quoting is used or backslash interpretation is enabled
-	// so it' not possible to split input
-	// parsing each character is needed - use finite automaton
-
-	// state
-	symbol state = `out_of_string;
-	// position in the input string
-	integer index = 0;
-	// parsed value
-	string str = "";
-
-	while(index < size(options))
-	{
-	    string character = substring(options, index, 1);
-
-	    y2debug("character: %1 state: %2 index: %3", character, state, index);
-
-	    // interpret backslash sequence
-	    if (character == "\\" && interpret_backslash == true)
-	    {
-		if (index + 1 < size(options))
-		{
-		    string nextcharacter = substring(options, index + 1, 1);
-		    index = index + 1;
-
-		    // backslah sequences
-		    map backslash_seq = $[
-			"a"	: "\a",	// alert
-			"b"	: "\b", // backspace
-			"e"	: "\e", // escape
-			"f"	: "\f", // FF
-			"n"	: "\n", // NL
-			"r"	: "\r", // CR
-			"t"	: "\t", // tab
-			"v"	: "\v", // vertical tab
-			"\\"	: "\\", // backslash
-		    ];
-
-		    if (haskey(backslash_seq, nextcharacter) == true)
-		    {
-			character = backslash_seq[nextcharacter]:"DUMMY";
-		    }
-		    else
-		    {
-			if (nextcharacter != "\"")
-			{
-			    // ignore backslash in invalid backslash sequence
-			    character = nextcharacter;
-			}
-			else
-			{
-			    // backslash will be removed later,
-			    // double quote and escaped double quote have to different yet
-			    character = "\\\"";
-			}
-		    }
-
-		    y2debug("backslash sequnce: '%1'", character);
-		}
-		else
-		{
-		    y2warning("Missing character after backslash (\\) at the end of string");
-		}
-	    }
-
-	    if (state == `out_of_string)
-	    {
-		if (issubstring(separator, character) == true)
-		{
-		    index = index + 1;
-		    continue;
-		}
-		else if (character == "\"")
-		{
-		    state = `in_quoted_string;
-		}
-		else
-		{
-		    state = `in_string;
-
-		    if (character == "\\\"")
-		    {
-			str = "\"";
-		    }
-		    else
-		    {
-			str = character;
-		    }
-		}
-	    }
-	    else if (state == `in_quoted_string)
-	    {
-		if (character == "\"")
-		{
-		    state = `out_of_string;
-		    state = `in_string;
-
-		    if (unique == true)
-		    {
-			if (!contains(ret, str)) ret = add(ret, str);
-		    }
-		    else
-		    {
-			ret = add(ret, str);
-		    }
-
-		    str = "";
-		}
-		else if (character == "\\\"")
-		{
-		    str = str + "\"";
-		}
-		else
-		{
-		    str = str + character;
-		}
-	    }
-	    else if (state == `in_string)
-	    {
-		if (issubstring(separator, character) == true)
-		{
-		    state = `out_of_string;
-
-		    if (remove_whitespace == true)
-		    {
-			str = remove_whitespaces(str);
-		    }
-
-		    if (unique == true)
-		    {
-			if (!contains(ret, str)) ret = add(ret, str);
-		    }
-		    else
-		    {
-			ret = add(ret, str);
-		    }
-
-		    str = "";
-		}
-		else if (character == "\\\"")
-		{
-		    str = str + "\"";
-		}
-		else
-		{
-		    str = str + character;
-		}
-	    }
-
-	    index = index + 1;
-	}
-
-	if (state == `in_quoted_string)
-	{
-	    y2warning("Missing trainling double quote character(\") in input: '%1'", options);
-
-	    if (unique == true)
-	    {
-		if (!contains(ret, str)) ret = add(ret, str);
-	    }
-	    else
-	    {
-		ret = add(ret, str);
-	    }
-	}
-
-	if (state == `in_string)
-	{
-	    if (remove_whitespace)
-	    {
-		str = remove_whitespaces(str);
-	    }
-
-	    if (unique == true)
-	    {
-		if (!contains(ret, str)) ret = add(ret, str);
-	    }
-	    else
-	    {
-		ret = add(ret, str);
-	    }
-	}
-    }
-
-    if (remove_empty_strings == true)
-    {
-	ret = filter(string val, ret, ``(val != "" && val != nil));
-    }
-
-    y2debug("Parsed values: %1", ret);
-
-    return ret;
-}
-
-/**
  * Get description of selected variable
  * @param varid Variable identification
  * @return map Description map
@@ -600,7 +347,7 @@ global define map get_description(string varid) ``{
 
     if (deflt != nil)
     {
-	list parsed = ParseString(deflt, parse_param);
+	list parsed = String::ParseOptions(deflt, parse_param);
 	meta["Default"] = parsed[0]:"";
 
 	y2debug("Read default value: %1", parsed[0]:"");
@@ -912,7 +659,7 @@ global define symbol set_value(string variable, string new_value, boolean force,
 		else if (regexpmatch(type, "^list\\(.*\\)$"))
 		{
 		    string listopt = regexpsub(type, "^list\\((.*)\\)$", "\\1");
-		    list parsed_opts = ParseString(listopt, parse_param);
+		    list parsed_opts = String::ParseOptions(listopt, parse_param);
 
 		    valid = contains(parsed_opts, new_value);
 		}
@@ -1084,7 +831,7 @@ global define boolean Read() ``{
     }
 
     // register configuration files in SCR using INI-agent
-    string agentdef = sformat(".syseditor\n\n`ag_ini(IniAgent( %1,\n", files) + SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
+    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
     string tmp = tmpdir + "/sysconfig-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -1092,7 +839,7 @@ global define boolean Read() ``{
 
 
     // register agent for reading network template
-    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
+    agentdef = sformat(".sysconfig.network.template,\n\n`ag_ini(`IniAgent(\"/etc/sysconfig/network/ifcfg.template\"\n,") + SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
     tmp = tmpdir + "/sysconfig-template-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -1210,7 +957,7 @@ global define boolean Write() ``{
 	{
 	    if (size(restart_service) > 0)
 	    {
-		list parsed = ParseString(restart_service, parse_param);
+		list parsed = String::ParseOptions(restart_service, parse_param);
 		foreach(string s, parsed,
 		    ``{
 			Restarted[s] = true;
@@ -1220,7 +967,7 @@ global define boolean Write() ``{
 
 	    if (size(reload_service) > 0)
 	    {
-		list parsed = ParseString(reload_service, parse_param);
+		list parsed = String::ParseOptions(reload_service, parse_param);
 		foreach(string s, parsed,
 		    ``{
 			Reloaded[s] = true;
@@ -1230,7 +977,7 @@ global define boolean Write() ``{
 
 	    if (size(config_module) > 0)
 	    {
-		list parsed = ParseString(config_module, parse_param);
+		list parsed = String::ParseOptions(config_module, parse_param);
 		foreach(string s, parsed,
 		    ``{
 			Configmodules[s] = true;
