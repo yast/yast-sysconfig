@@ -13,11 +13,11 @@ EXTRA_DIST = COPYRIGHT.english COPYRIGHT.french COPYRIGHT.german \
 
 AUTOMAKE_OPTIONS = foreign 
 
-$(RPMNAME)-$(VERSION).tar.gz: dist
+$(RPMNAME)-$(VERSION).tar.bz2: dist-bzip2
 
 CLEANFILES = $(RPMNAME).kdoc
 
 MAINTAINERCLEANFILES = package/$(RPMNAME)-$(VERSION).tar.gz package/$(RPMNAME).spec
 
-package: $(RPMNAME)-$(VERSION).tar.gz
-	mv $(RPMNAME)-$(VERSION).tar.gz package
+package: $(RPMNAME)-$(VERSION).tar.bz2
+	mv $(RPMNAME)-$(VERSION).tar.bz2 package
