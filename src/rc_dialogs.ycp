@@ -395,11 +395,11 @@ Do you want to view the relevant log file?
     global define getD5Dialog( list entry_list )
 	``{
 
-	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-	map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
-	map l5 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 5 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0, nil );
+	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0, nil );
+	map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0, nil );
+	map l5 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 5 )), 0, nil );
 
 	if (l1 == nil) l1 = $[];
 	if (l2 == nil) l2 = $[];
@@ -492,10 +492,10 @@ Do you want to view the relevant log file?
     global define getD4Dialog( list entry_list )
 	``{
 
-	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
-	map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0, nil );
+	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0, nil );
+	map l4 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 4 )), 0, nil );
 
 	if (l1 == nil) l1 = $[];
 	if (l2 == nil) l2 = $[];
@@ -572,9 +572,9 @@ Do you want to view the relevant log file?
     global define getD3Dialog( list entry_list )
 	``{
 
-	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
-	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0, nil );
+	map l3 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 3 )), 0, nil );
 
 	if (l1 == nil) l1 = $[];
 	if (l2 == nil) l2 = $[];
@@ -636,8 +636,8 @@ Do you want to view the relevant log file?
     global define getD2Dialog( list entry_list )
 	``{
 
-	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
-	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
+	map l2 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 2 )), 0, nil );
 
 	if (l1 == nil) l1 = $[];
 	if (l2 == nil) l2 = $[];
@@ -684,7 +684,7 @@ Do you want to view the relevant log file?
     global define getD1Dialog( list entry_list )
 	``{
 
-	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0 );
+	map l1 = select( filter( `entry, entry_list, ``( lookup( entry, `entrynb, 0) == 1 )), 0, nil );
 
 	if (l1 == nil) l1 = $[];
 	  

@@ -180,7 +180,7 @@
   UI(`ChangeWidget(`id(`package),   `Label, _("Reading /etc/rc.config and additional describing data ...")));
   UI(`ChangeWidget(`id(`package),   `Value, 10));
  
-  integer arg_n = size(Args()) - 1;
+  arg_n = size(Args()) - 1;
   boolean test_mode = false;
   
   while (arg_n >= 0) {
@@ -206,7 +206,7 @@
 
   while ((id >= 0) && (id < size (dialog))) {
     
-    result = eval(select(dialog, id));
+    result = eval(select(dialog, id, nil));
     
     if (result == `cancel)
       break;

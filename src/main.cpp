@@ -372,8 +372,39 @@ int main(int argc, char* argv[])
 
   // array of all file patterns to search for rc.config files
   const char* globpattern[] = {
-    "/etc/rc.config.d/*rc.config",
-    "/etc/rc.config",
+    "/etc/sysconfig/network/config",
+    "/etc/sysconfig/network/ifcfg-lo",
+    "/etc/sysconfig/network/ifcfg-eth0",
+    "/etc/sysconfig/3ddiag",
+    "/etc/sysconfig/autofs",
+    "/etc/sysconfig/backup",
+    "/etc/sysconfig/clock",
+    "/etc/sysconfig/console",
+    "/etc/sysconfig/cron_daily",
+    "/etc/sysconfig/dhcpcd",
+    "/etc/sysconfig/displaymanager",
+    "/etc/sysconfig/hardware",
+    "/etc/sysconfig/hotplug",
+    "/etc/sysconfig/ispell",
+    "/etc/sysconfig/java",
+    "/etc/sysconfig/joystick",
+    "/etc/sysconfig/kernel",
+    "/etc/sysconfig/language",
+    "/etc/sysconfig/locate",
+    "/etc/sysconfig/lvm",
+    "/etc/sysconfig/mail",
+    "/etc/sysconfig/mouse",
+    "/etc/sysconfig/nfs-server",
+    "/etc/sysconfig/proxy",
+    "/etc/sysconfig/security",
+    "/etc/sysconfig/sendmail",
+    "/etc/sysconfig/sound",
+    "/etc/sysconfig/ssh",
+    "/etc/sysconfig/suseconfig",
+    "/etc/sysconfig/sysctl",
+    "/etc/sysconfig/windowmanager",
+    "/etc/sysconfig/xntp",
+    "/etc/sysconfig/ypbind",
     "/etc/rc.dialout"
   };
 
@@ -532,19 +563,18 @@ int main(int argc, char* argv[])
 	      varptr->setParent(downcase(varname));
 	      if (filename == "/etc/rc.config")
 	      {
-		 varptr->setPath(".rc.system." + varname);
+		 varptr->setPath(".rc_config." + varname);
+	      }
+	      else if (filename == "/etc/rc.dialout")
+	      {
+		 varptr->setPath(".rc_dialout." + varname);
 	      }
 	      //not ending with .rc.config
-	      else if (filename.find(".rc.config") == string::npos)
-	      {
-		 string base = after(filename,"/etc/rc.");
-		 varptr->setPath(".rc." + base + "." + varname);
-	      }
 	      else
 	      {
-		 string base = after(filename,"/etc/rc.config.d/");
-		 base        = base.substr(0,base.find(".rc.config"));
-		 varptr->setPath(".rc." + base + "." + varname);
+		 string base = after(filename,"/etc/sysconfig/");
+                 substitute( base, "/", "." );
+		 varptr->setPath(".sysconf." + base + "." + varname);
 	      }
 
 	      // add descr to RCVariable and afterwards set descr

@@ -342,9 +342,9 @@ configuration modules like the \"Network configuration\".</p>
 		  string new_val = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Value));
 		  string key     = UI(`QueryWidget(`id(sformat("%1_%2", dialogtype,i)), `Label));
 
-		  if ( lookup(lookup(rc_config_keys, key, $[]), `value) != new_val )
+		  if ( lookup(lookup(rc_config_keys, key, $[]), `value, nil) != new_val )
 		  {
-		     map curr_key = lookup(rc_config_keys, key);
+		     map curr_key = lookup(rc_config_keys, key, nil);
 		     curr_key     = add( curr_key, `value, new_val);
 		     curr_key     = add( curr_key, `new,   true);
 
@@ -442,7 +442,7 @@ configuration modules like the \"Network configuration\".</p>
 		    list rc_file_list = [];
 
 		    list ret_list = maplist( `entry, changes_list, ``( {
-		      SCR( `Write(lookup(entry, `path), lookup(entry, `value)));
+		      SCR( `Write(lookup(entry, `path, nil), lookup(entry, `value, nil)));
 
 		      string this_path    = sformat("%1", lookup(entry, `path,    ""));
 		      string this_linekey = sformat("%1", lookup(entry, `linekey, ""));
