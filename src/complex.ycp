@@ -753,9 +753,11 @@ Really set this value?
 				`Left(`Heading(`id(`heading), `opt(`hstretch), _("Current Selection: "))),
 				`VSpacing(0.5),
 				`HBox(
-				    `ReplacePoint(`id(`replace),
-					// combo box label
-					`ComboBox (`id(`combo), `opt(`disabled, `hstretch), _("S&etting of: "),  [""])
+				    `HWeight(1,
+					`ReplacePoint(`id(`replace),
+					    // combo box label
+					    `ComboBox (`id(`combo), `opt(`disabled, `hstretch), _("S&etting of: "),  [""])
+					)
 				    ),
 				    `VBox(
 					// dummy widget used to align button

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 26 14:29:59 CET 2004 - lslezak@suse.cz
+
+- [Default] button - fixed layout problem (#36745)
+- version 2.9.12
+
+-------------------------------------------------------------------
 Thu Mar 25 06:24:41 CET 2004 - nashif@suse.de
 
 - Dont run complete suseconfig when writing autoyast configuration
