@@ -1,0 +1,29 @@
+Steps:
+1) rm -rf root   // delete old version
+
+2) // check out the newest version
+   cvs up
+
+3) // create a editable tree version:
+   create_dirtree_from_eddb.pl meta_rc.config      
+
+4) // edit this tree ...
+
+5) // repack the editable tree to the file meta_rc.config:
+   cd root
+   ../create_eddb.pl        
+   
+   // the new meta_rc.config is created with the name ../EDDB
+   
+6) // Check if really only your changes are in the EDDB:
+   cd ..
+   diff -w EDDB meta_rc.config
+
+7) // if all is correct check in your new version
+   mv EDDB meta_rc.config
+   cvs ci meta_rc.config
+
+
+
+
+
