@@ -28,11 +28,16 @@ list param = [];
 
 
 /* Check arguments */
-if(size(Args()) > 0 && is(Args(0), string)) {
+if(size(Args()) > 0 && is(Args(0), string))
+{
     func = WFM::Args(0);
-    if(size(Args()) > 1 && is(Args(1), map))
-    param = WFM::Args(1);
+
+    if (size(Args()) > 1 && is(Args(1), list))
+    {
+	param = WFM::Args(1);
+    }
 }
+
 y2debug("func=%1", func);
 y2debug("param=%1", param);
 
@@ -41,14 +46,14 @@ if(func == "Import")
 {
     ret = Sysconfig::Import(param);
 }
-/* create a  summary*/
+/* create a summary */
 else if(func == "Summary")
 {
     ret =  Sysconfig::Summary();
 }
 else if (func == "Reset")
 {
-    ret = Sysconfig::Import($[]);
+    ret = Sysconfig::Import([]);
 }
 else if (func == "Change")
 {

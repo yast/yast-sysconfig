@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Feb  3 14:31:59 CET 2003 - lslezak@suse.cz
+
+- merged proof-read texts
+- bugfixes in sysconfig_auto.ycp
+- version 2.7.4
+
+-------------------------------------------------------------------
 Fri Jan 17 17:46:24 CET 2003 - lslezak@suse.cz
 
 - export/import data in 8.1 format

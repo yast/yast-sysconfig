@@ -49,7 +49,7 @@ global define symbol SysconfigSequence() ``{
     ];
 
     // dialog header
-    string caption = _("System configuration editor");
+    string caption = _("System Configuration Editor");
     // text in label widget
     term contents = `Label(_("Initializing ..."));
 
@@ -70,7 +70,7 @@ global define symbol SysconfigSequence() ``{
  */
 global define symbol SysconfigAutoSequence() ``{
     // dialog header
-    string caption = _("System configuration editor");
+    string caption = _("System Configuration Editor");
 
     // text in label widget
     term contents = `Label(_("Initializing ..."));

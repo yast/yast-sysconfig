@@ -179,7 +179,7 @@ global define string create_richtext_description(map description) ``{
     if (possible_vals != "" && possible_vals != nil)
     {
 	// rich text item
-	result = result + "<P><B>" + _("Possible values: ") + "</B> " + possible_vals + "</P>";
+	result = result + "<P><B>" + _("Possible Values: ") + "</B> " + possible_vals + "</P>";
     }
 
     if (default_value != nil && size(file) > 0)
@@ -190,7 +190,7 @@ global define string create_richtext_description(map description) ``{
 	    default_value = "\"\"";
 	}
 	// rich text value
-	result = result + "<P><B>" + _("Default value: ") + "</B> " + default_value + "</P>";
+	result = result + "<P><B>" + _("Default Value: ") + "</B> " + default_value + "</P>";
     }
 
     // if value was modified add original value
@@ -204,7 +204,7 @@ global define string create_richtext_description(map description) ``{
 	    original = "\"\"";
 	}
 	// rich text value
-	result = result + "<P><B>" + _("Original value: ") + "</B> " + original + "</P>";
+	result = result + "<P><B>" + _("Original Value: ") + "</B> " + original + "</P>";
     }
 
     if (comment != "" && comment != nil)
@@ -459,7 +459,7 @@ global define string possible_values(map description) ``{
     {
 	string regex = regexpsub(type, "^regexp\\((.*)\\)", "\\1");
 	// Translation: description of possible values, regular expression string is added after the text
-	ret = "<I>" + _("Value matching regular expression:") + "</I>" + regex;
+	ret = "<I>" + _("Value Matching Regular Expression:") + "</I>" + regex;
     }
     else if (type == "integer")
     {
@@ -495,17 +495,17 @@ global define string possible_values(map description) ``{
     else if (type == "ip")
     {
 	// allowed value description - IP adress
-	ret = "<I>" + _("IPv4 or IPv6 adress") + "</I>";
+	ret = "<I>" + _("IPv4 or IPv6 address") + "</I>";
     }
     else if (type == "ip4")
     {
 	// allowed value description - IPv4 adress
-	ret = "<I>" + _("IPv4 adress") + "</I>";
+	ret = "<I>" + _("IPv4 address") + "</I>";
     }
     else if (type == "ip6")
     {
 	// allowed value description - IPv6 adress
-	ret = "<I>" + _("IPv6 adress") + "</I>";
+	ret = "<I>" + _("IPv6 address") + "</I>";
     }
     else
     {
@@ -559,7 +559,7 @@ global define void update_location(map description) ``{
     string l = description["location"]:"";
 
     // header label
-    UI::ChangeWidget(`id(`heading), `Value, _("Current selection: ") + l);
+    UI::ChangeWidget(`id(`heading), `Value, _("Current Selection: ") + l);
 }
 
 /**
@@ -593,7 +593,11 @@ global define void check_set_current_value(boolean force_change)
 		string t = d["Type"]:"string";
 
 		// popup question dialog: variable value does not match defined type - ask user to set value (%1 is value entered by user, %2 is allowed type - e.g. integer
-		if (UI::AnyQuestionPopup(WarningMsg(), sformat(_("Value '%1'\ndoes not match type '%2'\n\nDo you really want to set this value?"), new_value, t), UI::YesButtonLabel(), UI::NoButtonLabel(), `focus_no) == true)
+		if (UI::AnyQuestionPopup(WarningMsg(), sformat(_("Value '%1'
+does not match type '%2'.
+
+Really set this value?
+"), new_value, t), UI::YesButtonLabel(), UI::NoButtonLabel(), `focus_no) == true)
 		{
 		    // force setting of value
 		    Sysconfig::set_value(selected_variable, new_value, true, force_change);
@@ -648,13 +652,13 @@ global define symbol MainDialog() ``{
 		    `HBox(
 			`HWeight(35,
 			    // tree widget label
-			    `Tree(`id(`tree), `opt(`notify, `vstretch), _("&Configuration options"), Sysconfig::tree_content)
+			    `Tree(`id(`tree), `opt(`notify, `vstretch), _("&Configuration Options"), Sysconfig::tree_content)
 			),
 			`HSpacing(1),
 			`HWeight(65,
 			    `VBox(`HSpacing(60),
 				// label widget
-				`Left(`Heading(`id(`heading), `opt(`hstretch), _("Current selection: "))),
+				`Left(`Heading(`id(`heading), `opt(`hstretch), _("Current Selection: "))),
 				`VSpacing(0.5),
 				`HBox(
 				    `ReplacePoint(`id(`replace),
@@ -670,13 +674,13 @@ global define symbol MainDialog() ``{
 				),
 				`VSpacing(1),
 				// help rich text displayed after module start (1/2)
-				`RichText(`id(`rt), _("<P><B>System configuration editor</B></P><P>With system configuration editor you can change some system settings. You can also use Yast2 to configure your hardware and system settings.</P>") +
+				`RichText(`id(`rt), _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")),
 				// push button label - displayed only in autoinstallation config mode
-				(Mode::config == true) ? `HBox(`PushButton(`id(`use_current), _("&Use current value")),
+				(Mode::config == true) ? `HBox(`PushButton(`id(`use_current), _("&Use Current Value")),
 					// push button label - displayed only in autoinstallation config mode
-					`PushButton(`id(`add_new), `opt(`key_F3), _("&Add new variable..."))
+					`PushButton(`id(`add_new), `opt(`key_F3), _("&Add New Variable..."))
 				    ) : `Empty()
 			    )
 			)
@@ -749,7 +753,7 @@ global define symbol MainDialog() ``{
 		y2milestone("Modified variables: %1", modified);
 
 		// popup dialog header
-		map result = display_variables_dialog(_("Modified variables"),
+		map result = display_variables_dialog(_("Modified Variables"),
 // help text in popup dialog
 _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
@@ -773,9 +777,9 @@ Choose \"Cancel\" to edit the values again.
 		if (size(found) > 0)
 		{
 		    // // popup dialog header
-		    map input = display_variables_dialog(_("Search sesult"),
+		    map input = display_variables_dialog(_("Search Result"),
 			// help text in popup dialog
-			_("Here is displayed search results. If you see the item you want, select this item then click \"Go to\". Otherwise, click \"Cancel\" to close this dialog."), create_table_content(found),
+			_("The search results are displayed here. If you see the item you want, select it then click \"Go to\". Otherwise, click \"Cancel\" to close this dialog."), create_table_content(found),
 			// push button label
 			 _("&Go to"), UI::CancelButtonLabel());
 
