@@ -19,7 +19,10 @@ include "ui/common_messages.ycp";
 include "sysconfig/helps.ycp";
 include "sysconfig/routines.ycp";
 
-
+/**
+ * Display search dialog
+ * @return map Search option values selected in the dialog
+ */
 global define map display_search_dialog()
 ``{
     // helptext for popup search
@@ -84,6 +87,15 @@ global define map display_search_dialog()
     return ret;
 }
 
+/**
+ * Display dialog with selected variables
+ * @param header Heading in the dialog
+ * @param label Label in the dialog
+ * @param table_content Table content list
+ * @param ok_label OK button label
+ * @param cancel_label Cancel button label
+ * @return map Selected variable and user input values
+ */
 global define map display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label) ``{
 
     UI::OpenDialog(`opt(`decorated), `HBox(
@@ -115,6 +127,10 @@ global define map display_variables_dialog(string header, string label, list tab
     return $[ "ui" : ret, "selected" : selected ];
 }
 
+/**
+ * Display dialog - ask user to install powertweak packages
+ * @return map User input and powertweak-extra package selection value
+ */
 global define map powertweak_install_dialog() ``{
 
     string helptext = _("This module requires package \"powertweak\", do you want to install it?\n\nClick \"Install\" to install packages and start module or click \"Cancel\" to quit without any change.\nPackage \"powertweak-extra\" extends configuration options of powertweak package.");

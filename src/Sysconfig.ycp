@@ -53,6 +53,12 @@ global define boolean Modified() ``{
     return (size(modified_variables) > 0);
 };
 
+/**
+ * Search in syscnfig files for value
+ * @param params search parameters
+ * @param show_progress if true progress bar will be displayed
+ * @return list(string) List of found variables (IDs)
+ */
 global define list(string) search(map params, boolean show_progress) ``{
     list(string) found = [];
 
@@ -61,6 +67,7 @@ global define list(string) search(map params, boolean show_progress) ``{
 
     if (show_progress == true)
     {
+	// Translation: Progress bar label
 	UI::OpenDialog(`ProgressBar(`id(`progress), _("Searching..."), size(files), 0));
     }
 
@@ -164,12 +171,22 @@ global define list(string) search(map params, boolean show_progress) ``{
     return found;
 }
 
-global define remove_whitespaces(string input) ``{
+/**
+ * Remove white spaces at beginning or at the end of string
+ * @param input Input string
+ * @return string String without white spaces
+ */
+global define string remove_whitespaces(string input) ``{
     string removed_whitespaces = regexpsub(input, "^[ \t]*(([^ \t]*[ \t]*[^ \t]+)*)[ \t]*$", "\\1");
 
     return (removed_whitespaces != nil) ? removed_whitespaces : input;
 }
 
+/**
+ * Parse string of possible values
+ * @param options Input string
+ * @return list List of strings
+ */
 global define list parse_options(string options) ``{
     list ret = [];
 
@@ -304,6 +321,11 @@ global define list parse_options(string options) ``{
     return ret;
 }
 
+/**
+ * Get description of selected variable
+ * @param varid Variable identification
+ * @return map Description map
+ */
 
 global define map get_description(string varid) ``{
     string varname = get_name_from_id(varid);
@@ -417,6 +439,11 @@ global define map get_description(string varid) ``{
     return meta;
 }
 
+/**
+ * Parse metadata from comment
+ * @param comment Input comment
+ * @return map parsed metadata
+ */
 global define map parse_metadata(string comment) ``{
     map ret = $[];
 
@@ -493,7 +520,11 @@ global define map parse_metadata(string comment) ``{
     return ret;
 }
 
-
+/**
+ * Get metadata lines from input string
+ * @param input Input string
+ * @return list(string) Metadata lines in list
+ */
 global define list(string) get_metadata(string input) ``{
     if (input == nil || input == "")
     {
@@ -504,7 +535,11 @@ global define list(string) get_metadata(string input) ``{
     return (filter(string line, lines, ``(regexpmatch(line, "^##.*"))));
 }
 
-// only comment without metadata
+/**
+ * Get comment without metadata
+ * @param input Input string
+ * @return string Comment used as variable descriprion
+ */
 global define string get_only_comment(string input) ``{
     if (input == nil || input == "")
     {
@@ -533,6 +568,11 @@ global define string get_only_comment(string input) ``{
     return ret;
 }
 
+/**
+ * Get variable name from variable identification
+ * @param id Variable identification
+ * @return string Variable name
+ */
 global define string get_name_from_id(string id) ``{
 
     integer pos = findfirstof(id, "$");
@@ -547,10 +587,20 @@ global define string get_name_from_id(string id) ``{
     }
 }
 
+/**
+ * Get variable location in tree widget from variable identification
+ * @param id Variable identification
+ * @return string Variable location
+ */
 global define string get_location_from_id(string id) ``{
     return variable_locations[id]:"";
 }
 
+/**
+ * Get file name where is variable located from variable identification
+ * @param id Variable identification
+ * @return string File name
+ */
 global define string get_file_from_id(string id) ``{
     integer pos = findfirstof(id, "$");
 
@@ -564,7 +614,15 @@ global define string get_file_from_id(string id) ``{
     }
 }
 
-
+/**
+ * Set new variable value
+ * @param variable Variable identification
+ * @param new_value New value
+ * @param force If true - do not check if new value is valid
+ * @return symbol Result: `not_found (specified variable was not found in config file),
+ *   `not_valid (new  value is not valid - doesn't match variable type definition),
+ *   `ok (success)
+ */
 global define symbol set_value(string variable, string new_value, boolean force) ``{
     map desc = get_description(variable);
     string name = get_name_from_id(variable);
@@ -674,10 +732,19 @@ global define symbol set_value(string variable, string new_value, boolean force)
     }
 }
 
+/**
+ * Return modification status of variable
+ * @param varid Variable identification
+ * @return boolean True if variable was modified
+ */
 global define boolean modified(string varid) ``{
     return haskey(modified_variables, varid);
 }
 
+/**
+ * Get list of modified variables
+ * @return list List of modified variables
+ */
 global define list get_modified()
 ``{
 

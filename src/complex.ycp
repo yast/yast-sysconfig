@@ -154,6 +154,11 @@ global define symbol WriteDialog() ``{
     return ret ? `next : `abort;
 }
 
+/**
+ * Create rich text description string from description values
+ * @param description Description
+ * @return string Rich text string
+ */
 global define string create_richtext_description(map description) ``{
     string varname = description["name"]:"";
     string file = description["file"]:"";
@@ -205,6 +210,11 @@ global define string create_richtext_description(map description) ``{
     return result;
 }
 
+/**
+ * Get combo box editable status - depends on Type value
+ * @param description Description of variable
+ * @return boolean True if combo box should be editable
+ */
 global define boolean combo_editable(map description) ``{
     string type = description["Type"]:"";
 
@@ -213,11 +223,21 @@ global define boolean combo_editable(map description) ``{
 	|| regexpmatch(type, "^regexp\\(.*\\)$"));
 }
 
+/**
+ * Generic list function - add value to the list if it isn't already there
+ * @param l Input list
+ * @param v Input value
+ * @return list List with value v
+ */
 global define list add_if_missing(list l, string v) ``{
     return (!contains(l, v)) ? add(l, v) : l;
 }
 
-
+/**
+ * Escape double quotes and back slash characters by back slash
+ * @param input String to escape
+ * @return Escaped string
+ */
 global define string backslash_add(string input) ``{
 
     // escape double quotes and back slashes
@@ -250,6 +270,11 @@ global define string backslash_add(string input) ``{
     return escaped;
 }
 
+/**
+ * Remove backslashes from string - opposite funtion to the backslash_add function.
+ * @param input Escaped string
+ * @return string String without escape chars
+ */
 global define string backslash_remove(string input) ``{
 
     if (input == nil)
@@ -288,7 +313,12 @@ global define string backslash_remove(string input) ``{
     return ret;
 }
 
-
+/**
+ * Create list of values for combo box widget
+ * @param description Variable description
+ * @param set_default If true add default value to the list
+ * @return list List of values for combo box widget
+ */
 global define list combo_list(map description, boolean set_default) ``{
     string new_value = backslash_remove(description["new_value"]:nil);
     string value = backslash_remove(description["value"]:"");
@@ -372,6 +402,11 @@ global define list combo_list(map description, boolean set_default) ``{
     return ret;
 }
 
+/**
+ * Get string representation of type definition. Used at richtext description.
+ * @param description Variable description
+ * @return string Textual description of the type
+ */
 global define string possible_values(map description) ``{
     string ret = "";
 
@@ -412,6 +447,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^regexp\\(.*\\)"))
     {
 	string regex = regexpsub(type, "^regexp\\((.*)\\)", "\\1");
+	// Translation: %1 is regular expression string
 	ret = sformat(_("<I>Value matching regular expression</I> %1"), regex);
     }
     else if (type == "integer")
@@ -441,10 +477,31 @@ global define string possible_values(map description) ``{
     {
 	ret = "<I>" + _("Any value") + "</I>";
     }
+    else if (type == "ip")
+    {
+	ret = "<I>" + _("IPv4 or IPv6 adress") + "</I>";
+    }
+    else if (type == "ip4")
+    {
+	ret = "<I>" + _("IPv4 adress") + "</I>";
+    }
+    else if (type == "ip6")
+    {
+	ret = "<I>" + _("IPv6 adress") + "</I>";
+    }
+    else
+    {
+	y2warning("Unknown type definition: %1", type);
+    }
 
     return ret;
 }
 
+/**
+ * Update combo box in dialog
+ * @param description Variable description
+ * @param set_default Set to true ifdefault value should be in the combo box
+ */
 global define void update_combo(map description, boolean set_default) ``{
     string varname = description["name"]:"";
     string modif_flag = (haskey(description, "new_value")) ? "  " + _("(changed)") : "";
@@ -462,22 +519,38 @@ global define void update_combo(map description, boolean set_default) ``{
     UI::ChangeWidget(`id(`combo), `Enabled, ((description["file"]:"") != ""));
 }
 
+/**
+ * Update "Default" button state (enable/disable) in the dialog
+ * @param description Variable description
+ */
 global define void update_button_state(map description) ``{
     string def = description["Default"]:nil;
 
     UI::ChangeWidget(`id(`def), `Enabled, (def != nil));
 }
 
+/**
+ * Update location text in the dialog
+ * @param description Variable description
+ */
 global define void update_location(map description) ``{
     string l = description["location"]:"";
 
     UI::ChangeWidget(`id(`heading), `Value, _("Current selection: ") + l);
 }
 
+/**
+ * Is selected item in the tree widget leaf node?
+ * @param id Value from tree widget
+ * @return boolean True if node is not leaf-node
+ */
 global define boolean is_node(string id) ``{
     return (findfirstof(id, "$") == nil);
 }
 
+/**
+ * Set new value for variable, warn user if new value does not match type definition.
+ */
 global define void check_set_current_value()
 ``{
     // check current value
@@ -506,6 +579,11 @@ global define void check_set_current_value()
     }
 }
 
+/**
+ * Create table content list for selected variables
+ * @param varids Variables which will be contained in the table
+ * @return list Table content
+ */
 global define list create_table_content(list varids)
 ``{
     list table_content = [];
@@ -562,7 +640,7 @@ global define symbol MainDialog() ``{
 				    )
 				),
 				`VSpacing(1),
-				`RichText(`id(`rt), _("<P><B>System configuration editor</B></P><P>With system configuration editor you can change some system settings. You can use Yast2 to configure most of hardware and system settings.</P>") +
+				`RichText(`id(`rt), _("<P><B>System configuration editor</B></P><P>With system configuration editor you can change some system settings. You can also use Yast2 to configure your hardware and system settings.</P>") +
 				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")
 				)
 			    )
