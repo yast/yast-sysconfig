@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 26 13:26:55 CET 2003 - lslezak@suse.cz
+
+- fixes for the new interpreter
+- version 2.9.1
+
+-------------------------------------------------------------------
 Tue Nov 25 15:32:34 CET 2003 - lslezak@suse.cz
 
 - use String::ParseOptions function
