@@ -27,6 +27,7 @@ Summary:	Editor for /etc/sysconfig
 @clientdir@/sysconfig_step1.ycp
 @clientdir@/sysconfig.ycp
 @ydatadir@/meta_sys.config
+%dir @yncludedir@/sysconfig
 @yncludedir@/sysconfig/sys_dialogs.ycp
 @ybindir@/syscreate_data
 %doc @docdir@
