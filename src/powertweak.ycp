@@ -2,6 +2,8 @@
  * Author:	Ladislav Slezak <lslezak@suse.cz>
  * Summary:	Alias - enable 'yast2 powertweak' command
  * $Id$
+ *
+ * Powertweak alias - start sysconfig in powertweak mode
  */
 
 {

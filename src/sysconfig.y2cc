@@ -8,7 +8,7 @@
 [Y2Module sysconfig]
 
 ; name of the entry, shown in y2cc
-Name = _("Editor for /etc/sysconfig")
+Name = _("Editor for /etc/sysconfig files")
 
 ; "raw" group name to which this module belongs
 ; see /usr/lib/YaST2/etc/y2controlcentericons.y2cc for valid values
@@ -34,5 +34,8 @@ SortKey =
 
 ; which textdomain to use for translations (important!)
 Textdomain = sysconfig
+
+; autoinstallation is supported
+Autoinst = all
 
 ; vim:syntax=dosini

@@ -16,11 +16,11 @@ textdomain "sysconfig";
  */
 global map HELPS = $[
 
-    /* Read dialog help 1/2 */
+    /* Read dialog help */
     "read" : _("<p><b><big>Initializing sysconfig configuration</big></b><br>
 Please wait for a while...<br></p>"),
 
-    /* Write dialog help 1/2 */
+    /* Write dialog help */
     "write" : _("<p><b><big>Saving sysconfig configuration</big></b><br>
 Please wait for a while...<br></p>")
 
