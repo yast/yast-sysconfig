@@ -176,6 +176,11 @@ string downcase(const string& str)
 {
   string s=str;
   transform (s.begin(), s.end(), s.begin(), mytolower());
+
+  if (s == str)
+  {
+      s += ' ';
+  }
   return s;
 }
 
@@ -381,40 +386,11 @@ int main(int argc, char* argv[])
     "/etc/sysconfig/network/wireless",
     "/etc/sysconfig/network/ifcfg-lo",
     "/etc/sysconfig/network/ifcfg-eth0",
-    "/etc/sysconfig/3ddiag",
-    "/etc/sysconfig/autofs",
-    "/etc/sysconfig/backup",
-    "/etc/sysconfig/clock",
-    "/etc/sysconfig/console",
-    "/etc/sysconfig/cron_daily",
-    "/etc/sysconfig/dhcpcd",
-    "/etc/sysconfig/displaymanager",
-    "/etc/sysconfig/hardware",
-    "/etc/sysconfig/hotplug",
-    "/etc/sysconfig/ispell",
-    "/etc/sysconfig/java",
-    "/etc/sysconfig/joystick",
-    "/etc/sysconfig/kernel",
-    "/etc/sysconfig/language",
-    "/etc/sysconfig/locate",
-    "/etc/sysconfig/lvm",
-    "/etc/sysconfig/mail",
-    "/etc/sysconfig/postfix",
-    "/etc/sysconfig/mouse",
-    "/etc/sysconfig/nfs-server",
-    "/etc/sysconfig/proxy",
-    "/etc/sysconfig/security",
-    "/etc/sysconfig/sendmail",
-    "/etc/sysconfig/sound",
-    "/etc/sysconfig/ssh",
-    "/etc/sysconfig/suseconfig",
-    "/etc/sysconfig/sysctl",
-    "/etc/sysconfig/windowmanager",
-    "/etc/sysconfig/xntp",
-    "/etc/sysconfig/ypbind",
+
     "/etc/rc.config",
-    "/etc/rc.dialout",
-    "/etc/powertweak/tweaks"
+    "/etc/powertweak/tweaks",
+
+    "/etc/sysconfig/*"
   };
 
   // struct for glob() (see: man 3 glob)
@@ -480,19 +456,19 @@ int main(int argc, char* argv[])
   if ( !firewall_mode && !powertweak_only)
   {
      dirptr->setName("etc");
-     dirptr->setBranch("/");
+     dirptr->setBranch("$");
      dirptr->setDialogtype("dir");
      RCDirectories["etc"] = *dirptr;
   }
   dirptr = NULL;
 
   // add the directories "/" and "/etc" to the directory set
-  *dirPath = (string)"/";
+  *dirPath = (string)"$";
   DirectorySet.insert(*dirPath);
 
   if (!firewall_mode && !powertweak_only)
   {
-     *dirPath = (string)"/etc";
+     *dirPath = (string)"$etc";
      DirectorySet.insert(*dirPath);
   }
 
@@ -591,29 +567,21 @@ int main(int argc, char* argv[])
 	      // set branch, parent, path, ...
 	      varptr = new RCVariable;
 
-	      string pathname = varname;
-
 /*	      unsigned int br = 0;
-	      while((br = varname.find("/")) != string::npos)
+	      while((br = varname.find("$")) != string::npos)
 	      {
 		   varname.erase(br, 1);
 	      }*/
 
-	      // powertweak hack: some variables contain '/' char
-	      replace(varname.begin(), varname.end(), '/', 'I');
-
-	      // dirty hack: allow editing variables with only lowercase chars in name
-	      if (varname == downcase(varname))
-	      {
-		  varname += 'I';
-	      }
+	      // hack: replace '$' -> 's' ($ is used as tree node separator
+	      replace(varname.begin(), varname.end(), '$', 's');
 	      
-	      varptr->setName(pathname/*varname*/);
-	      varptr->setBranch("/etc/" + downcase(varname));
+	      varptr->setName(varname);
+	      varptr->setBranch("$etc$" + downcase(varname));
 	      varptr->setParent(downcase(varname));
 	      string base = filename;
 	      substitute( base, "/", "." );
-	      varptr->setPath( base + "." + pathname /*varname*/);
+	      varptr->setPath( base + "." + varname);
 
 	      // add descr to RCVariable and afterwards set descr
 	      // to "", filter comments
@@ -653,22 +621,22 @@ int main(int argc, char* argv[])
 		    // found: set values of found entry
 		    varptr = &it->second;
 
-		    value = "/" + powertweak;
+		    value = "$" + powertweak;
 
 		    // set branch of the RCVariable
 		    {
-		       varptr->setBranch(value + "/" + downcase(varname));
+		       varptr->setBranch(value + "$" + downcase(varname));
 
 		       string rest_dir = value;
 		       string dirname = "";
-		       string lowleveldir = value.substr(value.rfind('/')+1);
+		       string lowleveldir = value.substr(value.rfind('$')+1);
 
-		       while (rest_dir.find('/') != string::npos)
+		       while (rest_dir.find('$') != string::npos)
 		       {
-			  dirname  = rest_dir.substr(rest_dir.find('/')+1);
+			  dirname  = rest_dir.substr(rest_dir.find('$')+1);
 			  rest_dir = dirname;
-			  if (dirname.find('/')!=string::npos)
-			     dirname = dirname.substr(0,dirname.find('/'));
+			  if (dirname.find('$')!=string::npos)
+			     dirname = dirname.substr(0,dirname.find('$'));
 
 			  // find dirname in RCDirectories
 			  if (dirname != "")
@@ -682,14 +650,14 @@ int main(int argc, char* argv[])
 				dirptr = new RCDirectory;
 				dirptr->setName(dirname);
 
-				if (value.substr(0,value.find((string)"/" + dirname)).empty())
+				if (value.substr(0,value.find((string)"$" + dirname)).empty())
 				{
-				   dirptr->setBranch("/");
+				   dirptr->setBranch("$");
 				}
 				else
 				{
-				   dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
-				   *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
+				   dirptr->setBranch(value.substr(0,value.find((string)"$" + dirname)));
+				   *dirPath = ((string)(value.substr(0,value.find((string)"$" + dirname))));
 				   //if (*dirPath != "")
 				   //DirectorySet.insert(*dirPath);
 				}
@@ -773,18 +741,18 @@ int main(int argc, char* argv[])
 	// set branch of the RCVariable
 	if (property == "path")
 	{
-	   varptr->setBranch(value + "/" + downcase(varname));
+	   varptr->setBranch(value + "$" + downcase(varname));
 
 	   string rest_dir = value;
 	   string dirname = "";
-	   string lowleveldir = value.substr(value.rfind('/')+1);
+	   string lowleveldir = value.substr(value.rfind('$')+1);
 
-	   while (rest_dir.find('/') != string::npos)
+	   while (rest_dir.find('$') != string::npos)
 	   {
-	      dirname  = rest_dir.substr(rest_dir.find('/')+1);
+	      dirname  = rest_dir.substr(rest_dir.find('$')+1);
 	      rest_dir = dirname;
-	      if (dirname.find('/')!=string::npos)
-		 dirname = dirname.substr(0,dirname.find('/'));
+	      if (dirname.find('$')!=string::npos)
+		 dirname = dirname.substr(0,dirname.find('$'));
 
 	      // find dirname in RCDirectories
 	      if (dirname != "")
@@ -798,14 +766,14 @@ int main(int argc, char* argv[])
 		    dirptr = new RCDirectory;
 		    dirptr->setName(dirname);
 
-		    if (value.substr(0,value.find((string)"/" + dirname)).empty())
+		    if (value.substr(0,value.find((string)"$" + dirname)).empty())
 		    {
-		       dirptr->setBranch("/");
+		       dirptr->setBranch("$");
 		    }
 		    else
 		    {
-		       dirptr->setBranch(value.substr(0,value.find((string)"/" + dirname)));
-		       *dirPath = ((string)(value.substr(0,value.find((string)"/" + dirname))));
+		       dirptr->setBranch(value.substr(0,value.find((string)"$" + dirname)));
+		       *dirPath = ((string)(value.substr(0,value.find((string)"$" + dirname))));
 		       //if (*dirPath != "")
 		       //DirectorySet.insert(*dirPath);
 		    }
@@ -882,7 +850,7 @@ int main(int argc, char* argv[])
 	 variable_it != RCVariables.end();
 	 ++variable_it)
      {
-	if (variable_it->second.getBranch().find("/etc/")!=string::npos)
+	if (variable_it->second.getBranch().find("$etc$")!=string::npos)
 	{
 	   RCDirectoryMap::iterator dir_it = RCDirectories.find("etc");
 	   if (dir_it == RCDirectories.end())
@@ -930,7 +898,7 @@ int main(int argc, char* argv[])
 	       ++cii)
 	    {
 	      RCVariable* var_ptr = &RCVariables[*cii];
-	      var_ptr->setBranch(var_ptr->getBranch().substr(0,var_ptr->getBranch().find("/" + downcase(*cii))));
+	      var_ptr->setBranch(var_ptr->getBranch().substr(0,var_ptr->getBranch().find("$" + downcase(*cii))));
 	      var_ptr->setParent(ci->first);
 	      var_ptr->setEntrynb(entrynb++);
 
@@ -954,18 +922,18 @@ int main(int argc, char* argv[])
 	      RCDirectory* dir_ptr = new RCDirectory;
 	      dir_ptr->setName(downcase(*cii));
 
-	      // if branch is "/" no extra slash must be included
-	      if (ci->second.getBranch() == "/")
+	      // if branch is "$" no extra slash must be included
+	      if (ci->second.getBranch() == "$")
 		dir_ptr->setBranch(ci->second.getBranch() + ci->second.getName());
 	      else
-		dir_ptr->setBranch(ci->second.getBranch() + "/" + ci->second.getName());
+		dir_ptr->setBranch(ci->second.getBranch() + "$" + ci->second.getName());
 
 	      dir_ptr->addVariable(*cii);
 	      NewRCDirectories[downcase(*cii)] = *dir_ptr;
 
-	      *dirPath = ((string)(ci->second.getBranch() + "/"
+	      *dirPath = ((string)(ci->second.getBranch() + "$"
 				   + ci->second.getName()
-				   + "/" + downcase(*cii)));
+				   + "$" + downcase(*cii)));
 	      DirectorySet.insert(*dirPath);
 
 	      dir_ptr = NULL;
@@ -1063,8 +1031,8 @@ int main(int argc, char* argv[])
 	  // array for the splitted directory paths
 	  string words[MAX_DIR_DEPTH+1];
 
-	  // split the path at "/" and count the number of substrings
-	  int numOfWords = split(*ci, words, MAX_DIR_DEPTH, (string)"/");
+	  // split the path at "$" and count the number of substrings
+	  int numOfWords = split(*ci, words, MAX_DIR_DEPTH, (string)"$");
 
 	  // iterate each substring
 	  for (int i = 1; i < numOfWords; ++i)

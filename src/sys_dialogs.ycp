@@ -713,11 +713,11 @@ configuration modules like the \"Network configuration\".</p>
 	    else if (WFM::powertweak_only_mode == true)
 	    {
 		// help text for powertweak only configuration - 1/3
-		helptextCR = _("<p>Here you can edit powertweak configuration, which is stored in /etc/powertweak/tweaks file.</p>")
+		helptextCR = _("<p>Here, edit powertweak configuration, which is stored in /etc/powertweak/tweaks file.</p>")
 		// help text for powertweak only configuration - 2/3
-		+ _("You can configure hardware and kernel parameters listed in tree on the left side of dialog.")
+		+ _("Configure hardware and kernel parameters listed in tree on the left side of dialog.")
 		// help text for powertweak only configuration - 3/3
-		+ _("<p><b>Warning:</b> Powertweak configuration is only for real experts! Setting wrong value can result in system lock or data loss!</p>");
+		+ _("<p><b>Warning:</b> Powertweak configuration is only for real experts! Setting a wrong value can result in system lock or data loss!</p>");
 	    }
 	    else
 	    {
