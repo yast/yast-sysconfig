@@ -360,7 +360,7 @@ global define list combo_list(map description, boolean set_default) ``{
 
     if (deflt != nil)
     {
-	list parsed = Sysconfig::parse_options(deflt, Sysconfig::parse_param);
+	list parsed = Sysconfig::ParseString(deflt, Sysconfig::parse_param);
 	deflt = parsed[0]:deflt;
     }
 
@@ -379,7 +379,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^list\\((.*)\\)", "\\1");
-	list(string) parsed = Sysconfig::parse_options(values_string, Sysconfig::parse_param);
+	list(string) parsed = Sysconfig::ParseString(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -391,7 +391,7 @@ global define list combo_list(map description, boolean set_default) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	string values_string = regexpsub(type, "^string\\((.*)\\)", "\\1");
-	list(string) parsed = Sysconfig::parse_options(values_string, Sysconfig::parse_param);
+	list(string) parsed = Sysconfig::ParseString(values_string, Sysconfig::parse_param);
 
 	// add missing items
 	foreach(string option, parsed,
@@ -440,7 +440,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^list\\(.*\\)"))
     {
 	list spaces = [];
-	list values = Sysconfig::parse_options(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+	list values = Sysconfig::ParseString(regexpsub(type, "^list\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -452,7 +452,7 @@ global define string possible_values(map description) ``{
     else if (regexpmatch(type, "^string\\(.*\\)"))
     {
 	list spaces = [];
-	list values = Sysconfig::parse_options(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
+	list values = Sysconfig::ParseString(regexpsub(type, "^string\\((.*)\\)", "\\1"), Sysconfig::parse_param);
 
 	foreach(string value, values, ``{
 		spaces = add(spaces, mergestring(splitstring(value, " "), "&nbsp;"));
@@ -771,12 +771,15 @@ global define symbol MainDialog() ``{
 _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
-"),			create_table_content(modified), UI::OKButtonLabel(), UI::CancelButtonLabel());
+"),			create_table_content(modified), UI::OKButtonLabel(), UI::CancelButtonLabel(), _("Confirm each activation command"), false);
 
 		if (result["ui"]:`dummy == `cancel)
 		{
 		    ret = `again;
 		}
+
+		// set confirmation flag
+		Sysconfig::ConfirmActions = result["checkbox"]:false;
 	    }
 	}
 	else if (ret == `search)
@@ -794,7 +797,7 @@ Choose \"Cancel\" to edit the values again.
 			// help text in popup dialog
 			_("The search results are displayed here. If you see the item you want, select it then click \"Go to\". Otherwise, click \"Cancel\" to close this dialog."), create_table_content(found),
 			// push button label
-			 _("&Go to"), UI::CancelButtonLabel());
+			 _("&Go to"), UI::CancelButtonLabel(), "", nil);
 
 		    if (input["ui"]:`dummy == `cancel)
 		    {

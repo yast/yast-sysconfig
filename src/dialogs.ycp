@@ -96,7 +96,7 @@ global define map display_search_dialog()
  * @param cancel_label Cancel button label
  * @return map Selected variable and user input values
  */
-global define map display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label) ``{
+global define map display_variables_dialog(string header, string label, list table_content, string ok_label, string cancel_label, string checkboxlabel, boolean checkboxvalue) ``{
 
     UI::OpenDialog(`opt(`decorated),
 	`HBox(
@@ -109,7 +109,8 @@ global define map display_variables_dialog(string header, string label, list tab
 
 		// table column header
 		`Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old Value"), _("File"), _("Description")), table_content),
-    `VSpacing(0.5),
+		(size(checkboxlabel) > 0) ? `CheckBox(`id(`chbox), checkboxlabel, checkboxvalue) : `Empty(),
+		`VSpacing(0.5),
 		`HBox(
 		    // push button label
 		    `PushButton(`id(`action), `opt(`default, `key_F10), ok_label),
@@ -122,10 +123,11 @@ global define map display_variables_dialog(string header, string label, list tab
 
     symbol ret = UI::UserInput();
     string selected = UI::QueryWidget(`id(`table), `CurrentItem);
+    boolean box = (size(checkboxlabel) > 0) ? UI::QueryWidget(`id(`chbox), `Value) : nil;
 
     UI::CloseDialog();
 
-    return $[ "ui" : ret, "selected" : selected ];
+    return $[ "ui" : ret, "selected" : selected, "checkbox" : box ];
 }
 
 /**
