@@ -830,7 +830,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("<P><B>Powertweak Configuration</B></P><P>In this configuration module, you can tune some kernel and hardware options.</P><P><B>Warning:</B> This configuration module is for experts only!</P>") :
 				    _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
-				    _("<P><B>Note:</B> Descriptions are not translated because thay are read directly from configuration files.</P>")),
+				    _("<P><B>Note:</B> Descriptions are not translated because they are read directly from configuration files.</P>")),
 				// push button label - displayed only in autoinstallation config mode
 				(Mode::config() == true) ? `HBox(`PushButton(`id(`use_current), _("&Use Current Value")),
 					// push button label - displayed only in autoinstallation config mode

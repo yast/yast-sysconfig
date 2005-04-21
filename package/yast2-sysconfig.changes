@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 21 10:42:04 CEST 2005 - lslezak@suse.cz
+
+- fixed typo in the help text (#79275)
+
+-------------------------------------------------------------------
 Wed Nov 24 13:22:09 CET 2004 - lslezak@suse.cz
 
 - display default value or empty string instead of the current
