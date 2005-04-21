@@ -16,7 +16,7 @@ X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstDataType=list
 
-Icon=rc_config
+Icon=yast-sysconfig
 Exec=/sbin/yast2 sysconfig 
 
 Name=/etc/sysconfig Editor

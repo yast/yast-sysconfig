@@ -16,7 +16,7 @@ X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=
 
-Icon=powertweak
+Icon=yast-powertweak
 Exec=/sbin/yast2 powertweak 
 
 Name=Powertweak Configuration
