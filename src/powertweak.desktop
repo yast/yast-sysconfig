@@ -19,8 +19,8 @@ X-SuSE-YaST-AutoInstResource=
 Icon=yast-powertweak
 Exec=/sbin/yast2 powertweak 
 
-Name=Powertweak Configuration
-GenericName=Configure powertweak settings -- only for experts!
+Name=Powertweak
+GenericName=Configure powertweak settings (for experts)
 Name[cs]=Konfigurace Powertweak
 GenericName[cs]=Nastavení powertweak -- pouze pro experty!
 Name[de]=Powertweak-Konfigu­ration
