@@ -806,7 +806,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 ")
 	    );
 
-    Wizard::SetContents(_("/etc/sysconfig Editor"),
+    Wizard::SetContents((Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") : _("/etc/sysconfig Editor"),
 			    `VBox(
 				// label widget
 				`Left(`Label(`id(`heading), `opt(`hstretch), _("Current Selection: "))),

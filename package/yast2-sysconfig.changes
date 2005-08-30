@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 30 17:59:22 CEST 2005 - lslezak@suse.cz
+
+- fixed dialog header in powertweak mode (#106731)
+- 2.12.2
+
+-------------------------------------------------------------------
 Thu Jul 28 10:12:52 CEST 2005 - lslezak@suse.cz
 
 - updated detktop files
