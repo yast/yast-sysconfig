@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep  5 16:43:32 CEST 2005 - lslezak@suse.cz
+
+- don't install powertweak-extra package by default (#105273)
+- 2.12.3
+
+-------------------------------------------------------------------
 Tue Aug 30 17:59:22 CEST 2005 - lslezak@suse.cz
 
 - fixed dialog header in powertweak mode (#106731)
