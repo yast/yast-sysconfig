@@ -154,7 +154,7 @@ The package \"powertweak-extra\" extends configuration options of powertweak.
 	    `Label(helptext),
 	    `VSpacing(1),
 	    // check box label text
-	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra Package"), true)),
+	    `Left(`CheckBox(`id(`extra), _("Install powertweak-&extra Package"), false)),
 	    `VSpacing(1),
 	    `HBox(
 		`PushButton(`id(`ok), `opt(`key_F10), Label::InstallButton()),
