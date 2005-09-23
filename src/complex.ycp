@@ -362,7 +362,8 @@ Create it and use powerteak?
 	    comment = mergestring(splitstring(comment, "\n"), "<BR>");
 
 	    // do not change node descriptions
-	    if (file != "")
+	    // do not change descriptions in powertweak mode - leave line wrapping enabled
+	    if (file != "" && !Sysconfig::powertweak_mode)
 	    {
 		// convert ' ' => '&nbsp;'
 		comment = mergestring(splitstring(comment, " "), "&nbsp;");
