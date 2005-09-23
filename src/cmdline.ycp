@@ -58,16 +58,7 @@
 	return true;
     }
 
-    /**
-     * Command line interface - handler for set command
-     * @param options list command options
-     * @return boolean True on success
-     */
-     define boolean setHandler(map<string, any> options) ``{
-	if (haskey(options, "variable") && haskey(options, "value"))
-	{
-	    string variable = (string) (options["variable"]:nil);
-	    string value = (string) (options["value"]:nil);
+    define boolean setHanlerProcess(string variable, string value, boolean force) {
 	    string vid = variable2id(variable);
 
 	    if (vid == nil)
@@ -75,15 +66,59 @@
 		return false;
 	    }
 
-	    symbol result = Sysconfig::set_value(vid, value, options["force"]:true, false);
+	    symbol result = Sysconfig::set_value(vid, value, force, false);
 
 	    // status message - %1 is a device name (/dev/hdc), %2 is a mode name (udma2), %3 is a result (translated Success/Failed text)
 	    CommandLine::Print(sformat(_("\nSetting variable '%1' to '%2': %3"), variable, value,
 	    // result message
 	    (result == `ok) ? _("Success") : _("Failed")));
+
+	    return (result == `ok);
+    }
+
+    /**
+     * Command line interface - handler for set command
+     * @param options list command options
+     * @return boolean True on success
+     */
+     define boolean setHandler(map<string, any> options) ``{
+	string variable = "";
+	string value = "";
+	boolean force = options["force"]:true;
+
+	if (haskey(options, "variable") && haskey(options, "value"))
+	{
+	    variable = (string) (options["variable"]:nil);
+	    value = (string) (options["value"]:nil);
+	}
+	// there is just one pair in the option map,
+	// user has called the module with option VARIABLE=value
+	else if (size(options) == 1)
+	{
+	    y2internal("options: %1", options);
+
+	    foreach(string key, any val, options, {
+		    variable = key;
+		    value = (string)val;
+		}
+	    );
 	}
 
-	return true;
+	if (variable != "" && value != "")
+	{
+	    string vid = variable2id(variable);
+
+	    if (vid == nil)
+	    {
+		// the variable was not found
+		return false;
+	    }
+
+	    // set the value
+	    return setHanlerProcess(variable, value, force);
+	}
+
+	return false;
     }
 
 

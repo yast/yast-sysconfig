@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Sep 23 14:01:57 CEST 2005 - lslezak@suse.cz
+
+- powerteak - wrap long description lines (#118517)
+- enhanced set command (in command line mode) to accept form
+  VARIABLE=value, enhanced the help text (#94417)
+- 2.13.0
+
+-------------------------------------------------------------------
 Mon Sep  5 16:43:32 CEST 2005 - lslezak@suse.cz
 
 - don't install powertweak-extra package by default (#105273)
