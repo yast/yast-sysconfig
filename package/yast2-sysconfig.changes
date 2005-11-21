@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov 21 18:05:00 CET 2005 - lslezak@suse.cz
+
+- redirect stdout and stderr output of restarted service to
+  /dev/null - do not hang at service restart (#86631)
+- version 2.13.1
+
+-------------------------------------------------------------------
 Fri Sep 23 14:01:57 CEST 2005 - lslezak@suse.cz
 
 - powerteak - wrap long description lines (#118517)
