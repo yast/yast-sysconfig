@@ -984,8 +984,8 @@ define symbol StartCommand(string start_command, string label, string error, str
 
     y2milestone("Starting: %1", start_command);
 
-    map output = (map) SCR::Execute(.target.bash_output, start_command);
-    integer exit = output["exit"]:0;
+    integer exit = (integer) SCR::Execute(.target.bash, start_command + " > /dev/null 2> /dev/null");
+
     y2milestone("Result: %1", exit);
 
     if (exit != 0)
