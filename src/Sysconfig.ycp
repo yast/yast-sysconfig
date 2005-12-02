@@ -171,7 +171,7 @@ global define string get_only_comment(string input) ``{
  * @param show_progress if true progress bar will be displayed
  * @return list<string> List of found variables (IDs)
  */
-global define list<string> search(map params, boolean show_progress) ``{
+global define list<string> Search(map params, boolean show_progress) ``{
     list<string> found = [];
 
     // get all configuration files

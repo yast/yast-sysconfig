@@ -901,7 +901,7 @@ Choose \"Cancel\" to edit the values again.
 
 	    if (search_parameters != $[])
 	    {
-		list<string> found = Sysconfig::search(search_parameters, true);
+		list<string> found = Sysconfig::Search(search_parameters, true);
 
 		if (size(found) > 0)
 		{
