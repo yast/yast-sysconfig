@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Dec  2 09:46:37 CET 2005 - lslezak@suse.cz
+
+- Sysconfig::search renamed to Search (search is a built-in
+  function now)
+- Powertweak - fixed line break in Y2CC (#135803)
+- 2.13.2
+
+-------------------------------------------------------------------
 Mon Nov 21 18:05:00 CET 2005 - lslezak@suse.cz
 
 - redirect stdout and stderr output of restarted service to
