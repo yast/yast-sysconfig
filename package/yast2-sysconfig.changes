@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May 17 13:02:34 CEST 2006 - lslezak@suse.cz
+
+- display warning if not running as root (#171197)
+- 2.13.6
+
+-------------------------------------------------------------------
 Mon Feb 20 09:42:31 CET 2006 - lslezak@suse.cz
 
 - updated BuildRequires (replaced yast2-devel-packages macro)
