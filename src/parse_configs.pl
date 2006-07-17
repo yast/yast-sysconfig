@@ -26,6 +26,9 @@
 # module for wild card file name expansion
 use File::Glob ':glob';
 
+use ycp;
+use strict;
+
 # global variable - normal or powertweak mode flag
 # used at tree widget content generation as opened/closed flag
 my $powertweak_mode = "false";
@@ -315,8 +318,23 @@ for my $arg (@ARGV)
     {
 	my @files = bsd_glob($arg);
 
+	# ignore *.bak, *~ files
+	my @source_files = ();
+
+	for my $f (@files)
+	{
+	    if (!($f =~ /\.bak$/) && !($f =~ /~$/))
+	    {
+		push(@source_files, $f);
+	    }
+	    else
+	    {
+		y2milestone("Ignoring backup file $f");
+	    }
+	}
+
 	# merge lists
-	@list = (@list, @files);
+	@list = (@list, @source_files);
     }
 }
 

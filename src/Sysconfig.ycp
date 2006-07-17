@@ -27,7 +27,7 @@ import "Mode";
 
 
 global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
-    "/etc/sysconfig/network/wireless", "/etc/sysconfig/network/dhcp",
+    "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions",
     "/etc/sysconfig/powersave/*", "/etc/sysconfig/uml/*"
     ];
@@ -203,6 +203,13 @@ global define list<string> Search(map params, boolean show_progress) ``{
     integer index = 0;
 
     foreach(string file, files, ``{
+	    // skip backup files
+	    if (regexpmatch(file, "\\.bak$") || regexpmatch(file, "~$"))
+	    {
+		y2milestone("Ignoring backup file %1", file);
+		continue;
+	    }
+
 	    // get all variables in file
 	    path var_path = add(.syseditor.value, file);
 	    list<string> variables = (list<string>)SCR::Dir(var_path);
