@@ -1026,6 +1026,9 @@ Choose \"Cancel\" to edit the values again.
 
 	    // update location in header
 	    update_location(description);
+
+	    // refresh the widgets
+	    UI::RecalcLayout();
 	}
     }
 
