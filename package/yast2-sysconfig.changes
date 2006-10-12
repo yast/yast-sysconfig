@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jul 17 13:09:32 CEST 2006 - lslezak@suse.cz
+
+- refresh UI layout after change of the selected variable (#172356)
+- ignore backup files in /etc/sysconfig directory (#177463)
+- 2.13.7
+
+-------------------------------------------------------------------
 Wed May 17 13:02:34 CEST 2006 - lslezak@suse.cz
 
 - display warning if not running as root (#171197)
