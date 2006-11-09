@@ -37,6 +37,8 @@ sysconfig:
 
 ycpchook = sysconfig
 
+SUBDIRS = config
+
 YCPCFLAGS=-I.
 
 EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(ybin_SCRIPTS) $(ydata_DATA) $(desktop_DATA)
