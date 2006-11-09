@@ -45,6 +45,7 @@ Summary:	Powertweak configuration
 @ybindir@/parse_configs.pl
 @ydatadir@/sysedit.agent
 @ydatadir@/descriptions
+@schemadir@/autoyast/rnc/sysconfig.rnc
 %doc @docdir@
 
 %files -n yast2-powertweak

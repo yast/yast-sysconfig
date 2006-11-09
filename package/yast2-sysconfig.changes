@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov  9 14:30:48 CET 2006 - lslezak@suse.cz
+
+- added RNC schema for Autoyast profile validation (#219011)
+- 2.13.8
+
+-------------------------------------------------------------------
 Mon Jul 17 13:09:32 CEST 2006 - lslezak@suse.cz
 
 - refresh UI layout after change of the selected variable (#172356)
