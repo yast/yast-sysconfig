@@ -28,6 +28,9 @@ include "sysconfig/dialogs.ycp";
  * current selected variable in the tree widget
  */
  string selected_variable = "";
+ string empty_string = "                                             ";
+ empty_string = empty_string + empty_string;
+ empty_string = empty_string + empty_string;
 
 /**
  * Return a modification status
@@ -648,7 +651,7 @@ Joined lines are displayed in the combo box.
     string l = description["location"]:"";
 
     // header label
-    UI::ChangeWidget(`id(`heading), `Value, _("Current Selection: ") + l);
+    UI::ChangeWidget(`id(`heading), `Value, _("Current Selection: ") + l + empty_string);
 }
 
 /**
@@ -810,7 +813,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
     Wizard::SetContents((Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") : _("/etc/sysconfig Editor"),
 			    `VBox(
 				// label widget
-				`Left(`Label(`id(`heading), `opt(`hstretch), _("Current Selection: "))),
+				`Left(`Label(`id(`heading), `opt(`hstretch), _("Current Selection: ") + empty_string)),
 				`VSpacing(0.5),
 				`HBox(
 				    `HWeight(1,
@@ -1026,9 +1029,6 @@ Choose \"Cancel\" to edit the values again.
 
 	    // update location in header
 	    update_location(description);
-
-	    // refresh the widgets
-	    UI::RecalcLayout();
 	}
     }
 

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Dec  8 13:43:03 CET 2006 - lslezak@suse.cz
+
+- append a long empty string to the header text to avoid cutting
+  of a long text after a change (do not use UI::RecalcLayout(),
+  it produces flickering in ncurses UI) (#227044)
+- 2.15.0
+
+-------------------------------------------------------------------
 Mon Nov 13 13:45:22 CET 2006 - lslezak@suse.cz
 
 - 2.14.0
