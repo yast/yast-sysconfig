@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar  9 13:48:02 CET 2007 - locilka@suse.cz
+
+- Removing yast2-installation from RPM dependencies.
+- 2.15.1
+
+-------------------------------------------------------------------
 Fri Dec  8 13:43:03 CET 2006 - lslezak@suse.cz
 
 - append a long empty string to the header text to avoid cutting
