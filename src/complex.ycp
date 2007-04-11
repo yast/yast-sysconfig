@@ -46,73 +46,7 @@ include "sysconfig/dialogs.ycp";
  * @return `abort if aborted and `next otherwise
  */
  define symbol ReadDialog() ``{
-    Wizard::SetHelpText(Sysconfig::powertweak_mode ? HELPS["read_powertweak"]:"" : HELPS["read"]:"");
-
-    if (Sysconfig::powertweak_mode == true)
-    {
-	// do not ask user to create powertweak configuration file
-	// after package installation - suppose "yes"
-	boolean just_installed = false;
-
-	y2debug("Powertweak MODE");
-
-	if (SCR::Read(.target.size, "/usr/sbin/powertweakd") < 0)
-	{
-	    y2warning("Package powertweak is not installed");
-
-	    // ask user to install powertweak package
-	    map ask = powertweak_install_dialog();
-
-	    if (ask["ui"]:`cancel == `cancel)
-	    {
-		return `abort;
-	    }
-
-	    // install powertweak package
-
-	    list<string> install = [ "powertweak" ];
-
-	    if (ask["extra"]:false == true)
-	    {
-		install = add(install, "powertweak-extra");
-	    }
-
-	    just_installed = Package::DoInstall(install);
-
-	    if (just_installed == false)
-	    {
-		Popup::Error(_("Package installation failed.
-Press OK to exit.
-"));
-		return `abort;
-	    }
-	}
-
-	y2debug("Installed packages: just_installed=%1", just_installed);
-
-	if (SCR::Read(.target.size, Sysconfig::powertweakconfig) == -1 || SCR::Read(.target.size, Sysconfig::powertweakconfig) == 0)
-	{
-	    // popup dialog question
-	    if (just_installed == true || Popup::AnyQuestion("", _("Powertweak configuration file does not exist.
-Create it and use powerteak?
-"), Label::YesButton(), Label::NoButton(), `focus_no) == true)
-	    {
-		// create powertweak config
-		integer exit = (integer)SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon --only-save");
-
-		if (exit != 0)
-		{
-		    y2warning("Powertweak exit code: %1", exit);
-		    // warning popup message
-		    Popup::Warning(_("Powertweak failed: configuration file may be missing or broken"));
-		}
-	    }
-	    else
-	    {
-		return `abort;
-	    }
-	}
-    }
+    Wizard::SetHelpText(HELPS["read"]:"");
 
     Sysconfig::Read();
 
@@ -124,7 +58,7 @@ Create it and use powerteak?
  * @return `abort if aborted and `next otherwise
  */
  define symbol WriteDialog() ``{
-    Wizard::SetHelpText(Sysconfig::powertweak_mode ? HELPS["write_powertweak"]:"" : HELPS["write"]:"");
+    Wizard::SetHelpText(HELPS["write"]:"");
 
     boolean ret = true;
 
@@ -365,8 +299,7 @@ Create it and use powerteak?
 	    comment = mergestring(splitstring(comment, "\n"), "<BR>");
 
 	    // do not change node descriptions
-	    // do not change descriptions in powertweak mode - leave line wrapping enabled
-	    if (file != "" && !Sysconfig::powertweak_mode)
+	    if (file != "" )
 	    {
 		// convert ' ' => '&nbsp;'
 		comment = mergestring(splitstring(comment, " "), "&nbsp;");
@@ -785,15 +718,7 @@ Really set this value?
     list<map> Tree = GenerateTree([], "", Sysconfig::tree_content) ;
     Wizard::CreateTree(Tree, _("&Configuration Options"));
 
-    string helptext = (Sysconfig::powertweak_mode == true) ?
-
-		// help text (powertweak mode)
-		_("<p>After you save your changes, this editor changes the variables in the
-/etc/powertweak/tweaks file. Then it restarts the powertweak daemon, which activates changes.</p>
-")
-
-	    :
-	    (
+    string helptext =
 		// helptext for popup - part 1/3
 		_("<p>After you save your changes, this editor changes the variables in the
 corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,
@@ -807,10 +732,9 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 		_("<p> SuSEconfig saves a checksum of each configuration file, so it can detect if
  you have manually changed any of them. If you have changed a configuration file manually,
  it will not touch it.</p>
-")
-	    );
+");
 
-    Wizard::SetContents((Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") : _("/etc/sysconfig Editor"),
+    Wizard::SetContents(_("/etc/sysconfig Editor"),
 			    `VBox(
 				// label widget
 				`Left(`Label(`id(`heading), `opt(`hstretch), _("Current Selection: ") + empty_string)),
@@ -831,8 +755,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 				),
 				`VSpacing(1),
 				// help rich text displayed after module start (1/2)
-				`RichText(`id(`rt), (Sysconfig::powertweak_mode == true) ? _("<P><B>Powertweak Configuration</B></P><P>In this configuration module, you can tune some kernel and hardware options.</P><P><B>Warning:</B> This configuration module is for experts only!</P>") :
-				    _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
+				`RichText(`id(`rt), _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because they are read directly from configuration files.</P>")),
 				// push button label - displayed only in autoinstallation config mode
@@ -887,7 +810,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 _("Here, see the values YaST2 will change.
 Choose \"OK\" for YaST2 to save these changes.
 Choose \"Cancel\" to edit the values again.
-"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), ((Sysconfig::powertweak_mode == false) ? _("Confirm Each Activation Command") : ""), false);
+"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), _("Confirm Each Activation Command"), false);
 
 		if (result["ui"]:`dummy == `cancel)
 		{

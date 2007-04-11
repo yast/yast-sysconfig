@@ -26,13 +26,11 @@ import "Service";
 import "Mode";
 
 
-global list configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
+global list<string> configfiles = ["/etc/sysconfig/*", "/etc/sysconfig/network/ifcfg-*",
     "/etc/sysconfig/network/dhcp",
     "/etc/sysconfig/network/config", Directory::ydatadir + "/descriptions",
     "/etc/sysconfig/powersave/*", "/etc/sysconfig/uml/*"
     ];
-
-global string powertweakconfig = "/etc/powertweak/tweaks";
 
 // Additional files from Import
 list custom_files = [];
@@ -58,8 +56,6 @@ global map parse_param = $[
 global boolean write_only = false;
 
 global list<list> tree_content = [];
-
-global boolean powertweak_mode = false;
 
 // map of actions to start when variable is modified
 map<string, any> actions = $[];
@@ -843,7 +839,7 @@ global define map<string, list<string> > get_all_names()
  * Register .syseditor path (use INI agent in multiple file mode)
  */
 global define void RegisterAgents() {
-    list<string> files = (Sysconfig::powertweak_mode == true) ? [powertweakconfig] : configfiles;
+    list<string> files = configfiles;
     string tmpdir = (string) SCR::Read(.target.tmpdir);
 
     if (tmpdir == nil || tmpdir == "")
@@ -853,7 +849,7 @@ global define void RegisterAgents() {
     }
 
     // register configuration files in SCR using INI-agent
-    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + (string)SCR::Read(.target.string, Directory::ydatadir + (powertweak_mode ? "/powertweak.agent" : "/sysedit.agent"));
+    string agentdef = sformat(".syseditor\n\n`ag_ini(`IniAgent( %1,\n", files) + (string)SCR::Read(.target.string, Directory::ydatadir + "/sysedit.agent");
     string tmp = tmpdir + "/sysconfig-agent.scr";
 
     SCR::Write(.target.string, tmp, agentdef);
@@ -868,7 +864,7 @@ global define boolean Read() ``{
 
     // TODO: solve custom_files parameter problem (used in Import)
     // read only powerteak config or all sysconfig files
-    list<string> files = (Sysconfig::powertweak_mode == true) ? [powertweakconfig] : configfiles;
+    list<string> files = configfiles;
 
     string tmpdir = (string) SCR::Read(.target.tmpdir);
     if (tmpdir == nil || tmpdir == "")
@@ -896,7 +892,7 @@ global define boolean Read() ``{
     foreach(string par, files, ``{param = param + "'" + par + "' ";});
 
     // create tree definition list and description map using external Perl script
-    SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + (powertweak_mode ? "--powertweak " : "") + param + "> " + tmpdir + "/treedef.ycp");
+    SCR::Execute(.target.bash, Directory::bindir + "/parse_configs.pl " + param + "> " + tmpdir + "/treedef.ycp");
 
     // read list
     list parsed_output = (list) SCR::Read(.target.ycp, tmpdir + "/treedef.ycp");
@@ -1121,10 +1117,10 @@ global define boolean Write() ``{
     });
 
     // write dialog caption
-    string caption = (powertweak_mode == true) ? _("Saving Powertweak Configuration") : _("Saving sysconfig Configuration");
+    string caption = _("Saving sysconfig Configuration");
 
     // set the right number of stages
-    integer steps = (powertweak_mode == false) ? size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + ((CompleteSuSEconfig) ? 1 : size(Configmodules)) + 1 /* flush*/ + 3 /* 3 stages */ : (size(modified_variables) + 2) /* 2 stages */;
+    integer steps = size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + ((CompleteSuSEconfig) ? 1 : size(Configmodules)) + 1 /* flush*/ + 3 /* 3 stages */;
 
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
@@ -1168,24 +1164,6 @@ global define boolean Write() ``{
 
     // now start required activation commands
     Progress::NextStage();
-
-    // activate powertweak configuration
-    if (powertweak_mode == true)
-    {
-	Progress::Title(sformat(_("Starting command: %1..."), "/usr/sbin/powertweakd --no-daemon"));
-
-	y2milestone("Activating powertweak configuration");
-	ret = (SCR::Execute(.target.bash, "/usr/sbin/powertweakd --no-daemon") == 0);
-
-	if (ret == false)
-	{
-	    return ret;
-	}
-
-	// activate powertweak at startup
-	ret = Service::Enable("powertweakd");
-	return ret;
-    }
 
     // start SuSEconfig
     if (CompleteSuSEconfig == true)

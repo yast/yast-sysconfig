@@ -6,8 +6,7 @@ yncludedir = @yncludedir@/sysconfig
 
 client_DATA =			\
 	sysconfig.ycp		\
-	sysconfig_auto.ycp	\
-	powertweak.ycp
+	sysconfig_auto.ycp
 
 ynclude_DATA =			\
 	helps.ycp		\
@@ -18,8 +17,7 @@ ynclude_DATA =			\
 	routines.ycp
 
 desktop_DATA =			\
-	sysconfig.desktop	\
-	powertweak.desktop
+	sysconfig.desktop
 
 module_DATA =			\
 	Sysconfig.ycp
@@ -29,7 +27,6 @@ ybin_SCRIPTS =			\
 
 ydata_DATA =                    \
 	sysedit.agent		\
-	powertweak.agent	\
 	descriptions
 
 sysconfig:

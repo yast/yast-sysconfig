@@ -32,11 +32,9 @@ include "sysconfig/cmdline.ycp";
      * Command line definition
      */
     map cmdline = $[
-	// help text header - configuration of 'powertweak' utility
-	"help"      : (Sysconfig::powertweak_mode == true) ? _("Powertweak Configuration") :
 	// help text header - sysconfig editor
-	 _("Editor for /etc/sysconfig Files"),
-	"id"        : (Sysconfig::powertweak_mode == true) ? "powertweak" : "sysconfig",
+	"help"      : _("Editor for /etc/sysconfig Files"),
+	"id"        : "sysconfig",
 	"guihandler": SysconfigSequence,
 	"initialize": Sysconfig::Read,
 	// use write handler - disable progress bar

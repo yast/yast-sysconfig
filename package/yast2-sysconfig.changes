@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 11 14:08:40 CEST 2007 - lslezak@suse.cz
+
+- dropped yast2-powertweak subpackage (FATE #301978)
+- 2.15.2
+
+-------------------------------------------------------------------
 Fri Mar  9 13:48:02 CET 2007 - locilka@suse.cz
 
 - Removing yast2-installation from RPM dependencies.

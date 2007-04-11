@@ -51,7 +51,7 @@ include "sysconfig/dialogs.ycp";
  */
  define symbol SysconfigAutoSequence() ``{
     Wizard::CreateDialog();
-    Wizard::SetDesktopIcon(Sysconfig::powertweak_mode ? "powertweak" : "sysconfig");
+    Wizard::SetDesktopIcon("sysconfig");
 
     // initialization
     if (Mode::config() && !Sysconfig::Modified() && (Sysconfig::tree_content == nil || size(Sysconfig::tree_content) == 0))
@@ -94,7 +94,7 @@ include "sysconfig/dialogs.ycp";
     ];
 
     Wizard::CreateDialog();
-    Wizard::SetDesktopIcon(Sysconfig::powertweak_mode ? "powertweak" : "sysconfig");
+    Wizard::SetDesktopIcon("sysconfig");
 
     any ret = Sequencer::Run(aliases, sequence);
 
