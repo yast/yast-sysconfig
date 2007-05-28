@@ -23,7 +23,6 @@ y2milestone ("Sysconfig module started");
 
 import "Sysconfig";
 import "CommandLine";
-import "Confirm";
 
 include "sysconfig/wizards.ycp";
 include "sysconfig/cmdline.ycp";
@@ -96,11 +95,6 @@ include "sysconfig/cmdline.ycp";
 	    "details" : ["variable"]
 	]
     ];
-
-if (!Confirm::MustBeRoot())
-{
-    return (any)`abort;
-}
 
 /* main ui function */
 any ret = CommandLine::Run(cmdline);

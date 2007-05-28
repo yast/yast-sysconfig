@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May 28 07:16:57 CEST 2007 - lslezak@suse.cz
+
+- check UID after evaluating command line arguments (#269909)
+- 2.15.3
+
+-------------------------------------------------------------------
 Fri May 25 13:30:04 CEST 2007 - jsrain@suse.cz
 
 - removed outdated translations from .desktop-files (#271209)
