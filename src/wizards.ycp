@@ -17,6 +17,7 @@ import "Sysconfig";
 import "Popup";
 import "Label";
 import "Sequencer";
+import "Confirm";
 
 include "sysconfig/complex.ycp";
 include "sysconfig/dialogs.ycp";
@@ -65,6 +66,17 @@ include "sysconfig/dialogs.ycp";
     return ret;
 }
 
+define symbol CheckRoot()
+{
+    if (!Confirm::MustBeRoot())
+    {
+	return `abort;
+    }
+
+    return `next;
+}
+
+
 /**
  * Whole configuration of sysconfig
  * @return sequence result
@@ -72,13 +84,18 @@ include "sysconfig/dialogs.ycp";
  define boolean SysconfigSequence() ``{
 
     map aliases = $[
+	"check"	: [ ``( CheckRoot() ), true ],
 	"read"	: [ ``( ReadDialog() ), true ],
 	"main"	:   ``( MainSequence() ),
 	"write"	: [ ``( WriteDialog() ), true ]
     ];
 
     map sequence = $[
-	"ws_start" : "read",
+	"ws_start" : "check",
+	"check" : $[
+	    `next	: "read",
+	    `abort	: `abort
+	],
 	"read" : $[
 	    `abort	: `abort,
 	    `next	: "main"
