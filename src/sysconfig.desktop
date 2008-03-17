@@ -23,3 +23,4 @@ Exec=/sbin/yast2 sysconfig
 Name=/etc/sysconfig Editor
 GenericName=Change settings in /etc/sysconfig configuration files
 X-KDE-SubstituteUID=true
+StartupNotify=true
