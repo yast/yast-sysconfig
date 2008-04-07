@@ -95,7 +95,7 @@
 	// user has called the module with option VARIABLE=value
 	else if (size(options) == 1)
 	{
-	    y2internal("options: %1", options);
+	    y2milestone("options: %1", options);
 
 	    foreach(string key, any val, options, {
 		    variable = key;
@@ -104,7 +104,7 @@
 	    );
 	}
 
-	if (variable != "" && value != "")
+	if (variable != "")
 	{
 	    string vid = variable2id(variable);
 
@@ -130,6 +130,9 @@
      define boolean clearHandler(map<string, any> options) ``{
 	// set empty value
 	options["value"] = "";
+
+	// do not check if the value is valid
+	options["force"] = true;
 
 	// call set handler
 	return setHandler(options);

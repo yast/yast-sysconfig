@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr  7 16:51:11 CEST 2008 - lslezak@suse.cz
+
+- 'clear' command line option works properly (bnc#377068)
+- 2.16.0
+
+-------------------------------------------------------------------
 Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
 
 - added 'StartupNotify=true' to the desktop file (bnc #304964)
