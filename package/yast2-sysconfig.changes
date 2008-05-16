@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 16 16:40:22 CEST 2008 - jsrain@suse.cz
+
+- added categories Settings and System into desktop file
+  (bnc #382778)
+
+-------------------------------------------------------------------
 Mon Apr  7 16:51:11 CEST 2008 - lslezak@suse.cz
 
 - 'clear' command line option works properly (bnc#377068)
