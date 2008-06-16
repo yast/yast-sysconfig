@@ -14,7 +14,6 @@ textdomain "sysconfig";
 import "Wizard";
 import "Sysconfig";
 import "Mode";
-import "Package";
 import "String";
 
 import "Popup";
@@ -766,11 +765,11 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 	),
 	helptext, true, true);
 
-    if (UI::WidgetExists(`id(`back)))
-    {
-        UI::ChangeWidget(`id(`back), `Label,  _("&Search") );
-    }
-    UI::ChangeWidget(`id(`next), `Label, Label::FinishButton() );
+    // push button label
+    Wizard::SetBackButton(`back, _("&Search"));
+    Wizard::SetNextButton(`next, Label::OKButton());
+    Wizard::SetAbortButton(`abort, Label::CancelButton());
+
     if (UI::WidgetExists(`id(`wizardTree)))
     {
         UI::ReplaceWidget(`id(`rep_button_box ), button_box );
