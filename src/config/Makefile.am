@@ -1,7 +1,7 @@
 #
 # Makefile.am for sysconfig/src/config
 #
-# $Id:$
+# $Id$
 #
 
 schemafilesdir =  $(schemadir)/autoyast/rnc
