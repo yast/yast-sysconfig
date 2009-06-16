@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 16 14:29:29 CEST 2009 - mvidner@suse.cz
+
+- Using autodocs-ycp.ami, which contains a fix for automake 1.11.
+
+-------------------------------------------------------------------
 Mon Jun 16 14:18:31 CEST 2008 - lslezak@suse.cz
 
 - OK/Cancel button in the main dialog (bnc#398491)
