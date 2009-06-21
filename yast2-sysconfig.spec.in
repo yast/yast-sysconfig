@@ -15,7 +15,8 @@ Obsoletes:	yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
 Summary:	YaST2 - Sysconfig Editor
 
 %description
--
+A graphical /etc/sysconfig/* editor with integrated search and context
+information.
 
 @PREP@
 
