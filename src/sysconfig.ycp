@@ -79,7 +79,11 @@ include "sysconfig/cmdline.ycp";
 	    ],
 	    "variable" : $[
 		// help text for option 'variable'
-		"help"      : _("Selected variable"),
+		"help"      : [ _("Selected variable"),
+		    _("If the variable is available in several files use"),
+		    _("<variable>$<file_name> syntax,"),
+		    _("for example CONFIG_TYPE$/etc/sysconfig/mail.")
+		],
 		"type"      : "string"
 	    ],
 	    "value" : $[
