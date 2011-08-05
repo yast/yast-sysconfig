@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug  5 12:35:30 CEST 2011 - tgoettlicher@suse.de
+
+- fixed .desktop file (bnc #681249)
+
+-------------------------------------------------------------------
 Wed Jul 27 12:53:34 UTC 2011 - lslezak@suse.cz
 
 - command line help text - added description and example for full
