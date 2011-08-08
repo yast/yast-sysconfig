@@ -50,7 +50,7 @@ include "sysconfig/routines.ycp";
 			    `HSpacing(2)
 			  ),
 		      `VSpacing(0.5),
-		      `HBox(
+		      `ButtonBox(
 			  // push button label
 			  `PushButton(`id(`ok), `opt(`default, `key_F10), Label::OKButton()),
 			  // push button label
@@ -102,14 +102,14 @@ include "sysconfig/routines.ycp";
 	    `VBox(`HSpacing(70),
 		//heading of popup
 		`Heading(header),
-		`Label(label),
+		label == "" ? `Empty() : `Label(label),
 		`VSpacing(0.5),
 
 		// table column header
 		`Table(`id(`table),`header(_("Name"), _("NEW VALUE"), _("Old Value"), _("File"), _("Description")), table_content),
 		(size(checkboxlabel) > 0) ? `CheckBox(`id(`chbox), checkboxlabel, checkboxvalue) : `Empty(),
 		`VSpacing(0.5),
-		`HBox(
+		`ButtonBox(
 		    // push button label
 		    `PushButton(`id(`action), `opt(`default, `key_F10), ok_label),
 		    // push button label
@@ -157,7 +157,7 @@ include "sysconfig/routines.ycp";
 		`TextEntry(`id(`file), _("&File Name"), "")
 	    ),
 	    `VSpacing(1),
-	    `HBox(
+	    `ButtonBox(
 		`PushButton(`id(`ok), `opt(`key_F10), Label::OKButton()),
 		`PushButton(`id(`cancel), `opt(`key_F9), Label::CancelButton())
 	    )

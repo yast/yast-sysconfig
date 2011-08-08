@@ -803,13 +803,10 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 
 		y2milestone("Modified variables: %1", modified);
 
-		// popup dialog header
-		map result = display_variables_dialog(_("Modified Variables"),
-// help text in popup dialog
-_("Here, see the values YaST2 will change.
-Choose \"OK\" for YaST2 to save these changes.
-Choose \"Cancel\" to edit the values again.
-"),			create_table_content(modified), Label::OKButton(), Label::CancelButton(), _("Confirm Each Activation Command"), false);
+		// popup dialog header - confirm to save the changes
+		map result = display_variables_dialog(_("Save Modified Variables"), "",
+			// checkbox label
+			create_table_content(modified), Label::SaveButton(), Label::CancelButton(), _("Confirm Each Activation Command"), false);
 
 		if (result["ui"]:`dummy == `cancel)
 		{
