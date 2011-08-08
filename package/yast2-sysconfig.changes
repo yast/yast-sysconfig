@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug  8 11:35:31 UTC 2011 - lslezak@suse.cz
+
+- use ButtonBox for push button widgets (bnc#701273)
+- removed unnecessary text from summary dialog
+- 2.21.1
+
+-------------------------------------------------------------------
 Fri Aug  5 12:35:30 CEST 2011 - tgoettlicher@suse.de
 
 - fixed .desktop file (bnc #681249)
