@@ -774,7 +774,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
     {
         UI::ReplaceWidget(`id(`rep_button_box ), button_box );
     }
-    Wizard::SetDesktopIcon("sysconfig");
+    Wizard::SetDesktopTitleAndIcon("sysconfig");
 
     any ret = nil;
 
