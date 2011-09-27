@@ -52,7 +52,7 @@ include "sysconfig/dialogs.ycp";
  */
  define symbol SysconfigAutoSequence() ``{
     Wizard::CreateDialog();
-    Wizard::SetDesktopIcon("sysconfig");
+    Wizard::SetDesktopTitleAndIcon("sysconfig");
 
     // initialization
     if (Mode::config() && !Sysconfig::Modified() && (Sysconfig::tree_content == nil || size(Sysconfig::tree_content) == 0))
@@ -111,7 +111,7 @@ define symbol CheckRoot()
     ];
 
     Wizard::CreateDialog();
-    Wizard::SetDesktopIcon("sysconfig");
+    Wizard::SetDesktopTitleAndIcon("sysconfig");
 
     any ret = Sequencer::Run(aliases, sequence);
 
