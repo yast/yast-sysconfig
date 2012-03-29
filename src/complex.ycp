@@ -754,7 +754,7 @@ and runs low-level configuration tools so your configuration in sysconfig takes 
 				),
 				`VSpacing(1),
 				// help rich text displayed after module start (1/2)
-				`RichText(`id(`rt), _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST2 to configure your hardware and system settings.</P>") +
+				`RichText(`id(`rt), _("<P><B>System Configuration Editor</B></P><P>With the system configuration editor, you can change some system settings. You can also use YaST to configure your hardware and system settings.</P>") +
 				// help rich text displayed after module start (2/2)
 				    _("<P><B>Note:</B> Descriptions are not translated because they are read directly from configuration files.</P>")),
 				// push button label - displayed only in autoinstallation config mode
