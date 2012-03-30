@@ -395,37 +395,9 @@ include "sysconfig/dialogs.ycp";
 	return nil;
     }
 
-    string  ret = "";
-    integer index = 0;
-    boolean backslash = false;
+    string ret = regexpsub(input, "(.*)\\([^$].*)", "\\1\\2");
 
-    while (index < size(input))
-    {
-	string ch = substring(input, index, 1);
-	string ch_1 = substring(input, index + 1, 1);
-
-	if (backslash == false)
-	{
-	    // don't remove backslash before \$ (#34809)
-	    if (ch == "\\" && ch_1 != nil && ch_1 != "$")
-	    {
-		backslash = true;
-	    }
-	    else
-	    {
-		ret = ret + ch;
-	    }
-	}
-	else
-	{
-	    ret = ret + ch;
-	    backslash = false;
-	}
-
-	index = index + 1;
-    }
-
-    return ret;
+    return (ret == nil) ? input : ret;
 }
 
 /**
@@ -444,7 +416,7 @@ include "sysconfig/dialogs.ycp";
 	value = (haskey(description, "Default")) ? description["Default"]:"" : "";
     }
 
-    if (description["actions","SingleQt"]:"" == "")
+    if (description["actions","SingleQt"]:"" == "1")
     {
 	new_value = backslash_remove(new_value);
 	value = backslash_remove(value);
@@ -608,7 +580,7 @@ Joined lines are displayed in the combo box.
 	map d = Sysconfig::get_description(selected_variable);
 
 	// check whether single quotes are used in the configuration file
-	if (d["actions", "SingleQt"]:"" == "")
+	if (d["actions", "SingleQt"]:"" == "1")
 	{
 	    new_value = backslash_add(new_value);
 	}
