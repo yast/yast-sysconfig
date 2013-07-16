@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 16 08:45:18 UTC 2013 - lslezak@suse.cz
+
+- do not call /sbin/SuSEconfig, it has been dropped (bnc#828254)
+- 2.24.0
+
+-------------------------------------------------------------------
 Fri Mar 30 14:18:00 UTC 2012 - lslezak@suse.cz
 
 - fixed displaying UTF-8 values (bnc#728588), fixed handling values
