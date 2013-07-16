@@ -1008,18 +1008,12 @@ define symbol StartCommand(string start_command, string label, string error, str
 global define boolean Write() ``{
 
     // remember all actions - start each action only once
-    map<string,boolean> Configmodules = $[];
     map<string,boolean> Restarted = $[];
     map<string,boolean> Reloaded = $[];
     map<string,boolean> Commands = $[];
-    // will be complete SuSEconfig started?
-    boolean CompleteSuSEconfig = false;
 
     // aborted?
     boolean abort = false;
-
-    // SuSEconfig script name
-    string SuSEconfigName = "SuSEconfig";
 
     // start presave commands
     foreach (string vid, string new_val, modified_variables, ``{
@@ -1043,17 +1037,6 @@ global define boolean Write() ``{
 		{
 		    abort = true;
 		}
-		else if (precommandresult == `failed)
-		{
-		    // PreSaveCommand returned non zero value
-		    // remove activation data for failed variable
-		    // (insert empty Command: to not start complete SuSEconfig)
-		    actions[vid] = $["Cmd" : ""];
-		}
-		else if (precommandresult != `success && precommandresult != `skip)
-		{
-		    y2error("Unknown return value from StartCommand(): %1", precommandresult);
-		}
 	    }
 	}
     );
@@ -1069,58 +1052,39 @@ global define boolean Write() ``{
 
 	string restart_service = (string) (activate["Rest"]:nil);
 	string reload_service = (string) (activate["Reld"]:nil);
-	string config_module = (string) (activate["Cfg"]:nil);
 	string bash_command = (string) (activate["Cmd"]:nil);
 
-	if (config_module == nil && reload_service == nil && restart_service == nil && bash_command == nil && CompleteSuSEconfig == false && !write_only)
-	{
-	    // start complete SuSEconfig (backward compatibility)
-	    CompleteSuSEconfig = true;
-	}
-	else
-	{
-	    if (restart_service != nil && size(restart_service) > 0)
-	    {
-		list<string> parsed = String::ParseOptions(restart_service, parse_param);
-		foreach(string s, parsed,
-		    ``{
-			Restarted[s] = true;
-		    }
-		);
-	    }
+        if (restart_service != nil && size(restart_service) > 0)
+        {
+            list<string> parsed = String::ParseOptions(restart_service, parse_param);
+            foreach(string s, parsed,
+                ``{
+                    Restarted[s] = true;
+                }
+            );
+        }
 
-	    if (reload_service != nil && size(reload_service) > 0)
-	    {
-		list<string> parsed = String::ParseOptions(reload_service, parse_param);
-		foreach(string s, parsed,
-		    ``{
-			Reloaded[s] = true;
-		    }
-		);
-	    }
+        if (reload_service != nil && size(reload_service) > 0)
+        {
+            list<string> parsed = String::ParseOptions(reload_service, parse_param);
+            foreach(string s, parsed,
+                ``{
+                    Reloaded[s] = true;
+                }
+            );
+        }
 
-	    if (config_module != nil && size(config_module) > 0)
-	    {
-		list<string> parsed = String::ParseOptions(config_module, parse_param);
-		foreach(string s, parsed,
-		    ``{
-			Configmodules[s] = true;
-		    }
-		);
-	    }
-
-	    if (bash_command != nil && size(bash_command) > 0)
-	    {
-		Commands[bash_command] = true;
-	    }
-	}
+        if (bash_command != nil && size(bash_command) > 0)
+        {
+            Commands[bash_command] = true;
+        }
     });
 
     // write dialog caption
     string caption = _("Saving sysconfig Configuration");
 
     // set the right number of stages
-    integer steps = size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + ((CompleteSuSEconfig) ? 1 : size(Configmodules)) + 1 /* flush*/ + 3 /* 3 stages */;
+    integer steps = size(modified_variables) + size(Restarted) + size(Reloaded) + size(Commands) + 1 /* flush*/ + 3 /* 3 stages */;
 
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
@@ -1164,50 +1128,6 @@ global define boolean Write() ``{
 
     // now start required activation commands
     Progress::NextStage();
-
-    // start SuSEconfig
-    if (CompleteSuSEconfig == true)
-    {
-	// action command is missing, start complete SuSEconfig (backward compatibility)
-	string start_command = "/sbin/SuSEconfig";
-	// message
-	string confirm = _("All configuration scripts will be started.");
-	// progeress bar label
-	string label = _("Starting configuration scripts...");
-	// Error message
-	string error = _("Configuration script failed.");
-
-	Progress::NextStep();
-
-	if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
-	{
-	    return false;
-	}
-    }
-    else if (size(Configmodules) > 0)
-    {
-	// start only required SuSEconfig modules
-	foreach(string modulename, boolean dummy, Configmodules,
-	``{
-	    if (abort) return;
-
-	    // action command is missing, start complete SuSEconfig (backward compatibility)
-	    string start_command = sformat("/sbin/SuSEconfig --module %1", modulename);
-	    string confirm = sformat(_("Configuration module %1 will be started."), modulename);
-	    // progress bar label - %1 is module name
-	    string label = sformat(_("Starting configuration module %1..."), modulename);
-	    // error message (config module failed) - %1 is module name
-	    string error = sformat(_("Configuration module %1 failed."), modulename);
-
-	    Progress::NextStep();
-
-	    if (StartCommand(start_command, label, error, confirm, ConfirmActions) == `abort)
-	    {
-		abort = true;
-	    }
-	}
-	);
-    }
 
     if (abort) return false;
 
