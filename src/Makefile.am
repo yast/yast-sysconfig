@@ -1,43 +1,35 @@
-#
-# Makefile.am for devtools/devtools/skeletons/config/src
-#
+# Sources for sysconfig
+
+module_DATA = \
+  modules/Sysconfig.rb
+
+client_DATA = \
+  clients/sysconfig_auto.rb \
+  clients/sysconfig.rb
 
 yncludedir = @yncludedir@/sysconfig
+ynclude_DATA = \
+  include/sysconfig/wizards.rb \
+  include/sysconfig/dialogs.rb \
+  include/sysconfig/complex.rb \
+  include/sysconfig/routines.rb \
+  include/sysconfig/cmdline.rb \
+  include/sysconfig/helps.rb
 
-client_DATA =			\
-	sysconfig.ycp		\
-	sysconfig_auto.ycp
+schemafilesdir = $(schemadir)/autoyast/rnc
+schemafiles_DATA = \
+  autoyast-rnc/sysconfig.rnc
 
-ynclude_DATA =			\
-	helps.ycp		\
-	wizards.ycp		\
-	dialogs.ycp		\
-	complex.ycp		\
-	cmdline.ycp		\
-	routines.ycp
+ybin_SCRIPTS = \
+  bin/parse_configs.pl
 
-desktop_DATA =			\
-	sysconfig.desktop
+ydata_DATA = \
+  data/descriptions \
+  data/sysedit.agent
 
-module_DATA =			\
-	Sysconfig.ycp
+desktop_DATA = \
+  desktop/sysconfig.desktop
 
-ybin_SCRIPTS =			\
-	parse_configs.pl
-
-ydata_DATA =                    \
-	sysedit.agent		\
-	descriptions
-
-sysconfig:
-	ln -sf . sysconfig
-
-ycpchook = sysconfig
-
-SUBDIRS = config
-
-YCPCFLAGS=-I.
-
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(ybin_SCRIPTS) $(ydata_DATA) $(desktop_DATA)
+EXTRA_DIST = $(module_DATA) $(client_DATA) $(ynclude_DATA) $(schemafiles_DATA) $(ybin_SCRIPTS) $(ydata_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
