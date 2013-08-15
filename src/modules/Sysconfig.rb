@@ -135,7 +135,7 @@ module Yast
         else
           ret = Ops.add(Ops.add(ret, com_line), "\n")
         end
-      end 
+      end
 
 
       ret
@@ -238,7 +238,7 @@ module Yast
           index = Ops.add(index, 1)
           UI.ChangeWidget(Id(:progress), :Value, index)
         end
-      end 
+      end
 
 
       UI.CloseDialog if show_progress == true
@@ -321,7 +321,7 @@ module Yast
           # add line to the previous lines
           multiline = Ops.add(multiline, part)
         end
-      end 
+      end
 
 
       Builtins.y2debug(
@@ -361,7 +361,7 @@ module Yast
             Builtins.y2warning("Unknown metadata line: %1", metaline)
           end
         end
-      end 
+      end
 
 
       deep_copy(ret)
@@ -714,7 +714,7 @@ module Yast
 
       Builtins.foreach(@modified_variables) do |varid, new_value|
         ret = Builtins.add(ret, varid)
-      end 
+      end
 
 
       deep_copy(ret)
@@ -727,7 +727,7 @@ module Yast
 
       Builtins.foreach(@variable_locations) do |varid, new_value|
         ret = Builtins.add(ret, varid)
-      end 
+      end
 
 
       deep_copy(ret)
@@ -749,7 +749,7 @@ module Yast
         else
           ret = Builtins.add(ret, name, [varid])
         end
-      end 
+      end
 
 
       deep_copy(ret)
@@ -977,7 +977,7 @@ module Yast
 
           abort = true if precommandresult == :abort
         end
-      end 
+      end
 
 
       return false if abort
@@ -1066,7 +1066,7 @@ module Yast
         # progress bar label, %1 is variable name (e.g. DISPLAYMANAGER)
         Progress.Title(Builtins.sformat(_("Saving variable %1..."), name))
         Progress.NextStep
-      end 
+      end
 
 
       Progress.Title(_("Saving changes to the files..."))
