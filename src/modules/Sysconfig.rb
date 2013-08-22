@@ -13,6 +13,7 @@ require "yast"
 
 module Yast
   class SysconfigClass < Module
+
     def main
       Yast.import "UI"
       textdomain "sysconfig"
@@ -41,9 +42,6 @@ module Yast
       # Additional files from Import
       @custom_files = []
 
-      # all read variables
-      @variables = {}
-
       # modified variables
       @modified_variables = {}
 
@@ -69,6 +67,10 @@ module Yast
       @ConfirmActions = false
 
       @config_modified = false
+    end
+
+    def inspect
+      "<#{self} @config_files=#{@configfiles} >"
     end
 
     # Data was modified?

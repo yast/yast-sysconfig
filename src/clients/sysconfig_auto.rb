@@ -77,7 +77,7 @@ module Yast
       Builtins.y2milestone("Sysconfig autoinit client finished")
       Builtins.y2milestone("----------------------------------")
 
-      deep_copy(@ret) 
+      deep_copy(@ret)
       # EOF
     end
   end
