@@ -23,6 +23,7 @@ describe "When we want to view or edit config files" do
       var_value = get_value(var_name)
       var_value.wont_be_empty
       get_config_metadata(var_name,:postfix)['Type'].must_match /#{var_value}/
+      config_file_contains?(var_name, var_value).must_equal true
     end
   end
 end

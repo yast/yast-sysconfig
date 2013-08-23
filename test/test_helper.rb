@@ -25,7 +25,7 @@ module TestHelpers
 
   attr_reader :sysconfig, :context
 
-  FILES_DIR = Pathname.new(File.join 'files')
+  FILES_DIR = Pathname.new(File.expand_path( '../files', __FILE__))
   TMP_DIR   = Pathname.new(File.expand_path('../tmp', __FILE__))
 
   # If needed extend this map as required
@@ -61,6 +61,12 @@ module TestHelpers
   # Proxy to sysconfig to get the value of some configuration variable
   def get_value config_variable
     get_config_value(config_variable, self.context)
+  end
+
+  # Check the written config file for the new value without using the
+  # yast built-in mechanizm
+  def config_file_contains?(variable, value=nil)
+    !(File.readlines(sample_path).grep(/^\s*#{variable}\s*=.*#{value}/).empty?)
   end
 
   # Proxy to sysconfig.set_value to make it shorter

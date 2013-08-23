@@ -10,16 +10,19 @@ describe "Change variables in config files" do
   it "should save the changed postfix variable value" do
     load_sample :postfix do
       var_name = "POSTFIX_MYHOSTNAME"
-      original_value = get_value(var_name)
       new_value = "suse.cz"
       sysconfig.Read
+      original_value = get_value(var_name)
       set_value(var_name, new_value)
       sysconfig.Modified.must_equal true
       modified_var?(var_name).wont_equal false
       sysconfig.Summary.must_match(/#{var_name}.*#{new_value}/)
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
+      config_file_contains?(var_name, new_value).must_equal true
       sysconfig.Read
-      get_value(var_name).must_equal(new_value)
+      changed_var_value = get_value(var_name)
+      changed_var_value.must_equal(new_value)
+      changed_var_value.wont_equal(original_value)
     end
   end
 
@@ -32,6 +35,7 @@ describe "Change variables in config files" do
       set_value(var_name, new_value)
       sysconfig.Modified.must_equal false
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
+      config_file_contains?(var_name, new_value).must_equal false
       sysconfig.Read
       get_value(var_name).must_equal(original_value)
     end
@@ -47,6 +51,7 @@ describe "Change variables in config files" do
       set_value(var_name, new_value)
       sysconfig.Modified.must_equal false
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
+      config_file_contains?(var_name, new_value).must_equal false
       sysconfig.Read
       get_value(var_name).must_be_empty
     end
@@ -63,6 +68,7 @@ describe "Change variables in config files" do
       modified_var?(variable_name).wont_equal false
       sysconfig.Summary.must_match(/#{variable_name}.*#{new_value}/)
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
+      config_file_contains?(variable_name, new_value).must_equal true
       sysconfig.Read
       get_value(variable_name).must_equal(new_value)
     end
