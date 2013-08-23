@@ -19,7 +19,7 @@ describe "When we want to view or edit config files" do
     paths = sysconfig.instance_variable_get(:@variable_locations).keys.map do |vars|
       vars.split('$').last
     end.uniq
-    paths.all? {|p| samples.index(p) }.must_equal(true)
+    paths.all? {|p| sample_files.index(p) }.must_equal(true)
     sysconfig.Modified.must_equal false
   end
 end
