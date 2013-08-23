@@ -88,8 +88,12 @@ module TestHelpers
     ( sysconfig.get_all_names[config_variable] || [] ).first
   end
 
-  def get_config_value config_variable_name, config_context
-    sysconfig.get_description("#{config_variable_name}$#{sample_path(config_context)}")['value'].to_s
+  def get_config_value variable_name, config_context=nil
+    sysconfig.get_description("#{variable_name}$#{sample_path(config_context || context)}")['value'].to_s
+  end
+
+  def get_config_metadata variable_name, config_context
+    sysconfig.get_description("#{variable_name}$#{sample_path(config_context)}")
   end
 
   # Use you want to work with a single sample file or with all of them

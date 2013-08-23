@@ -26,19 +26,33 @@ describe "Change variables in config files" do
   it "should not change configuration due to incorrect variable value" do
     load_sample :yast2 do
       var_name = 'USE_SNAPPER'
-      new_value = 'Not at weekends, baby'
+      new_value = 'Not at weekends and on christmas'
       sysconfig.Read
       original_value = get_value(var_name)
       set_value(var_name, new_value)
       sysconfig.Modified.must_equal false
-      sysconfig.Summary.wont_match(/#{var_name}.*#{new_value}/)
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
       sysconfig.Read
       get_value(var_name).must_equal(original_value)
     end
   end
 
-  it "should set hostname for dhcp client to yes" do
+  it "should ignore the unknown variable name" do
+    load_sample :postfix do
+      var_name = 'GMAIL_LISTEN'
+      new_value = 'YEEEES'
+      sysconfig.Read
+      original_value = get_value(var_name)
+      original_value.must_be_empty
+      set_value(var_name, new_value)
+      sysconfig.Modified.must_equal false
+      sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
+      sysconfig.Read
+      get_value(var_name).must_be_empty
+    end
+  end
+
+  it "should successfully change network client hostname settings" do
     load_sample :network_dhcp do
       variable_name = 'DHCLIENT_SET_HOSTNAME'
       original_value = get_value(variable_name)
