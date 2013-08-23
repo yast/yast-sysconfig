@@ -19,8 +19,12 @@ describe "Change variables in config files" do
       sysconfig.Summary.must_match(/#{var_name}.*#{new_value}/)
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
       sysconfig.Read
-      get_value(var_name).must_equal new_value
+      get_value(var_name).must_equal(new_value)
     end
+  end
+
+  it "should fail due to incorrect variable value" do
+    #TODO
   end
 
   it "should set hostname for dhcp client to yes" do
@@ -35,7 +39,7 @@ describe "Change variables in config files" do
       sysconfig.Summary.must_match(/#{variable_name}.*#{new_value}/)
       sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
       sysconfig.Read
-      get_value(variable_name).must_equal new_value
+      get_value(variable_name).must_equal(new_value)
     end
   end
 end

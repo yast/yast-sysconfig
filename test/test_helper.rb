@@ -40,8 +40,8 @@ module TestHelpers
 
   # Create the sysconfig object
   # Useful for before{} block in test examples
-  # FIXME Reinitializing in a test example causes segfaulting => do not
-  # call this method in any it{} block
+  # FIXME Reinitializing in a test example causes segfaulting once you have
+  # called sysconfig.Read
   def initialize_sysconfig
     @sysconfig = Yast::SysconfigClass.new
     sysconfig.main
@@ -78,8 +78,9 @@ module TestHelpers
   end
 
   # Get the tmp path to the named file
-  def file_path name
-    TMP_DIR.join(FILES[name]).to_path
+  def sample_path name=nil
+    return TMP_DIR.join(FILES[context]).to_s unless name
+    TMP_DIR.join(FILES[name]).to_s
   end
 
   # This ugly method is needed when calling #set_value on sysconfig
@@ -88,7 +89,7 @@ module TestHelpers
   end
 
   def get_config_value config_variable_name, config_context
-    sysconfig.get_description("#{config_variable_name}$#{file_path(config_context)}")['value'].to_s
+    sysconfig.get_description("#{config_variable_name}$#{sample_path(config_context)}")['value'].to_s
   end
 
   # Use you want to work with a single sample file or with all of them
