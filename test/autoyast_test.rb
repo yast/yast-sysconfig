@@ -7,10 +7,10 @@ describe "Import and export of autoyast configuration" do
     initialize_sysconfig
   end
 
-  it "accepts configuration values" do
-    var_name  = 'FIREWALL'
-    var_value = 'no'
+  it "can import configuration values" do
     load_sample :network_config do
+      var_name  = 'FIREWALL'
+      var_value = 'no'
       profile_values = [{
         'sysconfig_key'   => var_name,
         'sysconfig_value' => var_value,

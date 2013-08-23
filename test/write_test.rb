@@ -23,8 +23,19 @@ describe "Change variables in config files" do
     end
   end
 
-  it "should fail due to incorrect variable value" do
-    #TODO
+  it "should not change configuration due to incorrect variable value" do
+    load_sample :yast2 do
+      var_name = 'USE_SNAPPER'
+      new_value = 'Not at weekends, baby'
+      sysconfig.Read
+      original_value = get_value(var_name)
+      set_value(var_name, new_value)
+      sysconfig.Modified.must_equal false
+      sysconfig.Summary.wont_match(/#{var_name}.*#{new_value}/)
+      sysconfig.stub(:StartCommand, :success) { sysconfig.Write.must_equal true }
+      sysconfig.Read
+      get_value(var_name).must_equal(original_value)
+    end
   end
 
   it "should set hostname for dhcp client to yes" do
