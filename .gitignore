@@ -1,5 +1,4 @@
 Makefile
-Makefile.am
 Makefile.in
 *.m4
 *.ami
