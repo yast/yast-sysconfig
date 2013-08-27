@@ -28,7 +28,6 @@ module TestHelpers
   FILES_DIR = Pathname.new(File.expand_path( '../files', __FILE__))
   TMP_DIR   = Pathname.new(File.expand_path('../tmp', __FILE__))
 
-
   # If needed extend this map as required
   # Every file listed here should exist in the directory FILES_DIR
   # Otherwise exception will be raised while loading the file to TMP_DIR during tests

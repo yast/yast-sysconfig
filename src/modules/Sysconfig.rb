@@ -13,7 +13,6 @@ require "yast"
 
 module Yast
   class SysconfigClass < Module
-
     def main
       Yast.import "UI"
       textdomain "sysconfig"
@@ -70,7 +69,7 @@ module Yast
     end
 
     def inspect
-      "<#{self} @config_files=#{@configfiles} >"
+      "<#{self} @configfiles=#{@configfiles} >"
     end
 
     # Data was modified?
@@ -1260,7 +1259,6 @@ module Yast
           ret = Builtins.add(ret, m)
         end
       end
-
       deep_copy(ret)
     end
 
