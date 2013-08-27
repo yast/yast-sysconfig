@@ -1,10 +1,9 @@
 require_relative 'test_helper'
 
+include TestHelpers
+
 describe "Autoyast configuration" do
-
   describe "How the profile import works" do
-
-    include TestHelpers
 
     before do
       initialize_sysconfig
