@@ -8,6 +8,9 @@ BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-t
 Requires:	perl
 Requires:	yast2 >= 2.21.22
 
+# For tests
+BuildRequires: ruby
+
 BuildArchitectures:	noarch
 
 Provides:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
