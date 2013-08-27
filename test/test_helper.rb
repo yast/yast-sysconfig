@@ -28,6 +28,7 @@ module TestHelpers
   FILES_DIR = Pathname.new(File.expand_path( '../files', __FILE__))
   TMP_DIR   = Pathname.new(File.expand_path('../tmp', __FILE__))
 
+
   # If needed extend this map as required
   # Every file listed here should exist in the directory FILES_DIR
   # Otherwise exception will be raised while loading the file to TMP_DIR during tests
@@ -61,6 +62,15 @@ module TestHelpers
   # Proxy to sysconfig to get the value of some configuration variable
   def get_value config_variable
     get_config_value(config_variable, self.context)
+  end
+
+  # helper to generate autoyast profile values
+  def autoyast_profile options
+    [{
+      'sysconfig_key'   => options[:name],
+      'sysconfig_value' => options[:value],
+      'sysconfig_path'  => options[:path] || sample_path
+    }]
   end
 
   # Check the written config file for the new value without using the

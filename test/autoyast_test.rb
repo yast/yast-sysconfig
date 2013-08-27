@@ -12,28 +12,14 @@ describe "Autoyast configuration" do
 
     it "succeeds with correctly defined values" do
       load_sample :network_config do
-        var_name  = 'FIREWALL'
-        var_value = 'no'
-        profile_values = [{
-          'sysconfig_key'   => var_name,
-          'sysconfig_value' => var_value,
-          'sysconfig_path'  => sample_path
-        }]
-        sysconfig.Import(profile_values)
+        sysconfig.Import(autoyast_profile(:name => 'FIREWALL', :value => 'no'))
         sysconfig.Modified.must_equal true
       end
     end
 
     it "succeeds with incorrectly defined values" do
       load_sample :network_config do
-        var_name  = 'FIREBALL'
-        var_value = 'DONT TOUCH THIS'
-        profile_values = [{
-          'sysconfig_key'   => var_name,
-          'sysconfig_value' => var_value,
-          'sysconfig_path'  => sample_path
-        }]
-        sysconfig.Import(profile_values)
+        sysconfig.Import(autoyast_profile(:name => 'FIREBALL', :value => 'abcdefgh'))
         sysconfig.Modified.must_equal true
       end
     end
@@ -60,12 +46,7 @@ describe "Autoyast configuration" do
       load_sample :network_config do
         var_name  = 'NOZEROCONF'
         var_value = 'yes'
-        profile_values = [{
-          'sysconfig_key'   => var_name,
-          'sysconfig_value' => var_value,
-          'sysconfig_path'  => sample_path
-        }]
-        sysconfig.Import(profile_values)
+        sysconfig.Import(autoyast_profile(:name => var_name, :value => var_value))
         sysconfig.Modified.must_equal true
         sysconfig.Export.wont_be_empty
         sysconfig.Export.first['sysconfig_key'].wont_be_empty
@@ -81,12 +62,7 @@ describe "Autoyast configuration" do
       load_sample :network_config do
         var_name  = 'DEBUG'
         var_value = 'NOWAYTHISCORRECTVALUE'
-        profile_values = [{
-          'sysconfig_key'   => var_name,
-          'sysconfig_value' => var_value,
-          'sysconfig_path'  => sample_path
-        }]
-        sysconfig.Import(profile_values)
+        sysconfig.Import(autoyast_profile(:name => var_name, :value => var_value))
         sysconfig.Modified.must_equal true
         sysconfig.Export.wont_be_empty
         sysconfig.Export.first['sysconfig_key'].wont_be_empty
