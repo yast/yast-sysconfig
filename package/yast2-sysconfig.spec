@@ -80,7 +80,6 @@ provided by yast2-sysconfig package.
 %{yast_ydatadir}/descriptions
 %{yast_schemadir}/autoyast/rnc/sysconfig.rnc
 %dir %{yast_docdir}
-%doc %{yast_docdir}/README
 %doc %{yast_docdir}/COPYING
 %doc %{yast_docdir}/metadata.txt
 
