@@ -457,7 +457,7 @@ module Yast
     # @return [Array] List with value v
     def add_if_missing(l, v)
       l = deep_copy(l)
-      !Builtins.contains(l, v) ? Builtins.add(l, v) : l
+      !Builtins.contains(l, v) ? Builtins.add(l, v) : deep_copy(l)
     end
 
     # Escape double quotes and back slash characters by back slash
