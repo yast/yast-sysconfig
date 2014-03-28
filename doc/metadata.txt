@@ -75,8 +75,7 @@ possible values entered by user. Typos, invalid values or values out of range
 can be avoided by defining right descriptions.
 
   Action keywords describe actions which are required to activate changes.
-Usually it means starting SuSEconfig module and service restart or
-reload.
+Usually it means a service restart or reload.
 
   I. Descriptive keywords:
 
@@ -143,8 +142,6 @@ reload.
 	   it is required to do an action with old value (e.g. stop daemon
 	   which name is changed)
 
-    Config - start selected SuSEconfig/ULconfig modules
-
     ServiceReload - reload services if they are running (specify only the init
            script file names without the path)
 
@@ -190,7 +187,7 @@ Predefined paths
   All sysconfig variables are divided into basic categories:
 
 Hardware - all hardware related settings (e.g. sysconfig files: sound, keyboard...)
-System - basic system configuration (boot, suseconfig, cron, console, security...)
+System - basic system configuration (boot, cron, console, security...)
 Desktop - desktop settings (kde, gnome, xdm...)
 Applications - java, ispell, man...
 Network - network services (apache, mail, nfs...)
@@ -246,20 +243,10 @@ will do the following actions:
 
     - save all changed variables
 
-    - start all specified SuSEconfig modules
-
     - restart/reload specified services which are running (command
       "/etc/init.d/testservice status" returns 0).
 
     - start generic commands
-
-
-  If activation commands are missing in the whole sysconfig file complete
-SuSEconfig will be started for backward compatibility with old sysconfig files.
-Some variables need no activation (e.g. options in /etc/sysconfig/boot file are
-used only at boot), use empty Config: tag (or any from above tags) to not start
-the SuSEconfig script - if some action tag is specified (even empty) the
-backward compatible action (calling the SuSEconfig script) will not be started.
 
   Each command will be started only once to speed up the activation if more
 modified variables need the same activation command. The commands are compared

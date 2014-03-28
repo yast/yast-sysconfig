@@ -314,7 +314,7 @@ module Yast
             Ops.greater_than(Builtins.size(conf_modules), 0)
           # parse string with options, then add them to the rich text
           conf = String.ParseOptions(conf_modules, Sysconfig.parse_param)
-          # header in the variable description text, SuSEconfig/ULconfig module names are appended
+          # header in the variable description text
           result = Ops.add(
             Ops.add(
               Ops.add(
@@ -815,21 +815,15 @@ module Yast
       Wizard.CreateTree(_Tree, _("&Configuration Options"))
 
       helptext =
-        # helptext for popup - part 1/3
+        # helptext for popup - part 1/2
         _(
           "<p>After you save your changes, this editor changes the variables in the\n" +
             "corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,\n" +
             "and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>\n"
         ) +
-          # helptext for popup - part 2/3
+          # helptext for popup - part 2/2
           _(
             "<p><b>Important:</b> You still can edit each individual configuration file manually. The name of file is displayed in the variable description.</p>"
-          ) +
-          # helptext for popup - part 3/3
-          _(
-            "<p> SuSEconfig saves a checksum of each configuration file, so it can detect if\n" +
-              " you have manually changed any of them. If you have changed a configuration file manually,\n" +
-              " it will not touch it.</p>\n"
           )
 
       Wizard.SetContents(
