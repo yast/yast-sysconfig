@@ -815,13 +815,13 @@ module Yast
       Wizard.CreateTree(_Tree, _("&Configuration Options"))
 
       helptext =
-        # helptext for popup - part 1/3
+        # helptext for popup - part 1/2
         _(
           "<p>After you save your changes, this editor changes the variables in the\n" +
             "corresponding sysconfig file. Then it starts activation commands, which changes the underlying configuration files, stops and starts daemons,\n" +
             "and runs low-level configuration tools so your configuration in sysconfig takes effect.</p>\n"
         ) +
-          # helptext for popup - part 2/3
+          # helptext for popup - part 2/2
           _(
             "<p><b>Important:</b> You still can edit each individual configuration file manually. The name of file is displayed in the variable description.</p>"
           )
