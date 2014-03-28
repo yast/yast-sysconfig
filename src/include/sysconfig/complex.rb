@@ -314,7 +314,7 @@ module Yast
             Ops.greater_than(Builtins.size(conf_modules), 0)
           # parse string with options, then add them to the rich text
           conf = String.ParseOptions(conf_modules, Sysconfig.parse_param)
-          # header in the variable description text, SuSEconfig/ULconfig module names are appended
+          # header in the variable description text
           result = Ops.add(
             Ops.add(
               Ops.add(
