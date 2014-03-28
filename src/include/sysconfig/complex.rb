@@ -824,12 +824,6 @@ module Yast
           # helptext for popup - part 2/3
           _(
             "<p><b>Important:</b> You still can edit each individual configuration file manually. The name of file is displayed in the variable description.</p>"
-          ) +
-          # helptext for popup - part 3/3
-          _(
-            "<p> SuSEconfig saves a checksum of each configuration file, so it can detect if\n" +
-              " you have manually changed any of them. If you have changed a configuration file manually,\n" +
-              " it will not touch it.</p>\n"
           )
 
       Wizard.SetContents(
