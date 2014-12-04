@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec  4 09:51:41 UTC 2014 - jreidinger@suse.com
+
+- remove X-KDE-Library from desktop file (bnc#899104)
+
+-------------------------------------------------------------------
 Fri Mar 28 15:56:52 CET 2014 - locilka@suse.com
 
 - Removed any mention about SuSEconfig, that has been already
