@@ -13,6 +13,8 @@ require "yast"
 
 module Yast
   class SysconfigClass < Module
+    include Yast::Logger
+
     def main
       Yast.import "UI"
       textdomain "sysconfig"
@@ -26,6 +28,7 @@ module Yast
       Yast.import "String"
       Yast.import "Service"
       Yast.import "Mode"
+      Yast.import "SystemdService"
 
 
       @configfiles = [
@@ -874,14 +877,15 @@ module Yast
     # @param [String] message Confirmation message
     # @param [String] command Command to confirm
     # @return [Symbol] `cont - start command, `skip - skip this command, `abort - skip all remaining commands
-    def ConfirmationDialog(message, command)
+    def ConfirmationDialog(message, command = "")
+      # show the command itself only if it's a real shell command
+      confirm_cmd = (command.is_a?(String) ? command : "")
+
       UI.OpenDialog(
         Opt(:decorated),
         VBox(
           Label(message),
-          Ops.greater_than(Builtins.size(command), 0) ?
-            Label(Ops.add(_("Command: "), command)) :
-            Empty(),
+          command.size > 0 ? Label(_("Command: ") + command) : Empty(),
           VSpacing(0.5),
           HBox(
             PushButton(Id(:cont), Label.ContinueButton),
@@ -894,8 +898,8 @@ module Yast
 
       ret = nil
 
-      while ret != :cont && ret != :skip && ret != :abort
-        ret = Convert.to_symbol(UI.UserInput)
+      while ![:cont, :skip, :abort].include?(ret)
+        ret = UI.UserInput
 
         ret = :abort if ret == :close
       end
@@ -905,40 +909,82 @@ module Yast
       ret
     end
 
+    # Runs a command and returns whether is was successful
+    #
+    # @param [String] command
+    # @return [Boolean] if successful
+    def run_command(command)
+      Builtins.y2milestone("Starting: %1", command)
+
+      exit_code = SCR.Execute(
+        path(".target.bash"),
+        command + " > /dev/null 2> /dev/null"
+      )
+
+      Builtins.y2milestone("Result: %1", exit_code)
+
+      exit_code == 0
+    end
+
+    # Returns a reference to method that restarts given service
+    #
+    # @param [String] service name
+    # @return [Proc] method reference
+    def ref_restart(service_name)
+      proc do
+        log.info "Service #{service_name} will be restarted"
+        service = SystemdService.find(service_name)
+        return false unless service
+        service.restart
+      end
+    end
+
+    # Returns a reference to method that reloads given service
+    #
+    # @param [String] service name
+    # @return [Proc] method reference
+    def ref_reload(service_name)
+      proc do
+        log.info "Service #{service_name} will be reloaded"
+        service = SystemdService.find(service_name)
+        return false unless service
+        service.reload
+      end
+    end
+
     # Start activation command, ask user to confirm it when it is required.
     # Display specified error message when the command fails.
-    # @param [String] start_command Command to start
+    # @param [Any] (String or Proc) command to run
     # @param [String] label Progress bar label
     # @param [String] error Error message displayed when command failes
     # @param [String] confirm Confirmation messge
-    # @param [Boolean] confirmaction Display confirmation dialog
+    # @param [Boolean] confirm_action Display confirmation dialog
     # @return [Symbol] `success - command was started, `failed - command failed (non-zero exit value),
     # `skip - command was skipped, `abort - command starting was aborted
-    def StartCommand(start_command, label, error, confirm, confirmaction)
-      return :success if Builtins.size(start_command) == 0
+    def StartCommand(start_command, label, error, confirm, confirm_action)
+      return :success if start_command.nil? || start_command == ""
 
       # set progress bar label
       Progress.Title(label)
 
-      if confirmaction == true
-        # show confirmation dialog
+      if confirm_action
+        # show confirmation dialog, show the command itself only if it's a real shell command
         input = ConfirmationDialog(confirm, start_command)
 
         return input if input != :cont
       end
 
-      Builtins.y2milestone("Starting: %1", start_command)
+      result = nil
 
-      exit = Convert.to_integer(
-        SCR.Execute(
-          path(".target.bash"),
-          Ops.add(start_command, " > /dev/null 2> /dev/null")
-        )
-      )
+      if start_command.is_a?(Proc)
+        result = start_command.call
+      elsif start_command.is_a?(String)
+        result = run_command(start_command)
+      else
+        raise "Unknown command type #{start_command.inspect}"
+      end
 
-      Builtins.y2milestone("Result: %1", exit)
-
-      if exit != 0
+      unless result
         Report.Error(error)
         return :failed
       end
@@ -946,14 +992,35 @@ module Yast
       :success
     end
 
+    # Returns whether given service is active (info from systemd)
+    # If service is not found, reports error in UI and returns nil
+    #
+    # @param service name
+    # @return [Boolean] active?
+    def service_active?(service_name)
+      service_unit = SystemdService.find(service_name)
+
+      unless service_unit
+        Report.Error(
+          # Error message, do not translate %{service} - it's later
+          # replaced with a real service name
+          _("Cannot find out service state, systemd service '%{service}'\ndoes not exist.") % \
+            { :service => service_name }
+        )
+
+        return nil
+      end
+
+      service_unit.active?
+    end
 
     # Write all sysconfig settings
     # @return [Boolean] true on success
     def Write
       # remember all actions - start each action only once
-      _Restarted = {}
-      _Reloaded = {}
-      _Commands = {}
+      restart_services = []
+      reload_services = []
+      services_commands = []
 
       # aborted?
       abort = false
@@ -980,28 +1047,31 @@ module Yast
         end
       end
 
-
       return false if abort
 
-      Builtins.foreach(@modified_variables) do |vid, new_val|
+      @modified_variables.each_key do |variable_id|
         # get activation map for variable
-        activate = Ops.get_map(@actions, vid, {})
-        restart_service = Ops.get_string(activate, "Rest")
-        reload_service = Ops.get_string(activate, "Reld")
-        bash_command = Ops.get_string(activate, "Cmd")
+        activate = @actions.fetch(variable_id, {})
+
+        restart_service = activate["Rest"]
+        reload_service = activate["Reld"]
+        bash_command = activate["Cmd"]
+
         if restart_service != nil &&
             Ops.greater_than(Builtins.size(restart_service), 0)
           parsed = String.ParseOptions(restart_service, @parse_param)
-          Builtins.foreach(parsed) { |s| Ops.set(_Restarted, s, true) }
+          Builtins.foreach(parsed) { |s| restart_services << s unless restart_services.include?(s) }
         end
+
         if reload_service != nil &&
             Ops.greater_than(Builtins.size(reload_service), 0)
           parsed = String.ParseOptions(reload_service, @parse_param)
-          Builtins.foreach(parsed) { |s| Ops.set(_Reloaded, s, true) }
+          Builtins.foreach(parsed) { |s| reload_services << s unless reload_services.include?(s) }
         end
+
         if bash_command != nil &&
             Ops.greater_than(Builtins.size(bash_command), 0)
-          Ops.set(_Commands, bash_command, true)
+          services_commands << bash_command unless services_commands.include?(bash_command)
         end
       end
 
@@ -1009,22 +1079,11 @@ module Yast
       caption = _("Saving sysconfig Configuration")
 
       # set the right number of stages
-      steps = Ops.add(
-        Ops.add(
-          Ops.add(
-            Ops.add(
-              Ops.add(
-                Builtins.size(@modified_variables),
-                Builtins.size(_Restarted)
-              ),
-              Builtins.size(_Reloaded)
-            ),
-            Builtins.size(_Commands)
-          ),
-          1
-        ), # flush
-        3
-      ) # 3 stages
+      steps = @modified_variables.size +
+        restart_services.size +
+        reload_services.size +
+        services_commands.size +
+        4 # 1 for flushing the cache plus 3 stages
 
       # We do not set help text here, because it was set outside
       Progress.New(
@@ -1045,15 +1104,17 @@ module Yast
       ret = true
 
       # save each changed variable
-      Builtins.foreach(@modified_variables) do |vid, new_val|
-        file = get_file_from_id(vid)
-        name = get_name_from_id(vid)
+      @modified_variables.each do |value_id, new_val|
+        file = get_file_from_id(value_id)
+        name = get_name_from_id(value_id)
+        # progress bar label, %1 is variable name (e.g. DISPLAYMANAGER)
+        Progress.Title(Builtins.sformat(_("Saving variable %1..."), name))
         value_path = Builtins.add(
           Builtins.add(path(".syseditor.value"), file),
           name
         )
-        written = SCR.Write(value_path, new_val)
-        if written == false
+
+        unless SCR.Write(value_path, new_val)
           # error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)
           Report.Error(
             Builtins.sformat(
@@ -1064,11 +1125,9 @@ module Yast
           )
           ret = false
         end
-        # progress bar label, %1 is variable name (e.g. DISPLAYMANAGER)
-        Progress.Title(Builtins.sformat(_("Saving variable %1..."), name))
+
         Progress.NextStep
       end
-
 
       Progress.Title(_("Saving changes to the files..."))
       # flush changes
@@ -1080,113 +1139,77 @@ module Yast
 
       return false if abort
 
-      if Ops.greater_than(Builtins.size(_Reloaded), 0)
-        # restart required services
-        Builtins.foreach(_Reloaded) do |servicename, dummy|
-          next if abort
-          # check whether service is running
-          check_command = Builtins.sformat("/etc/init.d/%1 status", servicename)
-          result = Convert.to_integer(
-            SCR.Execute(path(".target.bash"), check_command)
-          )
-          Builtins.y2milestone("%1 service status: %2", servicename, result)
-          if result == 0
-            # service is running, reload it
-            start_command = Builtins.sformat(
-              "/etc/init.d/%1 reload",
-              servicename
-            )
-            confirm = Builtins.sformat(
-              _("Service %1 will be reloaded"),
-              servicename
-            )
-            label = Builtins.sformat(_("Reloading service %1..."), servicename)
-            error = Builtins.sformat(
-              _("Reload of the service %1 failed"),
-              servicename
-            )
+      # restart required services
+      reload_services.each do |servicename|
+        break if abort
+        Progress.NextStep
 
-            Progress.NextStep
+        next unless service_active?(servicename)
 
-            if StartCommand(
-                start_command,
-                label,
-                error,
-                confirm,
-                @ConfirmActions
-              ) == :abort
-              abort = true
-            end
-          end
+        # service is running, reload it
+        start_command = ref_reload(servicename)
+        confirm = Builtins.sformat(
+          _("Service %1 will be reloaded"),
+          servicename
+        )
+        label = Builtins.sformat(_("Reloading service %1..."), servicename)
+        error = Builtins.sformat(_("Reload of the service %1 failed"), servicename)
+
+        if StartCommand(start_command, label, error, confirm, @ConfirmActions) == :abort
+          abort = true
         end
       end
 
       return false if abort
 
-      if Ops.greater_than(Builtins.size(_Restarted), 0)
-        # restart required services
-        Builtins.foreach(_Restarted) do |servicename, dummy|
-          # check whether service is running
-          check_command = Builtins.sformat("/etc/init.d/%1 status", servicename)
-          result = Convert.to_integer(
-            SCR.Execute(path(".target.bash"), check_command)
-          )
-          Builtins.y2milestone("%1 service status: %2", servicename, result)
-          Progress.NextStep
-          if result == 0
-            # service is running, restart it
-            start_command = Builtins.sformat(
-              "/etc/init.d/%1 restart",
-              servicename
-            )
-            confirm = Builtins.sformat(
-              _("Service %1 will be restarted"),
-              servicename
-            )
-            label = Builtins.sformat(_("Restarting service %1..."), servicename)
-            error = Builtins.sformat(
-              _("Restart of the service %1 failed"),
-              servicename
-            )
+      # restart required services
+      restart_services.each do |servicename|
+        break if abort
+        Progress.NextStep
 
-            if StartCommand(
-                start_command,
-                label,
-                error,
-                confirm,
-                @ConfirmActions
-              ) == :abort
-              abort = true
-            end
-          end
-        end
-      end
+        next unless service_active?(servicename)
 
-      if Ops.greater_than(Builtins.size(_Commands), 0)
-        # start generic commands
-        Builtins.foreach(_Commands) do |cmd, dummy|
-          Builtins.y2milestone("Command: %1", cmd)
-          Progress.NextStep
-          if Ops.greater_than(Builtins.size(cmd), 0)
-            confirm = _("A command will be executed")
-            label = Builtins.sformat(_("Starting command: %1..."), cmd)
-            error = Builtins.sformat(_("Command %1 failed"), cmd)
+        # service is running, restart it
+        start_command = ref_restart(servicename)
+        confirm = Builtins.sformat(
+          _("Service %1 will be restarted"),
+          servicename
+        )
+        label = Builtins.sformat(_("Restarting service %1..."), servicename)
+        error = Builtins.sformat(_("Restart of the service %1 failed"), servicename)
 
-            if StartCommand(cmd, label, error, confirm, @ConfirmActions) == :abort
-              abort = true
-            end
-          end
+        if StartCommand(start_command, label, error, confirm, @ConfirmActions) == :abort
+          abort = true
         end
       end
 
       return false if abort
 
-      # set 100% in progress bar
+      # start generic commands
+      services_commands.each do |cmd|
+        break if abort
+        Builtins.y2milestone("Command: %1", cmd)
+        Progress.NextStep
+
+        next if cmd.nil? || cmd.size == 0
+
+        confirm = _("A command will be executed")
+        label = Builtins.sformat(_("Starting command: %1..."), cmd)
+        error = Builtins.sformat(_("Command %1 failed"), cmd)
+
+        if StartCommand(cmd, label, error, confirm, @ConfirmActions) == :abort
+          abort = true
+        end
+      end
+
+      return false if abort
+
       Progress.NextStep
+
       Progress.Title(_("Finished"))
 
       # set "finished" mark for the last stage
-      Progress.NextStage
+      Progress.Finish
 
       ret
     end
