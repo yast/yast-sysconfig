@@ -839,16 +839,7 @@ module Yast
       # create tree definition list and description map using external Perl script
       SCR.Execute(
         path(".target.bash"),
-        Ops.add(
-          Ops.add(
-            Ops.add(
-              Ops.add(Ops.add(Directory.bindir, "/parse_configs.pl "), param),
-              "> "
-            ),
-            tmpdir
-          ),
-          "/treedef.ycp"
-        )
+        "#{Directory.bindir}/parse_configs.pl #{param} > #{tmpdir}/treedef.ycp"
       )
 
       # read list
