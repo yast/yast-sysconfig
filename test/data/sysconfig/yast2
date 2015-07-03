@@ -11,7 +11,7 @@
 # to render yast widgets
 # auto: will attempt to detect both desktop & plugin
 #       presence and adapt accordingly
-WANTED_SHELL="auto"
+WANTED_SHELL="qt"
 
 ## Type: list(auto,qt,gtk,ncurses)
 ## Default: "auto"
