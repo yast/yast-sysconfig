@@ -162,8 +162,10 @@ describe Yast::Sysconfig do
     before { sysconfig.Read }
 
     it "writes all the modified values" do
-      allow(sysconfig).to receive(:exec_cmd_action)
-      allow(sysconfig).to receive(:exec_service_action)
+      # This methods are private
+      # Mocking them is not very robust, but is clear and simple
+      allow(sysconfig).to receive(:exec_action)
+      allow(sysconfig).to receive(:service_active?).and_return true
 
       expect(Yast::SCR).to receive(:Write)
         .with(path(".syseditor.value.#{postfix_file}.#{myhostname_var}"), myhostname_value)
