@@ -42,3 +42,36 @@ if ENV["COVERAGE"]
     ]
   end
 end
+
+# Current value of the variable in the sysconfig object
+def var_value(var, sysconfig)
+  sysconfig.get_description(var)['value'].to_s
+end
+
+# Returns a clean Sysconfig object to make sure that potentially
+# problematic operations like .Read don't pollute other examples
+def new_sysconfig(configfiles = [])
+  clear_sysconfig_cache
+  ymodule = Yast::SysconfigClass.new
+  ymodule.main
+  ymodule.configfiles = configfiles
+  ymodule
+end
+
+# Sad but true, this is needed to prevent different instances of
+# Yast::SysconfigClass to interfere with each other
+def clear_sysconfig_cache
+  file = Yast::SCR.Read(path(".target.tmpdir")) + "/treedef.ycp"
+  File.delete(file) if File.exist?(file)
+  Yast::SCR.UnregisterAgent(path(".sysconfig.network.template"))
+  Yast::SCR.UnregisterAgent(path(".syseditor"))
+end
+
+# Structure of an autoyast entry for the sysconfig module
+def autoyast_entry(name, value, path)
+  {
+    'sysconfig_key'   => name,
+    'sysconfig_value' => value,
+    'sysconfig_path'  => path
+  }
+end

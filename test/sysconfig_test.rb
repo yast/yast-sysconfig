@@ -5,29 +5,9 @@ require_relative 'test_helper'
 Yast.import "Sysconfig"
 Yast.import "SystemdService"
 
-# Current value of the variable in the sysconfig object
-def var_value(var, sysconfig)
-  sysconfig.get_description(var)['value'].to_s
-end
-
-# Sad but true, this is needed to prevent different instances of
-# Yast::SysconfigClass to interfere with each other
-def clear_sysconfig_cache
-  file = Yast::SCR.Read(path(".target.tmpdir")) + "/treedef.ycp"
-  File.delete(file) if File.exist?(file)
-  Yast::SCR.UnregisterAgent(path(".sysconfig.network.template"))
-  Yast::SCR.UnregisterAgent(path(".syseditor"))
-end
-
 describe Yast::Sysconfig do
-  # Let's use always a clean Sysconfig object to make sure that potentially
-  # problematic operations like .Read don't pollute other examples
   subject(:sysconfig) do
-    clear_sysconfig_cache
-    ymodule = Yast::SysconfigClass.new
-    ymodule.main
-    ymodule.configfiles = configfiles
-    ymodule
+    new_sysconfig(configfiles)
   end
 
   describe ".Read" do
