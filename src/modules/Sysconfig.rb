@@ -1133,15 +1133,13 @@ module Yast
       error = Builtins.sformat(_("Command %1 failed"), cmd)
       confirm = _("A command will be executed") + "\n" + _("Command: ") + cmd
 
-      action = -> do
+      action = lambda do
         log.info "Starting: #{cmd}"
-        exit_code = SCR.Execute(
-          path(".target.bash"),
-          cmd + " > /dev/null 2> /dev/null"
-        )
-        log.info "Result: #{exit_code}"
+        cmd_out = SCR.Execute(path(".target.bash_output"), "#{cmd} 2>&1")
+        log.info "Result: #{cmd_out['exit']}"
+        log.info "Output: #{cmd_out['stdout']}"
 
-        exit_code == 0
+        cmd_out["exit"] == 0
       end
 
       exec_action(action, label, error, confirm)
@@ -1153,20 +1151,21 @@ module Yast
     # @param action [Symbol] :reload or :restart
     # @return [Symbol] result returned by #exec_action
     def exec_service_action(name, type = :reload)
-      raise "Wrong action type" unless [:restart, :reload].include?(type)
-
-      if type == :reload
+      case type
+      when :reload
         label = _("Reloading service %s...") % name
         error = _("Reload of the service %s failed") % name
         confirm = _("Service %s will be reloaded") % name
-      else
+      when :restart
         label = _("Restarting service %s...") % name
         error = _("Restart of the service %s failed") % name
         confirm = _("Service %s will be restarted") % name
+      else
+        raise "Wrong action type #{type}"
       end
 
-      action = -> do
-        log.info "Service #{name} will be restarted"
+      action = lambda do
+        log.info "Service #{name} will be restarted (#{type})"
         service = SystemdService.find(name)
         return false unless service
         service.send(type)
@@ -1185,10 +1184,8 @@ module Yast
 
       unless service_unit
         Report.Error(
-          # Error message, do not translate %{service} - it's later
-          # replaced with a real service name
-          _("Cannot find out service state, systemd service '%{service}'\ndoes not exist.") % \
-            { :service => service_name }
+          _("Cannot determine service state, systemd service does not exist:") +
+            "\n#{service_name}"
         )
 
         return nil
@@ -1205,7 +1202,7 @@ module Yast
       @modified_variables.each_pair do |vid, new_val|
         # get activation map for variable
         cmd = Ops.get_string(@actions, [vid, "Pre"])
-        if cmd && cmd.size > 0
+        if cmd && !cmd.empty?
           result = exec_cmd_action(cmd)
 
           return false if result == :abort
@@ -1233,22 +1230,26 @@ module Yast
         reload_service = activate["Reld"]
         bash_command = activate["Cmd"]
 
-        if restart_service && restart_service.size > 0
+        if restart_service && !restart_service.empty?
           parsed = String.ParseOptions(restart_service, @parse_param)
-          Builtins.foreach(parsed) { |s| restart_services << s unless restart_services.include?(s) }
+          parsed.each { |s| restart_services << s }
         end
 
-        if reload_service && reload_service.size > 0
+        if reload_service && !reload_service.empty?
           parsed = String.ParseOptions(reload_service, @parse_param)
-          Builtins.foreach(parsed) { |s| reload_services << s unless reload_services.include?(s) }
+          parsed.each { |s| reload_services << s }
         end
 
-        if bash_command && bash_command.size > 0
-          services_commands << bash_command unless services_commands.include?(bash_command)
+        if bash_command && !bash_command.empty?
+          services_commands << bash_command
         end
       end
 
-      { restart: restart_services, reload: reload_services, cmd: services_commands }
+      {
+        restart: restart_services.uniq,
+        reload: reload_services.uniq,
+        cmd: services_commands.uniq
+      }
     end
 
     # Writes the modified variables into the corresponding files
@@ -1263,10 +1264,7 @@ module Yast
         name = get_name_from_id(value_id)
         # progress bar label, %1 is variable name (e.g. DISPLAYMANAGER)
         Progress.Title(Builtins.sformat(_("Saving variable %1..."), name))
-        value_path = Builtins.add(
-          Builtins.add(path(".syseditor.value"), file),
-          name
-        )
+        value_path = path(".syseditor.value") + file + name
 
         unless SCR.Write(value_path, new_val)
           # error popup: %1 - variable name (e.g. DISPLAYMANAGER), %2 - file name (/etc/sysconfig/displaymanager)

@@ -205,7 +205,9 @@ describe Yast::Sysconfig do
 
     it "runs associated commands" do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
-      expect(Yast::SCR).to receive(:Execute).with(path(".target.bash"), /echo example command/)
+      expect(Yast::SCR).to receive(:Execute)
+        .with(path(".target.bash_output"), /echo example command/)
+        .and_return({"exit" => 0, "stdout" => "", "stderr" => ""})
 
       sysconfig.set_value(listen_var_id, listen_value, false, false)
       sysconfig.Write
