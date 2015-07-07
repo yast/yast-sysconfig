@@ -17,6 +17,7 @@ POSTFIX_RELAYHOST=""
 ## Type:        string
 ## Default:     ""
 ## Config:      postfix
+## Command:     echo example command
 #
 # Comma separated list of IP's
 # NOTE: If not set, LISTEN on all interfaces
@@ -92,6 +93,7 @@ POSTFIX_DIALUP="no"
 ## Type:        yesno
 ## Default:     no
 ## Config:      postfix
+## ServiceReload: postfix
 #
 # Some people use Postfix to deliver mail across a LAN that is disconnected
 # most of the time. Under such conditions, mail delivery can suffer from
@@ -345,7 +347,7 @@ POSTFIX_SMTP_AUTH_SERVER="no"
 # you have to edit /etc/postfix/sasl_passwd and call
 # SuSEconfig.postfix afterwards
 #
-POSTFIX_SMTP_AUTH="no"
+POSTFIX_SMTP_AUTH="yes"
 
 ## Type:        string
 ## Default:     ""

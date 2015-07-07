@@ -17,7 +17,7 @@
 
 
 Name:           yast2-sysconfig
-Version:        3.1.2
+Version:        3.1.3
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -27,6 +27,8 @@ Group:	        System/YaST
 License:        GPL-2.0+
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite
 BuildRequires:  yast2-devtools >= 3.1.10
+# path_matching (RSpec argument matcher)
+BuildRequires:  yast2-ruby-bindings >= 3.1.31
 Requires:	perl
 Requires:	yast2 >= 2.21.22
 

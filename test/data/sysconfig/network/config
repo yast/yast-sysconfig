@@ -1,0 +1,10 @@
+## Path:	Network/General
+## Description:	Set some general network configuration
+## Type:	yesno
+## Default:	yes
+# sometimes we want some script to be executed after an interface has been
+# brought up, or before an interface is taken down. 
+# default dir is /etc/sysconfig/network/if-up.d for POST_UP and
+# /etc/sysconfig/network/if-down.d for PRE_DOWN
+GLOBAL_POST_UP_EXEC="yes"
+GLOBAL_PRE_DOWN_EXEC="yes"

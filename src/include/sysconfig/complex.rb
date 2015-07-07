@@ -778,9 +778,9 @@ module Yast
       input = deep_copy(input)
       Builtins.foreach(input) do |i|
         id = Ops.get_string(i, [0, 0], "")
-        title = Ops.get_string(i, 1, "")
+        title = i[1] || ""
         enabled = Ops.get_boolean(i, 2, false)
-        children = Ops.get_list(i, 3, [])
+        children = i[3] || []
         _Tree = Wizard.AddTreeItem(_Tree, parent, title, id)
         if Ops.greater_than(Builtins.size(children), 0)
           _Tree = GenerateTree(_Tree, id, children)
