@@ -1085,7 +1085,7 @@ module Yast
         Builtins.foreach(_Reloaded) do |servicename, dummy|
           next if abort
           # check whether service is running
-          check_command = Builtins.sformat("/etc/init.d/%1 status", servicename)
+          check_command = Builtins.sformat("/usr/sbin/rc%1 status", servicename)
           result = Convert.to_integer(
             SCR.Execute(path(".target.bash"), check_command)
           )
@@ -1093,7 +1093,7 @@ module Yast
           if result == 0
             # service is running, reload it
             start_command = Builtins.sformat(
-              "/etc/init.d/%1 reload",
+              "/usr/sbin/rc%1 reload",
               servicename
             )
             confirm = Builtins.sformat(
@@ -1127,7 +1127,7 @@ module Yast
         # restart required services
         Builtins.foreach(_Restarted) do |servicename, dummy|
           # check whether service is running
-          check_command = Builtins.sformat("/etc/init.d/%1 status", servicename)
+          check_command = Builtins.sformat("/usr/sbin/rc%1 status", servicename)
           result = Convert.to_integer(
             SCR.Execute(path(".target.bash"), check_command)
           )
@@ -1136,7 +1136,7 @@ module Yast
           if result == 0
             # service is running, restart it
             start_command = Builtins.sformat(
-              "/etc/init.d/%1 restart",
+              "/usr/sbin/rc%1 restart",
               servicename
             )
             confirm = Builtins.sformat(
