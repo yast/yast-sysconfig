@@ -1085,17 +1085,9 @@ module Yast
         Builtins.foreach(_Reloaded) do |servicename, dummy|
           next if abort
           # check whether service is running
-          check_command = Builtins.sformat("/usr/sbin/rc%1 status", servicename)
-          result = Convert.to_integer(
-            SCR.Execute(path(".target.bash"), check_command)
-          )
-          Builtins.y2milestone("%1 service status: %2", servicename, result)
-          if result == 0
+          if service_running?(servicename)
             # service is running, reload it
-            start_command = Builtins.sformat(
-              "/usr/sbin/rc%1 reload",
-              servicename
-            )
+            start_command = service_command(servicename, "reload")
             confirm = Builtins.sformat(
               _("Service %1 will be reloaded"),
               servicename
@@ -1127,18 +1119,10 @@ module Yast
         # restart required services
         Builtins.foreach(_Restarted) do |servicename, dummy|
           # check whether service is running
-          check_command = Builtins.sformat("/usr/sbin/rc%1 status", servicename)
-          result = Convert.to_integer(
-            SCR.Execute(path(".target.bash"), check_command)
-          )
-          Builtins.y2milestone("%1 service status: %2", servicename, result)
           Progress.NextStep
-          if result == 0
+          if service_running?(servicename)
             # service is running, restart it
-            start_command = Builtins.sformat(
-              "/usr/sbin/rc%1 restart",
-              servicename
-            )
+            start_command = service_command(servicename, "restart")
             confirm = Builtins.sformat(
               _("Service %1 will be restarted"),
               servicename
@@ -1314,6 +1298,40 @@ module Yast
     publish :function => :Import, :type => "boolean (list)"
     publish :function => :Export, :type => "list ()"
     publish :function => :Summary, :type => "string ()"
+
+  private
+
+    def service_running?(name)
+      script = rc_script_for(name)
+      if script.nil?
+        command = "systemctl is-active #{name}.service"
+      else
+        command = "#{script} status"
+      end
+      result = Convert.to_integer(
+        SCR.Execute(path(".target.bash"), command)
+      )
+      Builtins.y2milestone("%1 service status: %2", name, result)
+      result == 0
+    end
+
+    def service_command(service, action)
+      script = rc_script_for(service)
+      if script.nil?
+        "systemctl #{action} #{service}.service"
+      else
+        "#{script} #{action}"
+      end
+    end
+
+    def rc_script_for(service)
+      script = "/usr/sbin/rc#{service}"
+      if SCR.Read(path(".target.size"), script) == -1
+        nil
+      else
+        script
+      end
+    end
   end
 
   Sysconfig = SysconfigClass.new
