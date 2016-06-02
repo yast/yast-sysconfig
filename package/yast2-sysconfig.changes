@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun  2 08:28:37 UTC 2016 - igonzalezsosa@suse.com
+
+- Drop yast2-sysconfig-devel-doc package (fate#320356)
+- 3.1.4
+
+-------------------------------------------------------------------
 Mon Jul  6 13:22:47 UTC 2015 - ancor@suse.com
 
 - Improved restarting/reloading of services for better
