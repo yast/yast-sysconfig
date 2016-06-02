@@ -17,7 +17,7 @@
 
 
 Name:           yast2-sysconfig
-Version:        3.1.3
+Version:        3.1.4
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -50,15 +50,6 @@ Summary:	YaST2 - Sysconfig Editor
 A graphical /etc/sysconfig/* editor with integrated search and context
 information.
 
-%package devel-doc
-Requires:       yast2-sysconfig = %version
-Group:          System/YaST
-Summary:        YaST2 - Sysconfig Editor - Development Documentation
-
-%description devel-doc
-This package contains development documentation for using the API
-provided by yast2-sysconfig package.
-
 %prep
 %setup -n %{name}-%{version}
 
@@ -84,7 +75,3 @@ provided by yast2-sysconfig package.
 %dir %{yast_docdir}
 %doc %{yast_docdir}/COPYING
 %doc %{yast_docdir}/metadata.txt
-
-%files devel-doc
-%doc %{yast_docdir}/autodocs
-
