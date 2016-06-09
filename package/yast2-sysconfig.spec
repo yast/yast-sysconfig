@@ -41,6 +41,7 @@ Provides:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
 Obsoletes:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
 Provides:	yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
 Obsoletes:	yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
+Obsoletes:      yast2-sysconfig-devel-doc
 
 Requires:       yast2-ruby-bindings >= 1.0.0
 
