@@ -182,7 +182,7 @@ describe Yast::Sysconfig do
     it "restarts associated services" do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
 
-      service = Yast::SystemdService.find("postfix")
+      service = double("postfix_service")
       allow(Yast::SystemdService).to receive(:find).with("postfix").and_return service
       expect(service).to receive(:active?).and_return true
       expect(service).to receive(:restart)
@@ -194,7 +194,7 @@ describe Yast::Sysconfig do
     it "reloads associated services" do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
 
-      service = Yast::SystemdService.find("postfix")
+      service = double("postfix_service")
       allow(Yast::SystemdService).to receive(:find).with("postfix").and_return service
       expect(service).to receive(:active?).and_return true
       expect(service).to receive(:reload)
