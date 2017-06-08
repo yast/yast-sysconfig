@@ -23,3 +23,7 @@ mkinstalldirs
 stamp-h*
 sysconfig.pot
 Makefile.am.common
+/coverage
+/.yardoc
+/testsuite/raw.tmp.*
+
