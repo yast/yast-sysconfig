@@ -23,3 +23,7 @@ mkinstalldirs
 stamp-h*
 sysconfig.pot
 Makefile.am.common
+doc/autodcs
+/.yardoc
+coverage/
+testsuite/*.err.*
