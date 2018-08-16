@@ -1,9 +1,9 @@
 #!/usr/bin/env rspec
 
 require_relative 'test_helper'
+require "yast2/systemd/service"
 
 Yast.import "Sysconfig"
-Yast.import "SystemdService"
 
 describe Yast::Sysconfig do
   subject(:sysconfig) do
@@ -183,7 +183,7 @@ describe Yast::Sysconfig do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
 
       service = double("postfix_service")
-      allow(Yast::SystemdService).to receive(:find).with("postfix").and_return service
+      allow(Yast2::Systemd::Service).to receive(:find).with("postfix").and_return service
       expect(service).to receive(:active?).and_return true
       expect(service).to receive(:restart)
 
@@ -195,7 +195,7 @@ describe Yast::Sysconfig do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
 
       service = double("postfix_service")
-      allow(Yast::SystemdService).to receive(:find).with("postfix").and_return service
+      allow(Yast2::Systemd::Service).to receive(:find).with("postfix").and_return service
       expect(service).to receive(:active?).and_return true
       expect(service).to receive(:reload)
 
