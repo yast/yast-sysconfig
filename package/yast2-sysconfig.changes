@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 20 17:11:37 CEST 2018 - schubi@suse.de
+
+- Changed dir of COPYING file.
+
+-------------------------------------------------------------------
 Wed Jun 27 15:37:57 CEST 2018 - schubi@suse.de
 
 - Added additional searchkeys to desktop file (fate#321043).
