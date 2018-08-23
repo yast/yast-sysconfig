@@ -10,6 +10,7 @@
 # Representation of the configuration of sysconfig.
 # Input and output routines.
 require "yast"
+require "yast2/systemd/service"
 
 module Yast
   class SysconfigClass < Module
@@ -28,7 +29,6 @@ module Yast
       Yast.import "String"
       Yast.import "Service"
       Yast.import "Mode"
-      Yast.import "SystemdService"
 
 
       @configfiles = [
@@ -1166,7 +1166,7 @@ module Yast
 
       action = lambda do
         log.info "Service #{name} will be restarted (#{type})"
-        service = SystemdService.find(name)
+        service = Yast2::Systemd::Service.find(name)
         return false unless service
         service.send(type)
       end
@@ -1180,7 +1180,7 @@ module Yast
     # @param service name
     # @return [Boolean] active?
     def service_active?(service_name)
-      service_unit = SystemdService.find(service_name)
+      service_unit = Yast2::Systemd::Service.find(service_name)
 
       unless service_unit
         Report.Error(
