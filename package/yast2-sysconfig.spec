@@ -24,7 +24,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
 Group:	        System/YaST
-License:        GPL-2.0+
+License:        GPL-2.0-or-later
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite
 BuildRequires:  yast2-devtools >= 3.1.10
 # path_matching (RSpec argument matcher)
