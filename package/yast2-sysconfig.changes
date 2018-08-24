@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Thu Aug 23 14:34:31 UTC 2018 - dgonzalez@suse.com
 
-- Update calls to Yast2 systemd classes (related to #319428)
+- Update calls to Yast2 systemd classes (related to fate#319428)
 - 4.1.0
 
 -------------------------------------------------------------------
