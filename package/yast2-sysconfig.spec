@@ -17,7 +17,7 @@
 
 
 Name:           yast2-sysconfig
-Version:        4.1.0
+Version:        4.1.1
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -74,6 +74,7 @@ information.
 %{yast_ydatadir}/sysedit.agent
 %{yast_ydatadir}/descriptions
 %{yast_schemadir}/autoyast/rnc/sysconfig.rnc
+%{_datadir}/icons/*
 %dir %{yast_docdir}
 %license %{yast_docdir}/COPYING
 %doc %{yast_docdir}/metadata.txt
