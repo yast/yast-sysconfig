@@ -74,7 +74,7 @@ information.
 %{yast_ydatadir}/sysedit.agent
 %{yast_ydatadir}/descriptions
 %{yast_schemadir}/autoyast/rnc/sysconfig.rnc
-%{_datadir}/icons/*
+%{yast_icondir}
 %dir %{yast_docdir}
 %license %{yast_docdir}/COPYING
 %doc %{yast_docdir}/metadata.txt
