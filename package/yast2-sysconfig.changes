@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Dec  4 13:27:20 UTC 2018 - Stefan Hundhammer <shundhammer@suse.com>
+
+- Security audit fix: Documented external command usage and added
+  warning if calling an external command without an absolute path
+  (bsc#1118291)
+- 4.1.2
+
+-------------------------------------------------------------------
 Mon Nov 26 05:04:52 UTC 2018 - Noah Davis <noahadvs@gmail.com>
 
 - Provide icon with module (boo#1109310)

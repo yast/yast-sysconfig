@@ -1133,7 +1133,23 @@ module Yast
       error = Builtins.sformat(_("Command %1 failed"), cmd)
       confirm = _("A command will be executed") + "\n" + _("Command: ") + cmd
 
+      # Any command executed here is taken verbatim from a file in
+      # /etc/sysconfig. The command should contain an absolute path, and if it
+      # has any arguments, they should be properly quoted.
+      #
+      # There does not seem to be a single example where such a command has any
+      # arguments, though.
+      #
+      # Example specification from /etc/sysconfig/fonts-config:
+      #
+      #   ## Command:     /usr/sbin/fonts-config
+      #
+      # Specification:
+      #  https://github.com/yast/yast-sysconfig/blob/master/doc/metadata.txt#L141-L159
+
       action = lambda do
+        log.warn("No absolute path in command #{cmd}") unless cmd.lstrip.start_with?("/")
+
         log.info "Starting: #{cmd}"
         cmd_out = SCR.Execute(path(".target.bash_output"), "#{cmd} 2>&1")
         log.info "Result: #{cmd_out['exit']}"
