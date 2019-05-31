@@ -12,69 +12,66 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
 
 Name:           yast2-sysconfig
+Summary:        YaST2 - Sysconfig Editor
 Version:        4.1.2
 Release:        0
+Url:            https://github.com/yast/yast-sysconfig
+Group:          System/YaST
+License:        GPL-2.0-or-later
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
-Group:	        System/YaST
-License:        GPL-2.0-or-later
-BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite
+BuildRequires:  perl-XML-Writer update-desktop-files yast2 yast2-testsuite
 BuildRequires:  yast2-devtools >= 3.1.10
 # path_matching (RSpec argument matcher)
 BuildRequires:  yast2-ruby-bindings >= 3.1.31
-Requires:	perl
-# Yast2::Systemd::Service
-Requires:	yast2 >= 4.1.3
-
 # For tests
 BuildRequires: ruby
 
-BuildArchitectures:	noarch
-
-Provides:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
-Obsoletes:	y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
-Provides:	yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
-Obsoletes:	yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
-Obsoletes:	yast2-sysconfig-devel-doc
-
+Requires:       perl
+# Yast2::Systemd::Service
+Requires:       yast2 >= 4.1.3
 Requires:       yast2-ruby-bindings >= 1.0.0
 
-Summary:	YaST2 - Sysconfig Editor
+Provides:       y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
+Provides:       yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
+
+Obsoletes:      y2c_rc_config yast2-config-rcconfig yast2-config-sysconfig
+Obsoletes:      yast2-trans-sysconfig yast2-trans-rcconfig y2t_rc_config
+Obsoletes:      yast2-sysconfig-devel-doc
+
+BuildArch:      noarch
 
 %description
 A graphical /etc/sysconfig/* editor with integrated search and context
 information.
 
 %prep
-%setup -n %{name}-%{version}
+%setup -q
 
 %build
 %yast_build
 
 %install
 %yast_install
-
+%yast_metainfo
 
 %files
-%defattr(-,root,root)
-%dir %{yast_yncludedir}/sysconfig
-%{yast_yncludedir}/sysconfig/*
-%{yast_clientdir}/sysconfig.rb
-%{yast_clientdir}/sysconfig_*.rb
-%{yast_moduledir}/Sysconfig.rb
-%{yast_desktopdir}/sysconfig.desktop
-%{yast_ybindir}/parse_configs.pl
-%{yast_ydatadir}/sysedit.agent
-%{yast_ydatadir}/descriptions
-%{yast_schemadir}/autoyast/rnc/sysconfig.rnc
+%{yast_yncludedir}
+%{yast_clientdir}
+%{yast_clientdir}
+%{yast_moduledir}
+%{yast_desktopdir}
+%{yast_metainfodir}
+%{yast_ybindir}
+%{yast_ydatadir}
+%{yast_ydatadir}
+%{yast_schemadir}
 %{yast_icondir}
-%dir %{yast_docdir}
-%license %{yast_docdir}/COPYING
-%doc %{yast_docdir}/metadata.txt
+%license COPYING
+%doc %{yast_docdir}
