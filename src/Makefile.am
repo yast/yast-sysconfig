@@ -28,7 +28,7 @@ ydata_DATA = \
   data/sysedit.agent
 
 desktop_DATA = \
-  desktop/sysconfig.desktop
+  desktop/org.openSUSE.YaST.Sysconfig.desktop
 
 scalabledir = @icondir@/hicolor/scalable/apps
 scalable_DATA = \
