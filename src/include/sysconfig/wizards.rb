@@ -45,7 +45,7 @@ module Yast
     # @return sequence result
     def SysconfigAutoSequence
       Wizard.CreateDialog
-      Wizard.SetDesktopTitleAndIcon("org.openSUSE.YaST.Sysconfig")
+      Wizard.SetDesktopTitleAndIcon("org.opensuse.yast.Sysconfig")
 
       # initialization
       if Mode.config && !Sysconfig.Modified &&
@@ -86,7 +86,7 @@ module Yast
       }
 
       Wizard.CreateDialog
-      Wizard.SetDesktopTitleAndIcon("org.openSUSE.YaST.Sysconfig")
+      Wizard.SetDesktopTitleAndIcon("org.opensuse.yast.Sysconfig")
 
       ret = Sequencer.Run(aliases, sequence)
 

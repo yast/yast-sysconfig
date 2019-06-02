@@ -893,7 +893,7 @@ module Yast
       if UI.WidgetExists(Id(:wizardTree))
         UI.ReplaceWidget(Id(:rep_button_box), button_box)
       end
-      Wizard.SetDesktopTitleAndIcon("org.openSUSE.YaST.Sysconfig")
+      Wizard.SetDesktopTitleAndIcon("org.opensuse.yast.Sysconfig")
 
       ret = nil
 
