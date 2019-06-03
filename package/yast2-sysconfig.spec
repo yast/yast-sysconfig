@@ -27,7 +27,7 @@ License:        GPL-2.0-or-later
 Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  perl-XML-Writer update-desktop-files yast2 yast2-testsuite
-BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:  yast2-devtools >= 4.2.2
 # path_matching (RSpec argument matcher)
 BuildRequires:  yast2-ruby-bindings >= 3.1.31
 # For tests
