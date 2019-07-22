@@ -13,7 +13,9 @@ config.status
 config.sub
 configure
 configure.ac
+coverage/
 depcomp
+doc/autodocs
 install-sh
 libtool
 ltconfig
@@ -22,4 +24,6 @@ missing
 mkinstalldirs
 stamp-h*
 sysconfig.pot
+testsuite/raw.tmp.*
 Makefile.am.common
+.yardoc/
