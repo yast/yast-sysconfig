@@ -13,6 +13,7 @@ X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstDataType=list
+X-SuSE-YaST-AutoInstResource=sysconfig
 X-SuSE-YaST-AutoInstSchema=sysconfig.rnc
 X-SuSE-YaST-Keywords=system,sysconfig,editor,configuration
 
