@@ -9,6 +9,7 @@ describe Yast::Sysconfig do
   subject(:sysconfig) do
     new_sysconfig(configfiles)
   end
+  let(:configfiles) { ["#{DATA_PATH}/sysconfig/*"] }
 
   describe ".Read" do
     let(:configfiles) do
@@ -211,6 +212,24 @@ describe Yast::Sysconfig do
 
       sysconfig.set_value(listen_var_id, listen_value, false, false)
       sysconfig.Write
+    end
+  end
+
+  describe ".remove_whitespaces" do
+    it "returns nil if nil is passed" do
+      expect(sysconfig.remove_whitespaces(nil)).to eq nil
+    end
+
+    it "returns empty string for string containing only whitespaces" do
+      ["", "     ", "\t"].each do |v|
+        expect(sysconfig.remove_whitespaces(v)).to eq ""
+      end
+    end
+
+    it "returns stripped string for others" do
+      ["var", "  var", "var\t", "\tvar   "].each do |v|
+        expect(sysconfig.remove_whitespaces(v)).to eq "var"
+      end
     end
   end
 end
