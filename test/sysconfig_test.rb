@@ -232,4 +232,36 @@ describe Yast::Sysconfig do
       end
     end
   end
+
+  describe ".get_only_comment" do
+    it "returns empty string if nil is passed" do
+      expect(subject.get_only_comment(nil)).to eq ""
+    end
+
+    it "returns empty string if empty string is passed" do
+      expect(subject.get_only_comment("")).to eq ""
+    end
+
+    it "removes all non comment lines" do
+      input = "test\n" \
+        "   test2\n" \
+        "   # not comment"
+
+      expected = ""
+
+      expect(subject.get_only_comment(input)).to eq expected
+    end
+
+    it "removes initial hash bang from comments" do
+      input = "#test\n" \
+        "#   \t\t\n" \
+        "# The END"
+
+      expected = "test\n" \
+        "   \t\t\n" \
+        " The END\n"
+
+      expect(subject.get_only_comment(input)).to eq expected
+    end
+  end
 end
