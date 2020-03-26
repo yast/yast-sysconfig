@@ -264,4 +264,24 @@ describe Yast::Sysconfig do
       expect(subject.get_only_comment(input)).to eq expected
     end
   end
+
+  describe ".parse_metadata" do
+    it "return empty hash if nil passed" do
+      expect(subject.parse_metadata(nil)).to eq({})
+    end
+
+    it "returns parsed metadata in hash" do
+      input = "## Type: abc\n\n##Default:x\n\n"
+      expected = { "Type" => "abc", "Default" => "x" }
+
+      expect(subject.parse_metadata(input)).to eq expected
+    end
+
+    it "can parse multiline metadata" do
+      input = "## Type: abc\\\n## cde efg\n##Default:x, asdf\n\n"
+      expected = { "Type" => "abc cde efg", "Default" => "x, asdf" }
+
+      expect(subject.parse_metadata(input)).to eq expected
+    end
+  end
 end
