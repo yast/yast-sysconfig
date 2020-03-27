@@ -284,4 +284,39 @@ describe Yast::Sysconfig do
       expect(subject.parse_metadata(input)).to eq expected
     end
   end
+
+  describe ".Export" do
+    it "returns empty array when nothing is changed" do
+      subject.Import([])
+      expect(subject.Export).to eq([])
+    end
+
+    it "returns array with modified variables" do
+      settings = [{
+        "sysconfig_key" => "VARIABLE",
+        "sysconfig_path" => "/etc/sysconfig/test",
+        "sysconfig_value" => "no"
+      }]
+      subject.Import(settings)
+
+      expect(subject.Export).to eq settings
+    end
+
+    it "exports always in new format" do
+      old_format = [{
+        "sysconfig_key" => "VARIABLE",
+        "sysconfig_path" => "test",
+        "sysconfig_value" => "no"
+      }]
+      new_format = [{
+        "sysconfig_key" => "VARIABLE",
+        "sysconfig_path" => "/etc/sysconfig/test",
+        "sysconfig_value" => "no"
+      }]
+      subject.Import(old_format)
+
+      expect(subject.Export).to eq new_format
+
+    end
+  end
 end
