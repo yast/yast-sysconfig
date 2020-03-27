@@ -17,14 +17,14 @@ describe Yast::Sysconfig do
     # run git version of parse_configs.pl
     allow(Yast::SCR).to receive(:Execute).with(path(".target.bash"), /parse_configs.pl/) do |path, command|
       params = command.split
-      params[0] = SRC_PATH + "/bin/parse_configs.pl"
+      params[0] = File.join(SRC_PATH, "bin/parse_configs.pl")
       `#{params.join(" ")}`
     end
 
     allow(Yast::SCR).to receive(:Read).and_call_original
     # read properly sysedit agent from git
     allow(Yast::SCR).to receive(:Read).with(path(".target.string"), /sysedit.agent/)
-      .and_return(::File.read(SRC_PATH+"/data/sysedit.agent"))
+      .and_return(::File.read(File.join(SRC_PATH, "/data/sysedit.agent")))
   end
 
   describe ".Read" do
@@ -282,7 +282,7 @@ describe Yast::Sysconfig do
   end
 
   describe ".parse_metadata" do
-    it "return empty hash if nil passed" do
+    it "returns empty hash if nil passed" do
       expect(subject.parse_metadata(nil)).to eq({})
     end
 
