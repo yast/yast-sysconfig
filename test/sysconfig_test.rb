@@ -11,6 +11,22 @@ describe Yast::Sysconfig do
   end
   let(:configfiles) { ["#{DATA_PATH}/sysconfig/*"] }
 
+  before do
+    allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"), anything)
+      .and_return("exit" => 0, "stdout" => "", "stderr" => "")
+    # run git version of parse_configs.pl
+    allow(Yast::SCR).to receive(:Execute).with(path(".target.bash"), /parse_configs.pl/) do |path, command|
+      params = command.split
+      params[0] = SRC_PATH + "/bin/parse_configs.pl"
+      `#{params.join(" ")}`
+    end
+
+    allow(Yast::SCR).to receive(:Read).and_call_original
+    # read properly sysedit agent from git
+    allow(Yast::SCR).to receive(:Read).with(path(".target.string"), /sysedit.agent/)
+      .and_return(::File.read(SRC_PATH+"/data/sysedit.agent"))
+  end
+
   describe ".Read" do
     let(:configfiles) do
       [
@@ -169,9 +185,9 @@ describe Yast::Sysconfig do
       allow(sysconfig).to receive(:service_active?).and_return true
 
       expect(Yast::SCR).to receive(:Write)
-        .with(path(".syseditor.value.#{postfix_file}.#{myhostname_var}"), myhostname_value)
+        .with(path(".syseditor.value.\"#{postfix_file}\".#{myhostname_var}"), myhostname_value)
       expect(Yast::SCR).to receive(:Write)
-        .with(path(".syseditor.value.#{postfix_file}.#{nullclient_var}"), nullclient_value)
+        .with(path(".syseditor.value.\"#{postfix_file}\".#{nullclient_var}"), nullclient_value)
       # Flush
       expect(Yast::SCR).to receive(:Write).with(path(".syseditor"), nil)
 
@@ -285,38 +301,111 @@ describe Yast::Sysconfig do
     end
   end
 
+  describe ".Import" do
+    let(:entry_path) { "/etc/sysconfig/network/config" }
+    let(:profile) { [autoyast_entry(var, value, entry_path)] }
+
+    before do
+      sysconfig.Import(profile)
+    end
+
+    context "with a correct profile" do
+      let(:var) { "FIREWALL" }
+      let(:value) { "no" }
+
+      it "schedules the value change" do
+        expect(sysconfig.Summary).to match /#{var}="#{value}"/
+        expect(sysconfig.modified("#{var}$#{entry_path}")).to eq true
+      end
+
+      it "sets the Modified flag" do
+        expect(sysconfig.Modified).to eq true
+      end
+    end
+
+    context "with a old style profile" do
+      let(:var) { "FIREWALL" }
+      let(:value) { "no" }
+      let(:entry_path) { "network/cfg" }
+
+      it "turns the relative path into absolute" do
+        expect(sysconfig.modified("#{var}$#{entry_path}")).to eq false
+        expect(sysconfig.modified("#{var}$/etc/sysconfig/#{entry_path}")).to eq true
+      end
+    end
+
+    context "with a profile with errors" do
+      let(:var) { "FIREBALL" }
+      let(:value) { "abcde" }
+
+      it "schedules the value change" do
+        expect(sysconfig.Summary).to match /#{var}="#{value}"/
+        expect(sysconfig.modified("#{var}$#{entry_path}")).to eq true
+      end
+
+      it "sets the Modified flag" do
+        expect(sysconfig.Modified).to eq true
+      end
+    end
+
+    context "with numeric random values" do
+      let(:var) { rand(8888) }
+      let(:value) { rand(8888) }
+      let(:entry_path) { rand(8888) }
+
+      it "schedules an invalid value change" do
+        expect(sysconfig.Summary).to match /nil="nil"/
+        expect(sysconfig.modified("nil$/etc/sysconfig/nil")).to eq true
+      end
+
+      it "sets the Modified flag" do
+        expect(sysconfig.Modified).to eq true
+      end
+    end
+  end
+
   describe ".Export" do
-    it "returns empty array when nothing is changed" do
-      subject.Import([])
-      expect(subject.Export).to eq([])
+    let(:entry_path) { "#{DATA_PATH}/sysconfig/network/config" }
+
+    before do
+      sysconfig.configfiles = [entry_path]
+      sysconfig.Read
     end
 
-    it "returns array with modified variables" do
-      settings = [{
-        "sysconfig_key" => "VARIABLE",
-        "sysconfig_path" => "/etc/sysconfig/test",
-        "sysconfig_value" => "no"
-      }]
-      subject.Import(settings)
-
-      expect(subject.Export).to eq settings
+    context "with no modified values" do
+      it "returns an empty array" do
+        expect(sysconfig.Export).to eq []
+      end
     end
 
-    it "exports always in new format" do
-      old_format = [{
-        "sysconfig_key" => "VARIABLE",
-        "sysconfig_path" => "test",
-        "sysconfig_value" => "no"
-      }]
-      new_format = [{
-        "sysconfig_key" => "VARIABLE",
-        "sysconfig_path" => "/etc/sysconfig/test",
-        "sysconfig_value" => "no"
-      }]
-      subject.Import(old_format)
+    context "with a correctly modified value" do
+      let(:var) { "GLOBAL_POST_UP_EXEC" }
+      let(:value) { "no" }
 
-      expect(subject.Export).to eq new_format
+      it "returns the corresponding entry" do
+        sysconfig.set_value("#{var}$#{entry_path}", value, false, false)
+        expect(sysconfig.Export).to eq [autoyast_entry(var, value, entry_path)]
+      end
+    end
 
+    context "with invalid imported values" do
+      let(:var) { "GLOBAL_POST_UP_EXEC" }
+      let(:value) { "NoWayThisIsCorrectValue" }
+
+      it "returns an identical entry" do
+        sysconfig.Import([autoyast_entry(var, value, entry_path)])
+        expect(sysconfig.Export).to eq [autoyast_entry(var, value, entry_path)]
+      end
+    end
+
+    context "with numeric random imported values" do
+      let(:var) { rand(8888) }
+      let(:value) { rand(8888) }
+
+      it "returns an invalid entry" do
+        sysconfig.Import([autoyast_entry(var, value, entry_path)])
+        expect(sysconfig.Export).to eq [autoyast_entry("nil", nil, entry_path)]
+      end
     end
   end
 end
