@@ -1,9 +1,14 @@
+include "common.rnc"
+
 sysconfig =
   element sysconfig {
     LIST,
     element sysconfig_entry {
-      element sysconfig_key { text }
-    & element sysconfig_path { text }
-    & element sysconfig_value { text }
+      MAP,
+      (
+        element sysconfig_key { STRING } &
+        element sysconfig_path { STRING } &
+        element sysconfig_value { STRING }
+      )
     }+
   }
