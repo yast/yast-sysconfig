@@ -26,12 +26,14 @@ License:        GPL-2.0-or-later
 
 Source0:        %{name}-%{version}.tar.bz2
 
-BuildRequires:  perl-XML-Writer update-desktop-files yast2 yast2-testsuite
+BuildRequires:  update-desktop-files yast2
 BuildRequires:  yast2-devtools >= 4.2.2
 # path_matching (RSpec argument matcher)
 BuildRequires:  yast2-ruby-bindings >= 3.1.31
 # For tests
-BuildRequires: ruby
+BuildRequires:  rubygem(%rb_default_ruby_abi:rspec)
+# For build
+BuildRequires:  rubygem(%rb_default_ruby_abi:yast-rake)
 
 Requires:       perl
 # Yast2::Systemd::Service
@@ -47,8 +49,10 @@ information.
 %prep
 %setup -q
 
+%check
+%yast_check
+
 %build
-%yast_build
 
 %install
 %yast_install

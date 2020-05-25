@@ -133,6 +133,7 @@ module Yast
         com_line = Builtins.regexpsub(line, "^#([^#].*)", "\\1")
         if com_line == nil
           # add empty lines
+          # FIXME: JR it cannot happen as it is catched above. So "#  " is replaced by "  "
           if Builtins.regexpmatch(line, "^#[ \t]*$") == true
             ret = Ops.add(ret, "\n")
           end

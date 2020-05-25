@@ -1,6 +1,0 @@
-Return	nil
-Return	[]
-Return	nil
-Return	[]
-Return	nil
-Return	[$["sysconfig_key":"VARIABLE", "sysconfig_path":"/etc/sysconfig/test", "sysconfig_value":"no"]]
