@@ -1165,7 +1165,7 @@ module Yast
     # Restarts or reloads a service using #exec_action
     # @see #exec_action
     # @param name [String] service name
-    # @param action [Symbol] :reload or :restart
+    # @param type [Symbol] :reload or :restart
     # @return [Symbol] result returned by #exec_action
     def exec_service_action(name, type = :reload)
       case type
@@ -1194,7 +1194,7 @@ module Yast
     # Returns whether given service is active (info from systemd)
     # If service is not found, reports error in UI and returns nil
     #
-    # @param service name
+    # @param service_name
     # @return [Boolean] active?
     def service_active?(service_name)
       service_unit = Yast2::Systemd::Service.find(service_name)
