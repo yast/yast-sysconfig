@@ -176,7 +176,13 @@ describe Yast::Sysconfig do
     let(:nodns_var_id) { "#{nodns_var}$#{postfix_file}" }
     let(:nodns_value) { "yes" }
 
-    before { sysconfig.Read }
+    before do
+      # mock service operations
+      service = double("postfix_service", active?: true, reload: true, restart: true)
+      allow(Yast2::Systemd::Service).to receive(:find).with("postfix").and_return service
+
+      sysconfig.Read
+    end
 
     it "writes all the modified values" do
       # This methods are private
@@ -186,8 +192,10 @@ describe Yast::Sysconfig do
 
       expect(Yast::SCR).to receive(:Write)
         .with(path(".syseditor.value.\"#{postfix_file}\".#{myhostname_var}"), myhostname_value)
+        .and_return(true)
       expect(Yast::SCR).to receive(:Write)
         .with(path(".syseditor.value.\"#{postfix_file}\".#{nullclient_var}"), nullclient_value)
+        .and_return(true)
       # Flush
       expect(Yast::SCR).to receive(:Write).with(path(".syseditor"), nil)
 
@@ -198,11 +206,12 @@ describe Yast::Sysconfig do
 
     it "restarts associated services" do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
+        .and_return(true)
 
       service = double("postfix_service")
       allow(Yast2::Systemd::Service).to receive(:find).with("postfix").and_return service
       expect(service).to receive(:active?).and_return true
-      expect(service).to receive(:restart)
+      expect(service).to receive(:restart).and_return true
 
       sysconfig.set_value(nullclient_var_id, nullclient_value, false, false)
       sysconfig.Write
@@ -210,11 +219,12 @@ describe Yast::Sysconfig do
 
     it "reloads associated services" do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
+        .and_return(true)
 
       service = double("postfix_service")
       allow(Yast2::Systemd::Service).to receive(:find).with("postfix").and_return service
       expect(service).to receive(:active?).and_return true
-      expect(service).to receive(:reload)
+      expect(service).to receive(:reload).and_return true
 
       sysconfig.set_value(nodns_var_id, nodns_value, false, false)
       sysconfig.Write
@@ -222,6 +232,7 @@ describe Yast::Sysconfig do
 
     it "runs associated commands" do
       allow(Yast::SCR).to receive(:Write).with(path_matching(/^\.syseditor/), anything)
+        .and_return(true)
       expect(Yast::SCR).to receive(:Execute)
         .with(path(".target.bash_output"), /echo example command/)
         .and_return({"exit" => 0, "stdout" => "", "stderr" => ""})
