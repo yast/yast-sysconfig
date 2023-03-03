@@ -18,7 +18,7 @@
 
 Name:           yast2-sysconfig
 Summary:        YaST2 - Sysconfig Editor
-Version:        4.5.0
+Version:        4.6.0
 Release:        0
 Url:            https://github.com/yast/yast-sysconfig
 Group:          System/YaST
