@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-sysconfig
 #
-# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2023 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -20,13 +20,14 @@ Name:           yast2-sysconfig
 Summary:        YaST2 - Sysconfig Editor
 Version:        4.6.0
 Release:        0
-Url:            https://github.com/yast/yast-sysconfig
+URL:            https://github.com/yast/yast-sysconfig
 Group:          System/YaST
 License:        GPL-2.0-or-later
 
 Source0:        %{name}-%{version}.tar.bz2
 
-BuildRequires:  update-desktop-files yast2
+BuildRequires:  update-desktop-files
+BuildRequires:  yast2
 BuildRequires:  yast2-devtools >= 4.2.2
 # path_matching (RSpec argument matcher)
 BuildRequires:  yast2-ruby-bindings >= 3.1.31
@@ -74,3 +75,5 @@ information.
 %{yast_icondir}
 %license COPYING
 %doc %{yast_docdir}
+
+%changelog
