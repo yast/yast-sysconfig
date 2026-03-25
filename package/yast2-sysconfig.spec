@@ -18,7 +18,7 @@
 
 Name:           yast2-sysconfig
 Summary:        YaST2 - Sysconfig Editor
-Version:        5.0.0
+Version:        5.0.1
 Release:        0
 Url:            https://github.com/yast/yast-sysconfig
 Group:          System/YaST
@@ -26,7 +26,6 @@ License:        GPL-2.0-or-later
 
 Source0:        %{name}-%{version}.tar.bz2
 
-BuildRequires:  update-desktop-files yast2
 BuildRequires:  yast2-devtools >= 4.2.2
 # path_matching (RSpec argument matcher)
 BuildRequires:  yast2-ruby-bindings >= 3.1.31
